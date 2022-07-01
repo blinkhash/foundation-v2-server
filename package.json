@@ -1,0 +1,54 @@
+{
+  "name": "foundation-v2-server",
+  "version": "0.0.1",
+  "description": "A high performance Stratum pool-server written in Node.js",
+  "keywords": [
+    "bitcoin",
+    "stratum",
+    "mining",
+    "pool"
+  ],
+  "homepage": "https://github.com/blinkhash/foundation-v2-server",
+  "bugs": {
+    "url": "https://github.com/blinkhash/foundation-v2-server/issues"
+  },
+  "license": "GPL-3.0",
+  "author": {
+    "name": "Nick Sarris"
+  },
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "configs/",
+      ".mock.js"
+    ]
+  },
+  "scripts": {
+    "start": "nodemon ./index.js",
+    "clean": "eslint . --ext .js --ignore-pattern node_modules/",
+    "clean:fix": "eslint . --ext .js --fix --ignore-pattern node_modules/",
+    "test": "jest --coverage",
+    "deploy": "npm install && npm run clean:fix && npm run test"
+  },
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blinkhash/foundation-v2-server.git"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "nodemon": "^2.0.16"
+  },
+  "devDependencies": {
+    "codecov": "^3.8.1",
+    "eslint": "^7.23.0",
+    "jest": "^26.6.3",
+    "mockdate": "^3.0.5",
+    "nock": "^13.2.4"
+  },
+  "engines": {
+    "node": ">=12.16"
+  },
+  "readmeFilename": "README.md"
+}

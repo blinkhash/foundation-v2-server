@@ -1,0 +1,11 @@
+build/
+coverage/
+node_modules/
+.DS_Store
+verthash.dat
+
+configs/*
+!configs/main.js
+!configs/pools/example.js
+certificates/*
+!certificates/README.md
