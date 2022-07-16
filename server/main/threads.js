@@ -6,10 +6,11 @@ const cluster = require('cluster');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Initializer Function
-const Threads = function(logger, configMain) {
+const Threads = function(logger, client, configMain) {
 
   const _this = this;
   this.logger = logger;
+  this.client = client;
   this.configMain = configMain;
 
   // Start Pool Server
@@ -28,7 +29,7 @@ const Threads = function(logger, configMain) {
     if (cluster.isWorker) {
       switch (process.env.type) {
       case 'worker':
-        new Workers(_this.logger).setupWorkers(() => {});
+        new Workers(_this.logger, _this.client).setupWorkers(() => {});
         break;
       default:
         break;

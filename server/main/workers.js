@@ -3,10 +3,11 @@ const Stratum = require('./stratum');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Workers Function
-const Workers = function (logger) {
+const Workers = function (logger, client) {
 
   const _this = this;
   this.logger = logger;
+  this.client = client;
   this.stratums = {};
   this.configs = JSON.parse(process.env.configs);
   this.configMain = JSON.parse(process.env.configMain);
@@ -17,7 +18,7 @@ const Workers = function (logger) {
     return new Promise((resolve) => {
       const config = _this.configs[name];
       const template = require('foundation-v2-' + config.template);
-      const stratum = new Stratum(_this.logger, config, _this.configMain, template);
+      const stratum = new Stratum(_this.logger, _this.client, config, _this.configMain, template);
       stratum.setupStratum(() => resolve(stratum));
       resolve(stratum);
     });

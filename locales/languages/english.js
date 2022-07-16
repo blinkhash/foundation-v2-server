@@ -3,6 +3,11 @@ exports.builderWorkersText1 = (forkId) => `Fork ${ forkId } died, starting repla
 exports.builderWorkersText2 = () => 'No valid pool configs exist or are enabled. Check your configuration files';
 exports.builderWorkersText3 = (numConfigs, numForks) => `Started ${ numConfigs } pool(s) on ${ numForks } thread(s)`;
 
+// Database Text
+exports.databaseClientText1 = () => `Unable to validate your Redis client. Check your configuration files`;
+exports.databaseClientText2 = () => `Unable to validate your Redis client version (>= 2.7). Check your configuration files`;
+exports.databaseClientText3 = () => `Unknown database client type specified. Check your configuration files`;
+
 // Starting Text
 exports.startingMessageText1 = (pool) => `Initializing server (${ pool }) ...`;
 exports.startingMessageText2 = (coins) => `Connected coins: ${ coins }`;

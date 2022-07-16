@@ -24,7 +24,7 @@ describe('Test stratum functionality', () => {
 
   test('Test initialization of stratum', () => {
     const logger = new Logger(configMainCopy);
-    const stratum = new Stratum(logger, configCopy, configMainCopy);
+    const stratum = new Stratum(logger, null, configCopy, configMainCopy);
     expect(typeof stratum.config).toBe('object');
     expect(typeof stratum.setupStratum).toBe('function');
   });

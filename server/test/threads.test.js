@@ -13,7 +13,7 @@ describe('Test threads functionality', () => {
   });
 
   test('Test initialization of threads', () => {
-    const threads = new Threads(logger, configMainCopy);
+    const threads = new Threads(logger, null, configMainCopy);
     expect(typeof threads.configMain).toBe('object');
     expect(typeof threads.setupThreads).toBe('function');
   });

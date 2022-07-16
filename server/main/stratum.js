@@ -1,12 +1,14 @@
+const Shares = require('./shares');
 const Text = require('../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Stratum Function
-const Stratum = function (logger, config, configMain, template) {
+const Stratum = function (logger, client, config, configMain, template) {
 
   const _this = this;
   this.logger = logger;
+  this.client = client;
   this.config = config;
   this.configMain = configMain;
   this.template = template;
@@ -30,7 +32,9 @@ const Stratum = function (logger, config, configMain, template) {
     });
 
     // Handle Stratum Share Events
-    _this.stratum.on('pool.share', () => {});
+    _this.stratum.on('pool.share', (shareData, shareValid, blockValid) => {
+      _this.shares.handleShares(shareData, shareValid, blockValid);
+    });
   };
 
   // Output Stratum Data on Startup
@@ -66,8 +70,11 @@ const Stratum = function (logger, config, configMain, template) {
   /* istanbul ignore next */
   this.setupStratum = function(callback) {
 
-    // Build Daemon/Stratum Functionality
+    // Build out Initial Functionality
+    _this.shares = new Shares(logger, _this.client, _this.config, _this.configMain);
     _this.handleStratum();
+
+    // Build Daemon/Stratum Functionality
     _this.stratum.setupDaemons(() => {
     _this.stratum.setupPorts();
     _this.stratum.setupSettings(() => {
