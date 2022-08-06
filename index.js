@@ -12,12 +12,10 @@ try {
   const logger = new Logger(config);
 
   // Initialize Database
-  const client = new Client(config);
-  client.handleClient();
-  client.checkClient();
-
-  // Initialize Mining Pool Stratum
-  const threads = new Threads(logger, client, config).setupThreads();
+  const client = new Client(logger, config);
+  client.handleClient(() => {
+    const threads = new Threads(logger, client, config).setupThreads();
+  });
 
 // Error on Startup
 } catch(e) {

@@ -4,9 +4,20 @@ exports.builderWorkersText2 = () => 'No valid pool configs exist or are enabled.
 exports.builderWorkersText3 = (numConfigs, numForks) => `Started ${ numConfigs } pool(s) on ${ numForks } thread(s)`;
 
 // Database Text
-exports.databaseClientText1 = () => `Unable to validate your Redis client. Check your configuration files`;
-exports.databaseClientText2 = () => `Unable to validate your Redis client version (>= 2.7). Check your configuration files`;
-exports.databaseClientText3 = () => `Unknown database client type specified. Check your configuration files`;
+exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;
+exports.databaseSchemaText1 = (pool) => `Deploying the ${ pool } schema to the connected database`;
+exports.databaseSchemaText2 = (pool) => `Deploying the ${ pool }.historical_blocks table to the connected database`;
+exports.databaseSchemaText3 = (pool) => `Deploying the ${ pool }.historical_miners table to the connected database`;
+exports.databaseSchemaText4 = (pool) => `Deploying the ${ pool }.historical_network table to the connected database`;
+exports.databaseSchemaText5 = (pool) => `Deploying the ${ pool }.historical_payments table to the connected database`;
+exports.databaseSchemaText6 = (pool) => `Deploying the ${ pool }.historical_pool table to the connected database`;
+exports.databaseSchemaText7 = (pool) => `Deploying the ${ pool }.historical_transactions table to the connected database`;
+exports.databaseSchemaText8 = (pool) => `Deploying the ${ pool }.historical_workers table to the connected database`;
+exports.databaseSchemaText9 = (pool) => `Deploying the ${ pool }.pool_miners table to the connected database`;
+exports.databaseSchemaText10 = (pool) => `Deploying the ${ pool }.pool_workers table to the connected database`;
+exports.databaseSchemaText11 = (pool) => `Deploying the ${ pool }.round_current table to the connected database`;
+exports.databaseSchemaText12 = (pool) => `Deploying the ${ pool }.round_hashrate table to the connected database`;
+exports.databaseSchemaText13 = (pool) => `Deploying the ${ pool }.round_unpaid table to the connected database`;
 
 // Starting Text
 exports.startingMessageText1 = (pool) => `Initializing server (${ pool }) ...`;
@@ -20,7 +31,7 @@ exports.startingMessageText8 = (peers) => `Current peer count: ${ peers }`;
 exports.startingMessageText9 = () => 'Server initialized successfully ...';
 
 // Loader Text
-exports.loaderCertificateText1 = () => 'There is an invalid key, certificate, or authority file specified for TLS. Check your configuration files.';
+exports.loaderCertificateText1 = () => 'There is an invalid key, certificate, or authority file specified for TLS. Check your configuration files';
 exports.loaderDaemonsText1 = () => 'There are no primary daemons configured, so the pool cannot be started. Check your configuration files';
 exports.loaderDaemonsText2 = () => 'There are no auxiliary daemons configured, so the pool cannot be started. Check your configuration files';
 exports.loaderNamesText1 = () => 'Pool names are only allowed to be a single word. Check your configuration files';

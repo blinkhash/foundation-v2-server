@@ -33,7 +33,7 @@ const Builder = function(logger, configMain) {
       const lines = [_this.text.builderWorkersText1(forkId)];
       _this.logger.error('Builder', 'Workers', lines);
       setTimeout(() => {
-        _this.createPoolWorker(forkId);
+        _this.createPoolWorkers(forkId);
       }, 2000);
     });
   };

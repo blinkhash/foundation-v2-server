@@ -19,9 +19,8 @@ config.logger.logLevel = 'log';
 
 // Database Configuration
 config.client = {};
-config.client.type = 'redis';
 config.client.host = '127.0.0.1';
-config.client.port = 6379;
+config.client.port = 5432;
 config.client.username = '';
 config.client.password = '';
 config.client.database = '';

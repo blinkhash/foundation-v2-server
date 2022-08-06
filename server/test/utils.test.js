@@ -4,6 +4,30 @@ const utils = require('../main/utils');
 
 describe('Test utility functionality', () => {
 
+  test('Test implemented checkSoloMining [1]', () => {
+    const data = { 'port': '3001' };
+    const config = { 'ports': [{ 'port': '3001', 'type': 'solo' }]};
+    expect(utils.checkSoloMining(config, data)).toBe(true);
+  });
+
+  test('Test implemented checkSoloMining [2]', () => {
+    const data = { 'ports': { '3001': '' }};
+    const config = { 'ports': [{ 'port': '3001', 'type': 'shared' }]};
+    expect(utils.checkSoloMining(config, data)).toBe(false);
+  });
+
+  test('Test implemented checkSoloMining [3]', () => {
+    const data = { 'port': '3001' };
+    const config = { 'ports': [{ 'port': '3001' }]};
+    expect(utils.checkSoloMining(config, data)).toBe(false);
+  });
+
+  test('Test implemented checkSoloMining [4]', () => {
+    const data = { 'port': '3002' };
+    const config = { 'ports': [{ 'port': '3001', 'type': 'solo' }]};
+    expect(utils.checkSoloMining(config, data)).toBe(false);
+  });
+
   test('Test implemented countProcessForks [1]', () => {
     const config = { 'clustering': { 'enabled': false, 'forks': 'auto' }};
     expect(utils.countProcessForks(config)).toBe(1);

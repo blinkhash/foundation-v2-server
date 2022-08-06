@@ -10,14 +10,12 @@ const Shares = function (logger, client, config, configMain) {
   this.client = client;
   this.config = config;
   this.configMain = configMain;
+  this.pool = config.name;
   this.text = Text[configMain.language];
 
   // Stratum Variables
   process.setMaxListeners(0);
   this.forkId = process.env.forkId;
-
-  // Handle Share Submissions
-  this.handleShares = function(shareData, shareValid, blockValid) {}
-}
+};
 
 module.exports = Shares;

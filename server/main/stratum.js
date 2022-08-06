@@ -61,7 +61,7 @@ const Stratum = function (logger, client, config, configMain, template) {
 
     // Send Starting Message to Logger
     if (_this.forkId === '0') {
-      _this.logger['log']('Pool', null, output, true);
+      _this.logger['log']('Pool', 'Output', output, true);
     }
   };
 

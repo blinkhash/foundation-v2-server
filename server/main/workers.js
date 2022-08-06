@@ -14,13 +14,12 @@ const Workers = function (logger, client) {
 
   // Build Promise from Input Configuration
   /* istanbul ignore next */
-  this.createPromises = function(name) {
+  this.handlePromises = function(pool) {
     return new Promise((resolve) => {
-      const config = _this.configs[name];
+      const config = _this.configs[pool];
       const template = require('foundation-v2-' + config.template);
       const stratum = new Stratum(_this.logger, _this.client, config, _this.configMain, template);
       stratum.setupStratum(() => resolve(stratum));
-      resolve(stratum);
     });
   };
 
@@ -28,7 +27,7 @@ const Workers = function (logger, client) {
   /* istanbul ignore next */
   this.setupWorkers = function(callback) {
     const keys = Object.keys(_this.configs);
-    const promises = keys.map((name) => _this.createPromises(name));
+    const promises = keys.map((pool) => _this.handlePromises(pool));
     Promise.all(promises).then((stratums) => {
       stratums.forEach((stratum) => _this.stratums[stratum.config.name] = stratum);
       callback();

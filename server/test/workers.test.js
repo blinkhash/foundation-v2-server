@@ -28,7 +28,7 @@ describe('Test workers functionality', () => {
     const logger = new Logger(configMainCopy);
     const workers = new Workers(logger);
     expect(typeof workers.configMain).toBe('object');
-    expect(typeof workers.createPromises).toBe('function');
+    expect(typeof workers.handlePromises).toBe('function');
     expect(typeof workers.setupWorkers).toBe('function');
   });
 });

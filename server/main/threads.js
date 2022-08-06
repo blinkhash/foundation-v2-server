@@ -21,8 +21,11 @@ const Threads = function(logger, client, configMain) {
     if (cluster.isMaster) {
       const loader = new Loader(_this.logger, _this.configMain);
       const builder = new Builder(_this.logger, _this.configMain);
-      builder.configs = loader.handleConfigs();
-      builder.setupPoolWorkers();
+      const configs = loader.handleConfigs();
+      _this.client.commands.schema.handleSchema(configs, () => {
+        builder.configs = configs;
+        builder.setupPoolWorkers();
+      });
     }
 
     // Handle Worker Forks

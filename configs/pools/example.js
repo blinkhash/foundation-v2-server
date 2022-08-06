@@ -26,6 +26,7 @@ config.ports = [];
 const ports1 = {};
 ports1.port = 3002;
 ports1.enabled = true;
+ports1.type = 'shared';
 ports1.tls = false;
 ports1.difficulty = {};
 ports1.difficulty.initial = 32;

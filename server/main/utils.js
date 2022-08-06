@@ -2,6 +2,16 @@ const os = require('os');
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Check if Miner is Solo Mining
+exports.checkSoloMining = function(poolConfig, data) {
+  let isSoloMining = false;
+  const activePort = poolConfig.ports.filter((port) => port.port === data.port);
+  if (activePort.length >= 1) {
+    isSoloMining = activePort[0].type === 'solo';
+  }
+  return isSoloMining;
+};
+
 // Count Number of Process Forks
 exports.countProcessForks = function(configMain) {
   if (!configMain.clustering || !configMain.clustering.enabled) {
