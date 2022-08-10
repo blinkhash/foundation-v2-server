@@ -5,19 +5,7 @@ exports.builderWorkersText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 
 // Database Text
 exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;
-exports.databaseSchemaText1 = (pool) => `Deploying the ${ pool } schema to the connected database`;
-exports.databaseSchemaText2 = (pool) => `Deploying the ${ pool }.historical_blocks table to the connected database`;
-exports.databaseSchemaText3 = (pool) => `Deploying the ${ pool }.historical_miners table to the connected database`;
-exports.databaseSchemaText4 = (pool) => `Deploying the ${ pool }.historical_network table to the connected database`;
-exports.databaseSchemaText5 = (pool) => `Deploying the ${ pool }.historical_payments table to the connected database`;
-exports.databaseSchemaText6 = (pool) => `Deploying the ${ pool }.historical_pool table to the connected database`;
-exports.databaseSchemaText7 = (pool) => `Deploying the ${ pool }.historical_transactions table to the connected database`;
-exports.databaseSchemaText8 = (pool) => `Deploying the ${ pool }.historical_workers table to the connected database`;
-exports.databaseSchemaText9 = (pool) => `Deploying the ${ pool }.pool_miners table to the connected database`;
-exports.databaseSchemaText10 = (pool) => `Deploying the ${ pool }.pool_workers table to the connected database`;
-exports.databaseSchemaText11 = (pool) => `Deploying the ${ pool }.round_current table to the connected database`;
-exports.databaseSchemaText12 = (pool) => `Deploying the ${ pool }.round_hashrate table to the connected database`;
-exports.databaseSchemaText13 = (pool) => `Deploying the ${ pool }.round_unpaid table to the connected database`;
+exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
 
 // Starting Text
 exports.startingMessageText1 = (pool) => `Initializing server (${ pool }) ...`;
