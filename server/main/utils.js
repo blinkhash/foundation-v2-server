@@ -50,3 +50,14 @@ exports.loggerSeverity = {
   'special': 4,
   'error': 5,
 };
+
+// Round to # of Digits Given
+exports.roundTo = function(n, digits) {
+  if (!digits) {
+    digits = 0;
+  }
+  const multiplicator = Math.pow(10, digits);
+  n = parseFloat((n * multiplicator).toFixed(11));
+  const test = Math.round(n) / multiplicator;
+  return +(test.toFixed(digits));
+};

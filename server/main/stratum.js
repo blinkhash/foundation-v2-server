@@ -31,9 +31,9 @@ const Stratum = function (logger, client, config, configMain, template) {
       _this.logger[severity]('Pool', _this.config.name, [text]);
     });
 
-    // Handle Stratum Share Events
+    // Handle Stratum Submission Events
     _this.stratum.on('pool.share', (shareData, shareValid, blockValid) => {
-      _this.shares.handleShares(shareData, shareValid, blockValid);
+      _this.shares.handleSubmissions(shareData, shareValid, blockValid);
     });
   };
 

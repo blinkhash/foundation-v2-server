@@ -59,4 +59,11 @@ describe('Test utility functionality', () => {
     expect(utils.loggerColors('error', `${'test'}`)).toBe('test'.red);
     expect(utils.loggerColors('other', `${'test'}`)).toBe('test'.italic);
   });
+
+  test('Test implemented roundTo', () => {
+    expect(utils.roundTo(10.31831)).toBe(10);
+    expect(utils.roundTo(10.9318)).toBe(11);
+    expect(utils.roundTo(10.31831, 1)).toBe(10.3);
+    expect(utils.roundTo(10.9318, 1)).toBe(10.9);
+  });
 });
