@@ -41,17 +41,17 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_auxiliary(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      height INT NOT NULL,
-      identifier VARCHAR NOT NULL,
-      invalid INT NOT NULL,
-      solo BOOLEAN NOT NULL,
-      stale INT NOT NULL,
-      times FLOAT NOT NULL,
-      valid INT NOT NULL,
-      work FLOAT NOT NULL,
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      height INT NOT NULL DEFAULT -1,
+      identifier VARCHAR NOT NULL DEFAULT 'master',
+      invalid INT NOT NULL DEFAULT 0,
+      solo BOOLEAN NOT NULL DEFAULT false,
+      stale INT NOT NULL DEFAULT 0,
+      times FLOAT NOT NULL DEFAULT 0,
+      valid INT NOT NULL DEFAULT 0,
+      work FLOAT NOT NULL DEFAULT 0,
       CONSTRAINT historical_auxiliary_unique UNIQUE (worker, solo, height));
     CREATE INDEX historical_auxiliary_miner ON "${ pool }".historical_auxiliary(miner);
     CREATE INDEX historical_auxiliary_worker ON "${ pool }".historical_auxiliary(worker);
@@ -70,7 +70,6 @@ const Schema = function (logger, configMain, executor) {
       WHERE table_schema = '${ pool }'
       AND table_name = 'historical_blocks');`;
     _this.executor([command], (results) => callback(results.rows[0].exists));
-
   };
 
   // Deploy Historical Blocks Table to Database
@@ -78,19 +77,19 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_blocks(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      difficulty FLOAT NOT NULL,
-      hash VARCHAR NOT NULL,
-      height INT UNIQUE NOT NULL,
-      identifier VARCHAR NOT NULL,
-      luck FLOAT NOT NULL,
-      orphan BOOLEAN NOT NULL,
-      paid BOOLEAN NOT NULL,
-      reward FLOAT NOT NULL,
-      solo BOOLEAN NOT NULL,
-      type VARCHAR NOT NULL,
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      difficulty FLOAT NOT NULL DEFAULT -1,
+      hash VARCHAR NOT NULL DEFAULT 'unknown',
+      height INT UNIQUE NOT NULL DEFAULT -1,
+      identifier VARCHAR NOT NULL DEFAULT 'master',
+      luck FLOAT NOT NULL DEFAULT 0,
+      orphan BOOLEAN NOT NULL DEFAULT false,
+      paid BOOLEAN NOT NULL DEFAULT true,
+      reward FLOAT NOT NULL DEFAULT 0,
+      solo BOOLEAN NOT NULL DEFAULT false,
+      type VARCHAR NOT NULL DEFAULT 'primary',
       CONSTRAINT historical_blocks_unique UNIQUE (height, type));
     CREATE INDEX historical_blocks_miner ON "${ pool }".historical_blocks(miner);
     CREATE INDEX historical_blocks_worker ON "${ pool }".historical_blocks(worker);
@@ -113,16 +112,16 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_metadata(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      efficiency FLOAT,
-      effort FLOAT,
-      hashrate FLOAT,
-      invalid INT,
-      miners INT,
-      stale INT,
-      valid INT,
-      work FLOAT,
-      workers INT);`;
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      efficiency FLOAT NOT NULL DEFAULT 0,
+      effort FLOAT NOT NULL DEFAULT 0,
+      hashrate FLOAT NOT NULL DEFAULT 0,
+      invalid INT NOT NULL DEFAULT 0,
+      miners INT NOT NULL DEFAULT 0,
+      stale INT NOT NULL DEFAULT 0,
+      valid INT NOT NULL DEFAULT 0,
+      work FLOAT NOT NULL DEFAULT 0,
+      workers INT NOT NULL DEFAULT 0);`;
     _this.executor([command], () => callback());
   };
 
@@ -141,10 +140,10 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_miners(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      efficiency FLOAT,
-      hashrate FLOAT NOT NULL);
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      efficiency FLOAT NOT NULL DEFAULT 0,
+      hashrate FLOAT NOT NULL DEFAULT 0);
     CREATE INDEX historical_miners_miner ON "${ pool }".historical_miners(miner);`;
     _this.executor([command], () => callback());
   };
@@ -164,10 +163,10 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_network(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      difficulty FLOAT NOT NULL,
-      hashrate FLOAT NOT NULL,
-      height INT NOT NULL);`;
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      difficulty FLOAT NOT NULL DEFAULT 0,
+      hashrate FLOAT NOT NULL DEFAULT 0,
+      height INT NOT NULL DEFAULT -1);`;
     _this.executor([command], () => callback());
   };
 
@@ -186,12 +185,12 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_payments(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      amount FLOAT NOT NULL,
-      height INT NOT NULL,
-      transaction VARCHAR NOT NULL);
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      amount FLOAT NOT NULL DEFAULT 0,
+      height INT NOT NULL DEFAULT -1,
+      transaction VARCHAR NOT NULL DEFAULT 'unknown');
     CREATE INDEX historical_payments_miner ON "${ pool }".historical_payments(miner);
     CREATE INDEX historical_payments_worker ON "${ pool }".historical_payments(worker);
     CREATE INDEX historical_payments_height ON "${ pool }".historical_payments(height);
@@ -214,17 +213,17 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_primary(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      height INT NOT NULL,
-      identifier VARCHAR NOT NULL,
-      invalid INT NOT NULL,
-      solo BOOLEAN NOT NULL,
-      stale INT NOT NULL,
-      times FLOAT NOT NULL,
-      valid INT NOT NULL,
-      work FLOAT NOT NULL,
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      height INT NOT NULL DEFAULT -1,
+      identifier VARCHAR NOT NULL DEFAULT 'master',
+      invalid INT NOT NULL DEFAULT 0,
+      solo BOOLEAN NOT NULL DEFAULT false,
+      stale INT NOT NULL DEFAULT 0,
+      times FLOAT NOT NULL DEFAULT 0,
+      valid INT NOT NULL DEFAULT 0,
+      work FLOAT NOT NULL DEFAULT 0,
       CONSTRAINT historical_primary_unique UNIQUE (worker, solo, height));
     CREATE INDEX historical_primary_miner ON "${ pool }".historical_primary(miner);
     CREATE INDEX historical_primary_worker ON "${ pool }".historical_primary(worker);
@@ -250,10 +249,10 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_transactions(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      amount FLOAT NOT NULL,
-      height INT UNIQUE NOT NULL,
-      transaction VARCHAR UNIQUE NOT NULL);
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      amount FLOAT NOT NULL DEFAULT 0,
+      height INT UNIQUE NOT NULL DEFAULT -1,
+      transaction VARCHAR NOT NULL DEFAULT 'unknown');
     CREATE INDEX historical_transactions_height ON "${ pool }".historical_transactions(height);
     CREATE INDEX historical_transactions_transaction ON "${ pool }".historical_transactions(transaction);`;
     _this.executor([command], () => callback());
@@ -274,11 +273,11 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".historical_workers(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      efficiency FLOAT,
-      hashrate FLOAT NOT NULL);
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      efficiency FLOAT NOT NULL DEFAULT 0,
+      hashrate FLOAT NOT NULL DEFAULT 0);
     CREATE INDEX historical_workers_miner ON "${ pool }".historical_workers(miner);
     CREATE INDEX historical_workers_worker ON "${ pool }".historical_workers(worker);`;
     _this.executor([command], () => callback());
@@ -299,17 +298,17 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".pool_auxiliary(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      height INT NOT NULL,
-      identifier VARCHAR NOT NULL,
-      invalid INT NOT NULL,
-      solo BOOLEAN NOT NULL,
-      stale INT NOT NULL,
-      times FLOAT NOT NULL,
-      valid INT NOT NULL,
-      work FLOAT NOT NULL,
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      height INT NOT NULL DEFAULT -1,
+      identifier VARCHAR NOT NULL DEFAULT 'master',
+      invalid INT NOT NULL DEFAULT 0,
+      solo BOOLEAN NOT NULL DEFAULT false,
+      stale INT NOT NULL DEFAULT 0,
+      times FLOAT NOT NULL DEFAULT 0,
+      valid INT NOT NULL DEFAULT 0,
+      work FLOAT NOT NULL DEFAULT 0,
       CONSTRAINT pool_auxiliary_unique UNIQUE (worker, solo, height));
     CREATE INDEX pool_auxiliary_miner ON "${ pool }".pool_auxiliary(miner);
     CREATE INDEX pool_auxiliary_worker ON "${ pool }".pool_auxiliary(worker);
@@ -334,10 +333,10 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".pool_hashrate(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      work FLOAT NOT NULL);`;
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      work FLOAT NOT NULL DEFAULT 0);`;
     _this.executor([command], () => callback());
   };
 
@@ -356,16 +355,16 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".pool_metadata(
       id BOOLEAN PRIMARY KEY DEFAULT TRUE,
-      timestamp BIGINT NOT NULL,
-      efficiency FLOAT,
-      effort FLOAT,
-      hashrate FLOAT,
-      invalid INT,
-      miners INT,
-      stale INT,
-      valid INT,
-      work FLOAT,
-      workers INT,
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      efficiency FLOAT NOT NULL DEFAULT 0,
+      effort FLOAT NOT NULL DEFAULT 0,
+      hashrate FLOAT NOT NULL DEFAULT 0,
+      invalid INT NOT NULL DEFAULT 0,
+      miners INT NOT NULL DEFAULT 0,
+      stale INT NOT NULL DEFAULT 0,
+      valid INT NOT NULL DEFAULT 0,
+      work FLOAT NOT NULL DEFAULT 0,
+      workers INT NOT NULL DEFAULT 0,
       CONSTRAINT pool_metadata_locked UNIQUE (id));`;
     _this.executor([command], () => callback());
   };
@@ -385,14 +384,14 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".pool_miners(
       miner VARCHAR PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      efficiency FLOAT NOT NULL,
-      effort FLOAT NOT NULL,
-      hashrate FLOAT NOT NULL,
-      balance FLOAT NOT NULL,
-      generate FLOAT NOT NULL,
-      immature FLOAT NOT NULL,
-      paid FLOAT NOT NULL);`;
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      efficiency FLOAT NOT NULL DEFAULT 0,
+      effort FLOAT NOT NULL DEFAULT 0,
+      hashrate FLOAT NOT NULL DEFAULT 0,
+      balance FLOAT NOT NULL DEFAULT 0,
+      generate FLOAT NOT NULL DEFAULT 0,
+      immature FLOAT NOT NULL DEFAULT 0,
+      paid FLOAT NOT NULL DEFAULT 0);`;
     _this.executor([command], () => callback());
   };
 
@@ -411,17 +410,17 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".pool_primary(
       id SERIAL PRIMARY KEY,
-      timestamp BIGINT NOT NULL,
-      miner VARCHAR NOT NULL,
-      worker VARCHAR NOT NULL,
-      height INT NOT NULL,
-      identifier VARCHAR NOT NULL,
-      invalid INT NOT NULL,
-      solo BOOLEAN NOT NULL,
-      stale INT NOT NULL,
-      times FLOAT NOT NULL,
-      valid INT NOT NULL,
-      work FLOAT NOT NULL,
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      worker VARCHAR NOT NULL DEFAULT 'unknown',
+      height INT NOT NULL DEFAULT -1,
+      identifier VARCHAR NOT NULL DEFAULT 'master',
+      invalid INT NOT NULL DEFAULT 0,
+      solo BOOLEAN NOT NULL DEFAULT false,
+      stale INT NOT NULL DEFAULT 0,
+      times FLOAT NOT NULL DEFAULT 0,
+      valid INT NOT NULL DEFAULT 0,
+      work FLOAT NOT NULL DEFAULT 0,
       CONSTRAINT pool_primary_unique UNIQUE (worker, solo, height));
     CREATE INDEX pool_primary_miner ON "${ pool }".pool_primary(miner);
     CREATE INDEX pool_primary_worker ON "${ pool }".pool_primary(worker);
@@ -447,15 +446,15 @@ const Schema = function (logger, configMain, executor) {
     const command = `
     CREATE TABLE "${ pool }".pool_workers(
       worker VARCHAR PRIMARY KEY,
-      miner VARCHAR NOT NULL,
-      timestamp BIGINT NOT NULL,
-      efficiency FLOAT NOT NULL,
-      effort FLOAT NOT NULL,
-      hashrate FLOAT NOT NULL,
-      balance FLOAT NOT NULL,
-      generate FLOAT NOT NULL,
-      immature FLOAT NOT NULL,
-      paid FLOAT NOT NULL);`;
+      miner VARCHAR NOT NULL DEFAULT 'unknown',
+      timestamp BIGINT NOT NULL DEFAULT -1,
+      efficiency FLOAT NOT NULL DEFAULT 0,
+      effort FLOAT NOT NULL DEFAULT 0,
+      hashrate FLOAT NOT NULL DEFAULT 0,
+      balance FLOAT NOT NULL DEFAULT 0,
+      generate FLOAT NOT NULL DEFAULT 0,
+      immature FLOAT NOT NULL DEFAULT 0,
+      paid FLOAT NOT NULL DEFAULT 0);`;
     _this.executor([command], () => callback());
   };
 
