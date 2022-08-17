@@ -10,7 +10,7 @@ const PoolMetadata = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Select Rows Using Current Round
-  this.selectPoolMetadataCurrent = function(pool, type) {
+  this.selectPoolMetadataType = function(pool, type) {
     return `
       SELECT * FROM "${ pool }".pool_metadata
       WHERE type = '${ type }'

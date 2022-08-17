@@ -4,7 +4,9 @@ const Text = require('../../locales/index');
 // Database Table Commands
 const PoolHashrate = require('./pool/hashrate');
 const PoolMetadata = require('./pool/metadata');
+const PoolMiners = require('./pool/miners');
 const PoolRounds = require('./pool/rounds');
+const PoolWorkers = require('./pool/workers');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +44,9 @@ const Commands = function (logger, client, configMain) {
   // Build Out Pool Command Modules for Client
   this.pool.hashrate = new PoolHashrate(_this.logger, _this.configMain);
   this.pool.metadata = new PoolMetadata(_this.logger, _this.configMain);
+  this.pool.miners = new PoolMiners(_this.logger, _this.configMain);
   this.pool.rounds = new PoolRounds(_this.logger, _this.configMain);
+  this.pool.workers = new PoolWorkers(_this.logger, _this.configMain);
 };
 
 module.exports = Commands;
