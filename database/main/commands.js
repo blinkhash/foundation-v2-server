@@ -2,9 +2,9 @@ const Schema = require('./schema');
 const Text = require('../../locales/index');
 
 // Database Table Commands
-const PoolAuxiliary = require('./pool/auxiliary');
+const PoolHashrate = require('./pool/hashrate');
 const PoolMetadata = require('./pool/metadata');
-const PoolPrimary = require('./pool/primary');
+const PoolRounds = require('./pool/rounds');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,9 +40,9 @@ const Commands = function (logger, client, configMain) {
   this.schema = new Schema(_this.logger, _this.configMain, _this.executor);
 
   // Build Out Pool Command Modules for Client
-  this.pool.auxiliary = new PoolAuxiliary(_this.logger, _this.configMain);
+  this.pool.hashrate = new PoolHashrate(_this.logger, _this.configMain);
   this.pool.metadata = new PoolMetadata(_this.logger, _this.configMain);
-  this.pool.primary = new PoolPrimary(_this.logger, _this.configMain);
+  this.pool.rounds = new PoolRounds(_this.logger, _this.configMain);
 };
 
 module.exports = Commands;

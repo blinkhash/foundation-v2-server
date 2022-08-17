@@ -10,10 +10,11 @@ const PoolMetadata = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Select Rows Using Current Round
-  this.selectPoolMetadataCurrent = function(pool) {
+  this.selectPoolMetadataCurrent = function(pool, type) {
     return `
       SELECT * FROM "${ pool }".pool_metadata
-      ORDER BY timestamp DESC`;
+      WHERE type = '${ type }'
+      ORDER BY timestamp DESC;`;
   };
 
   // Insert Rows Using Hashrate Data
@@ -21,13 +22,14 @@ const PoolMetadata = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, hashrate, miners,
-        workers)
-        VALUES (
-          ${ updates.timestamp },
-          ${ updates.hashrate },
-          ${ updates.miners },
-          ${ updates.workers })
-      ON CONFLICT ON CONSTRAINT pool_metadata_locked
+        type, workers)
+      VALUES (
+        ${ updates.timestamp },
+        ${ updates.hashrate },
+        ${ updates.miners },
+        '${ updates.type }',
+        ${ updates.workers })
+      ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
         timestamp = ${ updates.timestamp },
         hashrate = ${ updates.hashrate },
@@ -40,11 +42,12 @@ const PoolMetadata = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, efficiency, effort,
-        invalid, stale, valid, work)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         ${ updates.timestamp },
-        0, 0, 0, 0, 0, 0)
-      ON CONFLICT ON CONSTRAINT pool_metadata_locked
+        0, 0, 0, 0, '${ updates.type }', 0, 0)
+      ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
         timestamp = ${ updates.timestamp },
         efficiency = 0, effort = 0, invalid = 0,
@@ -56,16 +59,18 @@ const PoolMetadata = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, efficiency, effort,
-        invalid, stale, valid, work)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         ${ updates.timestamp },
         ${ updates.efficiency },
         ${ updates.effort },
         ${ updates.invalid },
         ${ updates.stale },
+        '${ updates.type }',
         ${ updates.valid },
         ${ updates.work })
-      ON CONFLICT ON CONSTRAINT pool_metadata_locked
+      ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
         timestamp = ${ updates.timestamp },
         efficiency = ${ updates.efficiency },
