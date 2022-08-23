@@ -40,24 +40,8 @@ const PoolMiners = function (logger, configMain) {
         hashrate = ${ updates.hashrate };`;
   };
 
-  // Insert Rows Using Reset
-  this.insertPoolMinersRoundReset = function(pool, updates) {
-    return `
-      INSERT INTO "${ pool }".pool_miners (
-        miner, timestamp, efficiency,
-        effort, type)
-      VALUES (
-        '${ updates.miner }',
-        ${ updates.timestamp },
-        0, 0, '${ updates.type }')
-      ON CONFLICT (miner)
-      DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        efficiency = 0, effort = 0;`;
-  };
-
   // Insert Rows Using Round Data
-  this.insertPoolMinersRoundUpdate = function(pool, updates) {
+  this.insertPoolMinersRounds = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         miner, timestamp, efficiency,
@@ -76,7 +60,7 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Insert Rows Using Payment Data
-  this.insertPoolMinersPayment = function(pool, updates) {
+  this.insertPoolMinersPayments = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         miner, timestamp, balance,

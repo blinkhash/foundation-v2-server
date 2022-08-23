@@ -17,13 +17,6 @@ const PoolHashrate = function (logger, configMain) {
       WHERE timestamp >= ${ timestamp };`;
   };
 
-  // Delete Rows From Current Round
-  this.deletePoolHashrateCurrent = function(pool, timestamp) {
-    return `
-      DELETE FROM "${ pool }".pool_hashrate
-      WHERE timestamp < ${ timestamp };`;
-  };
-
   // Insert Rows Using Current Round
   this.insertPoolHashrateCurrent = function(pool, updates) {
     return `
@@ -34,6 +27,13 @@ const PoolHashrate = function (logger, configMain) {
         '${ updates.miner }',
         '${ updates.worker }',
         ${ updates.work });`;
+  };
+
+  // Delete Rows From Current Round
+  this.deletePoolHashrateCurrent = function(pool, timestamp) {
+    return `
+      DELETE FROM "${ pool }".pool_hashrate
+      WHERE timestamp < ${ timestamp };`;
   };
 };
 

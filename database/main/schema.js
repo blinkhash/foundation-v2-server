@@ -46,14 +46,15 @@ const Schema = function (logger, configMain, executor) {
       worker VARCHAR NOT NULL DEFAULT 'unknown',
       difficulty FLOAT NOT NULL DEFAULT -1,
       hash VARCHAR NOT NULL DEFAULT 'unknown',
-      height INT UNIQUE NOT NULL DEFAULT -1,
+      height INT NOT NULL DEFAULT -1,
       identifier VARCHAR NOT NULL DEFAULT 'master',
       luck FLOAT NOT NULL DEFAULT 0,
       orphan BOOLEAN NOT NULL DEFAULT false,
       reward FLOAT NOT NULL DEFAULT 0,
+      round VARCHAR NOT NULL DEFAULT 'unknown',
       solo BOOLEAN NOT NULL DEFAULT false,
       type VARCHAR NOT NULL DEFAULT 'primary',
-      CONSTRAINT historical_blocks_unique UNIQUE (height, type));
+      CONSTRAINT historical_blocks_unique UNIQUE (round, type));
     CREATE INDEX historical_blocks_miner ON "${ pool }".historical_blocks(miner, type);
     CREATE INDEX historical_blocks_worker ON "${ pool }".historical_blocks(worker, type);
     CREATE INDEX historical_blocks_identifier ON "${ pool }".historical_blocks(identifier, type);
@@ -159,12 +160,12 @@ const Schema = function (logger, configMain, executor) {
       miner VARCHAR NOT NULL DEFAULT 'unknown',
       worker VARCHAR NOT NULL DEFAULT 'unknown',
       amount FLOAT NOT NULL DEFAULT 0,
-      height INT NOT NULL DEFAULT -1,
+      round VARCHAR NOT NULL DEFAULT 'unknown',
       transaction VARCHAR NOT NULL DEFAULT 'unknown',
       type VARCHAR NOT NULL DEFAULT 'primary');
     CREATE INDEX historical_payments_miner ON "${ pool }".historical_payments(miner, type);
     CREATE INDEX historical_payments_worker ON "${ pool }".historical_payments(worker, type);
-    CREATE INDEX historical_payments_height ON "${ pool }".historical_payments(height, type);
+    CREATE INDEX historical_payments_round ON "${ pool }".historical_payments(round, type);
     CREATE INDEX historical_payments_transaction ON "${ pool }".historical_payments(transaction, type);
     CREATE INDEX historical_payments_type ON "${ pool }".historical_payments(type);`;
     _this.executor([command], () => callback());
@@ -188,7 +189,7 @@ const Schema = function (logger, configMain, executor) {
       timestamp BIGINT NOT NULL DEFAULT -1,
       miner VARCHAR NOT NULL DEFAULT 'unknown',
       worker VARCHAR NOT NULL DEFAULT 'unknown',
-      height INT NOT NULL DEFAULT -1,
+      round VARCHAR NOT NULL DEFAULT 'unknown',
       identifier VARCHAR NOT NULL DEFAULT 'master',
       invalid INT NOT NULL DEFAULT 0,
       solo BOOLEAN NOT NULL DEFAULT false,
@@ -197,13 +198,13 @@ const Schema = function (logger, configMain, executor) {
       type VARCHAR NOT NULL DEFAULT 'primary',
       valid INT NOT NULL DEFAULT 0,
       work FLOAT NOT NULL DEFAULT 0,
-      CONSTRAINT historical_rounds_unique UNIQUE (worker, solo, height, type));
+      CONSTRAINT historical_rounds_unique UNIQUE (worker, solo, round, type));
     CREATE INDEX historical_rounds_miner ON "${ pool }".historical_rounds(miner, type);
     CREATE INDEX historical_rounds_worker ON "${ pool }".historical_rounds(worker, type);
     CREATE INDEX historical_rounds_identifier ON "${ pool }".historical_rounds(identifier, type);
-    CREATE INDEX historical_rounds_round ON "${ pool }".historical_rounds(solo, height, type);
+    CREATE INDEX historical_rounds_round ON "${ pool }".historical_rounds(solo, round, type);
     CREATE INDEX historical_rounds_historical ON "${ pool }".historical_rounds(worker, solo, type);
-    CREATE INDEX historical_rounds_combined ON "${ pool }".historical_rounds(worker, solo, height, type);`;
+    CREATE INDEX historical_rounds_combined ON "${ pool }".historical_rounds(worker, solo, round, type);`;
     _this.executor([command], () => callback());
   };
 
@@ -224,10 +225,10 @@ const Schema = function (logger, configMain, executor) {
       id SERIAL PRIMARY KEY,
       timestamp BIGINT NOT NULL DEFAULT -1,
       amount FLOAT NOT NULL DEFAULT 0,
-      height INT UNIQUE NOT NULL DEFAULT -1,
+      round VARCHAR UNIQUE NOT NULL DEFAULT 'unknown',
       transaction VARCHAR NOT NULL DEFAULT 'unknown',
       type VARCHAR NOT NULL DEFAULT 'primary');
-    CREATE INDEX historical_transactions_height ON "${ pool }".historical_transactions(height, type);
+    CREATE INDEX historical_transactions_round ON "${ pool }".historical_transactions(round, type);
     CREATE INDEX historical_transactions_transaction ON "${ pool }".historical_transactions(transaction, type);
     CREATE INDEX historical_transactions_type ON "${ pool }".historical_transactions(type);`;
     _this.executor([command], () => callback());
@@ -280,14 +281,15 @@ const Schema = function (logger, configMain, executor) {
       worker VARCHAR NOT NULL DEFAULT 'unknown',
       difficulty FLOAT NOT NULL DEFAULT -1,
       hash VARCHAR NOT NULL DEFAULT 'unknown',
-      height INT UNIQUE NOT NULL DEFAULT -1,
+      height INT NOT NULL DEFAULT -1,
       identifier VARCHAR NOT NULL DEFAULT 'master',
       luck FLOAT NOT NULL DEFAULT 0,
       orphan BOOLEAN NOT NULL DEFAULT false,
       reward FLOAT NOT NULL DEFAULT 0,
+      round VARCHAR UNIQUE NOT NULL DEFAULT 'unknown',
       solo BOOLEAN NOT NULL DEFAULT false,
       type VARCHAR NOT NULL DEFAULT 'primary',
-      CONSTRAINT pool_blocks_unique UNIQUE (height, type));
+      CONSTRAINT pool_blocks_unique UNIQUE (round, type));
     CREATE INDEX pool_blocks_miner ON "${ pool }".pool_blocks(miner, type);
     CREATE INDEX pool_blocks_worker ON "${ pool }".pool_blocks(worker, type);
     CREATE INDEX pool_blocks_identifier ON "${ pool }".pool_blocks(identifier, type);
@@ -395,22 +397,22 @@ const Schema = function (logger, configMain, executor) {
       timestamp BIGINT NOT NULL DEFAULT -1,
       miner VARCHAR NOT NULL DEFAULT 'unknown',
       worker VARCHAR NOT NULL DEFAULT 'unknown',
-      height INT NOT NULL DEFAULT -1,
       identifier VARCHAR NOT NULL DEFAULT 'master',
       invalid INT NOT NULL DEFAULT 0,
+      round VARCHAR NOT NULL DEFAULT 'current',
       solo BOOLEAN NOT NULL DEFAULT false,
       stale INT NOT NULL DEFAULT 0,
       times FLOAT NOT NULL DEFAULT 0,
       type VARCHAR NOT NULL DEFAULT 'primary',
       valid INT NOT NULL DEFAULT 0,
       work FLOAT NOT NULL DEFAULT 0,
-      CONSTRAINT pool_rounds_unique UNIQUE (worker, solo, height, type));
+      CONSTRAINT pool_rounds_unique UNIQUE (worker, solo, round, type));
     CREATE INDEX pool_rounds_miner ON "${ pool }".pool_rounds(miner, type);
     CREATE INDEX pool_rounds_worker ON "${ pool }".pool_rounds(worker, type);
     CREATE INDEX pool_rounds_identifier ON "${ pool }".pool_rounds(identifier, type);
-    CREATE INDEX pool_rounds_round ON "${ pool }".pool_rounds(solo, height, type);
+    CREATE INDEX pool_rounds_round ON "${ pool }".pool_rounds(solo, round, type);
     CREATE INDEX pool_rounds_historical ON "${ pool }".pool_rounds(worker, solo, type);
-    CREATE INDEX pool_rounds_combined ON "${ pool }".pool_rounds(worker, solo, height, type);`;
+    CREATE INDEX pool_rounds_combined ON "${ pool }".pool_rounds(worker, solo, round, type);`;
     _this.executor([command], () => callback());
   };
 

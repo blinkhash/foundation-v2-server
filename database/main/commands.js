@@ -2,6 +2,7 @@ const Schema = require('./schema');
 const Text = require('../../locales/index');
 
 // Database Table Commands
+const PoolBlocks = require('./pool/blocks');
 const PoolHashrate = require('./pool/hashrate');
 const PoolMetadata = require('./pool/metadata');
 const PoolMiners = require('./pool/miners');
@@ -42,6 +43,7 @@ const Commands = function (logger, client, configMain) {
   this.schema = new Schema(_this.logger, _this.configMain, _this.executor);
 
   // Build Out Pool Command Modules for Client
+  this.pool.blocks = new PoolBlocks(_this.logger, _this.configMain);
   this.pool.hashrate = new PoolHashrate(_this.logger, _this.configMain);
   this.pool.metadata = new PoolMetadata(_this.logger, _this.configMain);
   this.pool.miners = new PoolMiners(_this.logger, _this.configMain);

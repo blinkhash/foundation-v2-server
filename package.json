@@ -26,6 +26,10 @@
   },
   "scripts": {
     "start": "nodemon ./index.js",
+    "prod:start": "pm2 start ./index.js",
+    "prod:stop": "pm2 stop ./index.js",
+    "prod:logs": "pm2 logs main",
+    "prod:update": "pm2 update",
     "clean": "eslint . --ext .js --ignore-pattern node_modules/",
     "clean:fix": "eslint . --ext .js --fix --ignore-pattern node_modules/",
     "test": "jest --coverage",
@@ -39,7 +43,9 @@
   "dependencies": {
     "colors": "^1.4.0",
     "nodemon": "^2.0.19",
-    "pg": "^8.7.3"
+    "pg": "^8.7.3",
+    "pm2": "^5.2.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "codecov": "^3.8.1",

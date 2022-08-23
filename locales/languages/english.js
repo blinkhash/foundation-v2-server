@@ -7,6 +7,14 @@ exports.builderWorkersText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;
 exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
 
+// Shares Text
+exports.sharesSubmissionsText1 = (hash, address) => `Primary block found: ${ hash } by ${ address }`;
+exports.sharesSubmissionsText2 = (hash, address) => `Auxiliary block found: ${ hash } by ${ address }`;
+exports.sharesSubmissionsText3 = () => 'We thought a primary block was found but it was rejected by the daemon';
+exports.sharesSubmissionsText4 = () => 'We thought a auxiliary block was found but it was rejected by the daemon';
+exports.sharesSubmissionsText5 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;
+exports.sharesSubmissionsText6 = (error, address, ip) => `A share was rejected (${ error }) from ${ address } [${ ip }]`;
+
 // Starting Text
 exports.startingMessageText1 = (pool) => `Initializing server (${ pool }) ...`;
 exports.startingMessageText2 = (coins) => `Connected coins: ${ coins }`;
@@ -31,5 +39,3 @@ exports.loaderTemplateText1 = () => 'The pool template is not installed or does 
 
 // Stratum Text
 exports.stratumRecipientsText1 = () => 'No recipients have been added, which means that no fees will be taken';
-exports.stratumSharesText1 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;
-exports.stratumSharesText2 = (error, address, ip) => `A share was rejected (${ error }) from ${ address } [${ ip }]`;

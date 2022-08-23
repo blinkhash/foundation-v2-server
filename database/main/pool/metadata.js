@@ -38,7 +38,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Reset
-  this.insertPoolMetadataRoundReset = function(pool, updates) {
+  this.insertPoolMetadataRoundsReset = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, efficiency, effort,
@@ -55,7 +55,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Round Data
-  this.insertPoolMetadataRoundUpdate = function(pool, updates) {
+  this.insertPoolMetadataRoundsUpdate = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, efficiency, effort,

@@ -1,5 +1,6 @@
 const Text = require('../../locales/index');
 const utils = require('./utils');
+const uuid = require('uuid');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +43,31 @@ const Shares = function (logger, client, config, configMain) {
     const timeChange = utils.roundTo(Math.max(Date.now() - lastTime, 0) / 1000, 4);
     if (timeChange < 900) times = times + timeChange;
     return times;
+  };
+
+  // Handle Blocks Updates
+  this.handleBlocks = function(work, worker, difficulty, round, shareData, shareType, minerType, blockType) {
+
+    // Calculate Features of Blocks
+    const identifier = shareData.identifier || 'master';
+    const luck = _this.handleEffort(work, shareData, shareType, difficulty);
+
+    // Return Blocks Updates
+    return {
+      timestamp: Date.now(),
+      miner: (worker || '').split('.')[0],
+      worker: worker,
+      difficulty: difficulty,
+      hash: shareData.hash,
+      height: shareData.height,
+      identifier: identifier,
+      luck: luck,
+      orphan: false,
+      reward: shareData.reward,
+      round: round,
+      solo: minerType,
+      type: blockType,
+    };
   };
 
   // Handle Hashrate Updates
@@ -121,7 +147,7 @@ const Shares = function (logger, client, config, configMain) {
       timestamp: Date.now(),
       miner: (worker || '').split('.')[0],
       worker: worker,
-      height: -1,
+      round: 'current',
       identifier: identifier,
       invalid: invalid,
       solo: minerType,
@@ -149,6 +175,76 @@ const Shares = function (logger, client, config, configMain) {
       effort: effort,
       type: blockType
     };
+  };
+
+  // Handle Primary Updates
+  this.handlePrimary = function(lookups, shareData, shareType, minerType, blockType, callback) {
+
+    // Build Round Update Data
+    const round = uuid.v4();
+    const miner = (shareData.addrPrimary || '').split('.')[0];
+
+    // Establish Specific Lookups
+    const primaryMetadata = lookups[2].rows[0] || {};
+    const primaryRound = lookups[4].rows[0] || {};
+    const primaryWork = minerType ? primaryRound.work || 0 : primaryMetadata.work || 0;
+
+    // Build Round Block to Submit
+    const primaryBlocks = _this.handleBlocks(
+      primaryWork, shareData.addrPrimary, shareData.blockDiffPrimary, round, shareData,
+      shareType, minerType, blockType);
+
+    // Build Round Update Transactions
+    const primaryMetadataReset = { timestamp: Date.now(), type: 'primary' };
+    const primaryUpdate = (minerType) ? (
+      _this.connection.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, round, 'primary')) : (
+      _this.connection.rounds.updatePoolRoundsCurrentShared(_this.pool, round, 'primary'));
+
+    // Build Combined Transaction
+    const transaction = [
+      'BEGIN;',
+      _this.connection.blocks.insertPoolBlocksCurrent(_this.pool, primaryBlocks),
+      _this.connection.metadata.insertPoolMetadataRoundsReset(_this.pool, primaryMetadataReset),
+      primaryUpdate,
+      'COMMIT;'];
+
+    // Insert Work into Database
+    _this.executor(transaction, () => callback());
+  };
+
+  // Handle Auxiliary Updates
+  this.handleAuxiliary = function(lookups, shareData, shareType, minerType, blockType, callback) {
+
+    // Build Round Update Data
+    const round = uuid.v4();
+    const miner = (shareData.addrAuxiliary || '').split('.')[0];
+
+    // Establish Specific Lookups
+    const auxiliaryMetadata = lookups[3].rows[0] || {};
+    const auxiliaryRound = lookups[5].rows[0] || {};
+    const auxiliaryWork = minerType ? auxiliaryRound.work || 0 : auxiliaryMetadata.work || 0;
+
+    // Build Round Block to Submit
+    const auxiliaryBlocks = _this.handleBlocks(
+      auxiliaryWork, shareData.addrAuxiliary, shareData.blockDiffAuxiliary, round, shareData,
+      shareType, minerType, blockType);
+
+    // Build Round Update Transactions
+    const auxiliaryMetadataReset = { timestamp: Date.now(), type: 'auxiliary' };
+    const auxiliaryUpdate = (minerType) ? (
+      _this.connection.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, round, 'auxiliary')) : (
+      _this.connection.rounds.updatePoolRoundsCurrentShared(_this.pool, round, 'auxiliary'));
+
+    // Build Combined Transaction
+    const transaction = [
+      'BEGIN;',
+      _this.connection.blocks.insertPoolBlocksCurrent(_this.pool, auxiliaryBlocks),
+      _this.connection.metadata.insertPoolMetadataRoundsReset(_this.pool, auxiliaryMetadataReset),
+      auxiliaryUpdate,
+      'COMMIT;'];
+
+    // Insert Work into Database
+    _this.executor(transaction, () => callback());
   };
 
   // Handle Share Updates
@@ -189,21 +285,21 @@ const Shares = function (logger, client, config, configMain) {
     const auxiliaryWorkerUpdates = _this.handleWorkers(
       shareData.addrAuxiliary, shareData.blockDiffAuxiliary, auxiliaryRound, shareData, shareType, 'auxiliary');
 
-    // Build Initial Transaction
+    // Build Combined Transaction
     const transaction = [
       'BEGIN;',
       _this.connection.hashrate.insertPoolHashrateCurrent(_this.pool, hashrateUpdates),
-      _this.connection.metadata.insertPoolMetadataRoundUpdate(_this.pool, primaryMetadataUpdates),
-      _this.connection.miners.insertPoolMinersRoundUpdate(_this.pool, primaryMinerUpdates),
-      _this.connection.rounds.insertPoolRoundCurrent(_this.pool, primaryRoundUpdates),
-      _this.connection.workers.insertPoolWorkersRoundUpdate(_this.pool, primaryWorkerUpdates)];
+      _this.connection.metadata.insertPoolMetadataRoundsUpdate(_this.pool, primaryMetadataUpdates),
+      _this.connection.miners.insertPoolMinersRounds(_this.pool, primaryMinerUpdates),
+      _this.connection.rounds.insertPoolRoundsCurrent(_this.pool, primaryRoundUpdates),
+      _this.connection.workers.insertPoolWorkersRounds(_this.pool, primaryWorkerUpdates)];
 
     // Add Support for Auxiliary Handling
     if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
-      transaction.push(_this.connection.metadata.insertPoolMetadataRoundUpdate(_this.pool, auxiliaryMetadataUpdates));
-      transaction.push(_this.connection.miners.insertPoolMinersRoundUpdate(_this.pool, auxiliaryMinerUpdates));
-      transaction.push(_this.connection.rounds.insertPoolRoundCurrent(_this.pool, auxiliaryRoundUpdates));
-      transaction.push(_this.connection.workers.insertPoolWorkersRoundUpdate(_this.pool, auxiliaryWorkerUpdates));
+      transaction.push(_this.connection.metadata.insertPoolMetadataRoundsUpdate(_this.pool, auxiliaryMetadataUpdates));
+      transaction.push(_this.connection.miners.insertPoolMinersRounds(_this.pool, auxiliaryMinerUpdates));
+      transaction.push(_this.connection.rounds.insertPoolRoundsCurrent(_this.pool, auxiliaryRoundUpdates));
+      transaction.push(_this.connection.workers.insertPoolWorkersRounds(_this.pool, auxiliaryWorkerUpdates));
     }
 
     // Insert Work into Database
@@ -212,7 +308,7 @@ const Shares = function (logger, client, config, configMain) {
   };
 
   // Handle Share/Block Submissions
-  this.handleSubmissions = function(shareData, shareValid) {
+  this.handleSubmissions = function(shareData, shareValid, blockValid) {
 
     // Calculate Share Features
     let shareType = 'valid';
@@ -221,31 +317,55 @@ const Shares = function (logger, client, config, configMain) {
     if (shareData.error && shareData.error === 'job not found') shareType = 'stale';
     else if (!shareValid || shareData.error) shareType = 'invalid';
 
-    // Build Initial Transaction
+    // Build Combined Transaction
     const transaction = [
       'BEGIN;',
       _this.connection.hashrate.deletePoolHashrateCurrent(_this.pool, windowTime),
       _this.connection.metadata.selectPoolMetadataType(_this.pool, 'primary'),
       _this.connection.metadata.selectPoolMetadataType(_this.pool, 'auxiliary'),
-      _this.connection.rounds.selectPoolRoundCombinedCurrent(_this.pool, shareData.addrPrimary, minerType, 'primary'),
-      _this.connection.rounds.selectPoolRoundCombinedCurrent(_this.pool, shareData.addrAuxiliary, minerType, 'auxiliary'),
+      _this.connection.rounds.selectPoolRoundsCombinedCurrent(_this.pool, shareData.addrPrimary, minerType, 'primary'),
+      _this.connection.rounds.selectPoolRoundsCombinedCurrent(_this.pool, shareData.addrAuxiliary, minerType, 'auxiliary'),
       'COMMIT;'];
 
     // Establish Separate Behavior
     switch (shareData.blockType) {
 
-    // Accepted Behavior
+    // Primary Behavior
     case 'primary':
-    case 'auxiliary':
-      _this.executor(transaction, () => {
+      _this.executor(transaction, (lookups) => {
+        _this.handleShares(lookups, shareData, shareType, minerType, () => {
+          const lines = [(blockValid) ?
+            _this.text.sharesSubmissionsText1(shareData.hash, shareData.addrPrimary) :
+            _this.text.sharesSubmissionsText3()];
+          if (blockValid) _this.handlePrimary(lookups, shareData, shareType, minerType, 'primary', () => {});
+          _this.logger.log('Shares', _this.config.name, lines);
+        });
+      });
+      break;
 
+    // Auxiliary Behavior
+    case 'auxiliary':
+      _this.executor(transaction, (lookups) => {
+        _this.handleShares(lookups, shareData, shareType, minerType, () => {
+          const lines = [(blockValid) ?
+            _this.text.sharesSubmissionsText2(shareData.hash, shareData.addrAuxiliary) :
+            _this.text.sharesSubmissionsText4()];
+          if (blockValid) _this.handleAuxiliary(lookups, shareData, shareType, minerType, 'auxiliary', () => {});
+          _this.logger.log('Shares', _this.config.name, lines);
+        });
       });
       break;
 
     // Share Behavior
     case 'share':
       _this.executor(transaction, (lookups) => {
-        _this.handleShares(lookups, shareData, shareType, minerType, () => {});
+        _this.handleShares(lookups, shareData, shareType, minerType, () => {
+          const lines = [(shareValid) ?
+            _this.text.sharesSubmissionsText5(
+              shareData.difficulty, shareData.shareDiff, shareData.addrPrimary, shareData.ip) :
+            _this.text.sharesSubmissionsText6(shareData.error, shareData.addrPrimary, shareData.ip)];
+          _this.logger.log('Shares', _this.config.name, lines);
+        });
       });
       break;
 

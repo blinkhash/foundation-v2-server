@@ -10,46 +10,78 @@ const PoolRounds = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Select Rows Using Miner
-  this.selectPoolRoundMiner = function(pool, miner, type) {
+  this.selectPoolRoundsMiner = function(pool, miner, type) {
     return `
       SELECT * FROM "${ pool }".pool_rounds
       WHERE miner = '${ miner }' AND type = '${ type }';`;
   };
 
   // Select Rows Using Worker
-  this.selectPoolRoundWorker = function(pool, worker, type) {
+  this.selectPoolRoundsWorker = function(pool, worker, type) {
     return `
       SELECT * FROM "${ pool }".pool_rounds
       WHERE worker = '${ worker }' AND type = '${ type }';`;
   };
 
   // Select Rows Using Identifier
-  this.selectPoolRoundIdentifier = function(pool, identifier, type) {
+  this.selectPoolRoundsIdentifier = function(pool, identifier, type) {
     return `
       SELECT * FROM "${ pool }".pool_rounds
       WHERE identifier = '${ identifier } AND type = '${ type }';`;
   };
 
   // Select Rows Using Current Round
-  this.selectPoolRoundCurrent = function(pool, solo, type) {
+  this.selectPoolRoundsCurrent = function(pool, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_rounds
-      WHERE solo = ${ solo } AND height = -1 AND type = '${ type }';`;
+      WHERE solo = ${ solo } AND round = 'current' AND type = '${ type }';`;
+  };
+
+  // Select Rows Using Specific Round
+  this.selectPoolRoundsSpecific = function(pool, solo, round, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_rounds
+      WHERE solo = ${ solo } AND round = '${ round }'
+      AND type = '${ type }';`;
+  };
+
+  // Select Rows Using Historical Data
+  this.selectPoolRoundsHistorical = function(pool, worker, solo, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_rounds
+      WHERE worker = '${ worker }' AND solo = ${ solo }
+      AND type = '${ type }';`;
+  };
+
+  // Select Rows Using Current Combined Data
+  this.selectPoolRoundsCombinedCurrent = function(pool, worker, solo, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_rounds
+      WHERE worker = '${ worker }' AND solo = ${ solo }
+      AND round = 'current' AND type = '${ type }';`;
+  };
+
+  // Select Rows Using Current Specific Data
+  this.selectPoolRoundsCombinedSpecific = function(pool, worker, solo, round, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_rounds
+      WHERE worker = '${ worker }' AND solo = ${ solo }
+      AND round = '${ round }' AND type = '${ type }';`;
   };
 
   // Insert Rows Using Worker
-  this.insertPoolRoundCurrent = function(pool, updates) {
+  this.insertPoolRoundsCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_rounds (
         timestamp, miner, worker,
-        height, identifier, invalid,
+        round, identifier, invalid,
         solo, stale, times, type,
         valid, work)
       VALUES (
         ${ updates.timestamp },
         '${ updates.miner }',
         '${ updates.worker }',
-        ${ updates.height },
+        '${ updates.round }',
         '${ updates.identifier }',
         ${ updates.invalid },
         ${ updates.solo },
@@ -68,36 +100,22 @@ const PoolRounds = function (logger, configMain) {
         work = "${ pool }".pool_rounds.work + ${ updates.work };`;
   };
 
-  // Select Rows Using Specific Round
-  this.selectPoolRoundSpecific = function(pool, solo, height, type) {
+  // Update Rows Using Round
+  this.updatePoolRoundsCurrentSolo = function(pool, miner, round, type) {
     return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE solo = ${ solo } AND height = ${ height }
+      UPDATE "${ pool }".pool_rounds
+      SET round = '${ round }'
+      WHERE round = 'current' AND miner = '${ miner }'
+      AND solo = true AND type = '${ type }';`;
+  };
+
+  // Update Rows Using Round
+  this.updatePoolRoundsCurrentShared = function(pool, round, type) {
+    return `
+      UPDATE "${ pool }".pool_rounds
+      SET round = '${ round }'
+      WHERE round = 'current' AND solo = false
       AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Historical Data
-  this.selectPoolRoundHistorical = function(pool, worker, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND solo = ${ solo }
-      AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Current Combined Data
-  this.selectPoolRoundCombinedCurrent = function(pool, worker, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND solo = ${ solo }
-      AND height = -1 AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Current Specific Data
-  this.selectPoolRoundCombinedSpecific = function(pool, worker, solo, height, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND solo = ${ solo }
-      AND height = ${ height } AND type = '${ type }';`;
   };
 };
 
