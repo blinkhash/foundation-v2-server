@@ -74,7 +74,7 @@ const PoolWorkers = function (logger, configMain) {
       INSERT INTO "${ pool }".pool_workers (
         worker, miner, timestamp,
         balance, generate, immature,
-        paid)
+        paid, type)
       VALUES (
         '${ updates.worker }',
         '${ updates.miner }',
@@ -82,7 +82,8 @@ const PoolWorkers = function (logger, configMain) {
         ${ updates.balance },
         ${ updates.generate },
         ${ updates.immature },
-        ${ updates.paid }')
+        ${ updates.paid },
+        '${ updates.type }')
       ON CONFLICT (worker)
       DO UPDATE SET
         timestamp = ${ updates.timestamp },

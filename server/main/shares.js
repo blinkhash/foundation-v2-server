@@ -195,6 +195,7 @@ const Shares = function (logger, client, config, configMain) {
       shareType, minerType, blockType);
 
     // Build Round Update Transactions
+    const primaryMetadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'primary' };
     const primaryMetadataReset = { timestamp: Date.now(), type: 'primary' };
     const primaryUpdate = (minerType) ? (
       _this.connection.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, round, 'primary')) : (
@@ -204,6 +205,7 @@ const Shares = function (logger, client, config, configMain) {
     const transaction = [
       'BEGIN;',
       _this.connection.blocks.insertPoolBlocksCurrent(_this.pool, primaryBlocks),
+      _this.connection.metadata.insertPoolMetadataBlocksUpdate(_this.pool, primaryMetadataBlocks),
       _this.connection.metadata.insertPoolMetadataRoundsReset(_this.pool, primaryMetadataReset),
       primaryUpdate,
       'COMMIT;'];
@@ -230,6 +232,7 @@ const Shares = function (logger, client, config, configMain) {
       shareType, minerType, blockType);
 
     // Build Round Update Transactions
+    const auxiliaryMetadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'auxiliary' };
     const auxiliaryMetadataReset = { timestamp: Date.now(), type: 'auxiliary' };
     const auxiliaryUpdate = (minerType) ? (
       _this.connection.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, round, 'auxiliary')) : (
@@ -239,6 +242,7 @@ const Shares = function (logger, client, config, configMain) {
     const transaction = [
       'BEGIN;',
       _this.connection.blocks.insertPoolBlocksCurrent(_this.pool, auxiliaryBlocks),
+      _this.connection.metadata.insertPoolMetadataBlocksUpdate(_this.pool, auxiliaryMetadataBlocks),
       _this.connection.metadata.insertPoolMetadataRoundsReset(_this.pool, auxiliaryMetadataReset),
       auxiliaryUpdate,
       'COMMIT;'];
@@ -334,11 +338,7 @@ const Shares = function (logger, client, config, configMain) {
     case 'primary':
       _this.executor(transaction, (lookups) => {
         _this.handleShares(lookups, shareData, shareType, minerType, () => {
-          const lines = [(blockValid) ?
-            _this.text.sharesSubmissionsText1(shareData.hash, shareData.addrPrimary) :
-            _this.text.sharesSubmissionsText3()];
           if (blockValid) _this.handlePrimary(lookups, shareData, shareType, minerType, 'primary', () => {});
-          _this.logger.log('Shares', _this.config.name, lines);
         });
       });
       break;
@@ -347,11 +347,7 @@ const Shares = function (logger, client, config, configMain) {
     case 'auxiliary':
       _this.executor(transaction, (lookups) => {
         _this.handleShares(lookups, shareData, shareType, minerType, () => {
-          const lines = [(blockValid) ?
-            _this.text.sharesSubmissionsText2(shareData.hash, shareData.addrAuxiliary) :
-            _this.text.sharesSubmissionsText4()];
           if (blockValid) _this.handleAuxiliary(lookups, shareData, shareType, minerType, 'auxiliary', () => {});
-          _this.logger.log('Shares', _this.config.name, lines);
         });
       });
       break;
@@ -360,11 +356,12 @@ const Shares = function (logger, client, config, configMain) {
     case 'share':
       _this.executor(transaction, (lookups) => {
         _this.handleShares(lookups, shareData, shareType, minerType, () => {
-          const lines = [(shareValid) ?
-            _this.text.sharesSubmissionsText5(
+          const type = (shareType === 'valid') ? 'log' : 'error';
+          const lines = [(shareType === 'valid') ?
+            _this.text.sharesSubmissionsText1(
               shareData.difficulty, shareData.shareDiff, shareData.addrPrimary, shareData.ip) :
-            _this.text.sharesSubmissionsText6(shareData.error, shareData.addrPrimary, shareData.ip)];
-          _this.logger.log('Shares', _this.config.name, lines);
+            _this.text.sharesSubmissionsText2(shareData.error, shareData.addrPrimary, shareData.ip)];
+          _this.logger[type]('Shares', _this.config.name, lines);
         });
       });
       break;

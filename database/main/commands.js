@@ -40,7 +40,7 @@ const Commands = function (logger, client, configMain) {
   };
 
   // Build Out Schema Generation for Client
-  this.schema = new Schema(_this.logger, _this.configMain, _this.executor);
+  this.schema = new Schema(_this.logger, _this.executor, _this.configMain);
 
   // Build Out Pool Command Modules for Client
   this.pool.blocks = new PoolBlocks(_this.logger, _this.configMain);

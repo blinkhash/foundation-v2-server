@@ -15,6 +15,7 @@ const Client = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Build Postgres Client
+  /* istanbul ignore next */
   this.handleClient = function(callback) {
 
     // Build Connection Options

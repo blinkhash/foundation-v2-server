@@ -17,6 +17,21 @@ const PoolMetadata = function (logger, configMain) {
       ORDER BY timestamp DESC;`;
   };
 
+  // Insert Rows Using Blocks Data
+  this.insertPoolMetadataBlocksUpdate = function(pool, updates) {
+    return `
+      INSERT INTO "${ pool }".pool_metadata (
+        timestamp, blocks, type)
+      VALUES (
+        ${ updates.timestamp },
+        ${ updates.blocks },
+        '${ updates.type }')
+      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      DO UPDATE SET
+        timestamp = ${ updates.timestamp },
+        blocks = "${ pool }".pool_metadata.blocks + ${ updates.blocks };`;
+  };
+
   // Insert Rows Using Hashrate Data
   this.insertPoolMetadataHashrateUpdate = function(pool, updates) {
     return `

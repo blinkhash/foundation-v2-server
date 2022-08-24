@@ -64,14 +64,16 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         miner, timestamp, balance,
-        generate, immature, paid)
+        generate, immature, paid,
+        type)
       VALUES (
         '${ updates.miner }',
         ${ updates.timestamp },
         ${ updates.balance },
         ${ updates.generate },
         ${ updates.immature },
-        ${ updates.paid }')
+        ${ updates.paid },
+        '${ updates.type }')
       ON CONFLICT (miner)
       DO UPDATE SET
         timestamp = ${ updates.timestamp },

@@ -8,12 +8,8 @@ exports.databaseCommandsText1 = (error) => `An error was thrown when trying to e
 exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
 
 // Shares Text
-exports.sharesSubmissionsText1 = (hash, address) => `Primary block found: ${ hash } by ${ address }`;
-exports.sharesSubmissionsText2 = (hash, address) => `Auxiliary block found: ${ hash } by ${ address }`;
-exports.sharesSubmissionsText3 = () => 'We thought a primary block was found but it was rejected by the daemon';
-exports.sharesSubmissionsText4 = () => 'We thought a auxiliary block was found but it was rejected by the daemon';
-exports.sharesSubmissionsText5 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;
-exports.sharesSubmissionsText6 = (error, address, ip) => `A share was rejected (${ error }) from ${ address } [${ ip }]`;
+exports.sharesSubmissionsText1 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;
+exports.sharesSubmissionsText2 = (error, address, ip) => `A share was rejected (${ error }) from ${ address } [${ ip }]`;
 
 // Starting Text
 exports.startingMessageText1 = (pool) => `Initializing server (${ pool }) ...`;
