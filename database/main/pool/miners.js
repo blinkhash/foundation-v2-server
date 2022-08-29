@@ -5,6 +5,7 @@ const Text = require('../../../locales/index');
 // Main Schema Function
 const PoolMiners = function (logger, configMain) {
 
+  const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
@@ -23,64 +24,101 @@ const PoolMiners = function (logger, configMain) {
       WHERE type = '${ type }';`;
   };
 
+  // Build Miners Values String
+  this.buildPoolMinersHashrate = function(updates) {
+    let values = '';
+    updates.forEach((miner, idx) => {
+      values += `(
+        ${ miner.timestamp },
+        '${ miner.miner }',
+        ${ miner.hashrate },
+        '${ miner.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
+  };
+
   // Insert Rows Using Hashrate Data
   this.insertPoolMinersHashrate = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_miners (
-        miner, timestamp, hashrate,
+        timestamp, miner, hashrate,
         type)
-      VALUES (
-        '${ updates.miner }',
-        ${ updates.timestamp },
-        ${ updates.hashrate },
-        '${ updates.type }')
-      ON CONFLICT (miner)
+      VALUES ${ _this.buildPoolMinersHashrate(updates) }
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        hashrate = ${ updates.hashrate };`;
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
+  };
+
+  // Build Miners Values String
+  this.buildPoolMinersRounds = function(updates) {
+    let values = '';
+    updates.forEach((miner, idx) => {
+      values += `(
+        ${ miner.timestamp },
+        '${ miner.miner }',
+        ${ miner.efficiency },
+        ${ miner.effort },
+        '${ miner.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Round Data
   this.insertPoolMinersRounds = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_miners (
-        miner, timestamp, efficiency,
+        timestamp, miner, efficiency,
         effort, type)
-      VALUES (
-        '${ updates.miner }',
-        ${ updates.timestamp },
-        ${ updates.efficiency },
-        ${ updates.effort },
-        '${ updates.type }')
-      ON CONFLICT (miner)
+      VALUES ${ _this.buildPoolMinersRounds(updates) }
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        efficiency = ${ updates.efficiency },
-        effort = ${ updates.effort };`;
+        timestamp = EXCLUDED.timestamp,
+        efficiency = EXCLUDED.efficiency,
+        effort = EXCLUDED.effort;`;
+  };
+
+  // Build Miners Values String
+  this.buildPoolMinersPayments = function(updates) {
+    let values = '';
+    updates.forEach((miner, idx) => {
+      values += `(
+        ${ miner.timestamp },
+        '${ miner.miner }',
+        ${ miner.balance },
+        ${ miner.generate },
+        ${ miner.immature },
+        ${ miner.paid },
+        '${ miner.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Payment Data
   this.insertPoolMinersPayments = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_miners (
-        miner, timestamp, balance,
+        timestamp, miner, balance,
         generate, immature, paid,
         type)
-      VALUES (
-        '${ updates.miner }',
-        ${ updates.timestamp },
-        ${ updates.balance },
-        ${ updates.generate },
-        ${ updates.immature },
-        ${ updates.paid },
-        '${ updates.type }')
-      ON CONFLICT (miner)
+      VALUES ${ _this.buildPoolMinersPayments(updates) }
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        balance = ${ updates.balance },
-        generate = ${ updates.generate },
-        immature = ${ updates.immature },
-        paid = ${ updates.paid };`;
+        timestamp = EXCLUDED.timestamp,
+        balance = EXCLUDED.balance,
+        generate = EXCLUDED.generate,
+        immature = EXCLUDED.immature,
+        paid = EXCLUDED.paid;`;
+  };
+
+  // Delete Rows From Current Round
+  this.deletePoolMinersCurrent = function(pool, timestamp) {
+    return `
+      DELETE FROM "${ pool }".pool_miners
+      WHERE timestamp < ${ timestamp };`;
   };
 };
 

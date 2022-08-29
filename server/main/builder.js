@@ -30,7 +30,7 @@ const Builder = function(logger, configMain) {
 
     // Handle Worker Failover
     _this.workers[forkId].on('exit', () => {
-      const lines = [_this.text.builderWorkersText1(forkId)];
+      const lines = [_this.text.builderThreadsText1(forkId)];
       _this.logger.error('Builder', 'Workers', lines);
       setTimeout(() => {
         _this.createPoolWorkers(forkId);
@@ -47,7 +47,7 @@ const Builder = function(logger, configMain) {
 
     // Check if any Valid Configs Exist
     if (Object.keys(_this.configs).length === 0) {
-      const lines = [_this.text.builderWorkersText2()];
+      const lines = [_this.text.builderThreadsText2()];
       _this.logger.error('Builder', 'Workers', lines);
       return;
     }
@@ -57,7 +57,7 @@ const Builder = function(logger, configMain) {
       _this.createPoolWorkers(_this.numWorkers);
       _this.numWorkers += 1;
       if (_this.numWorkers === numForks) {
-        const lines = [_this.text.builderWorkersText2(1, numForks)];
+        const lines = [_this.text.builderThreadsText2(1, numForks)];
         _this.logger.debug('Builder', 'Workers', lines);
         clearInterval(startInterval);
       }

@@ -5,16 +5,10 @@ const Text = require('../../../locales/index');
 // Main Schema Function
 const PoolWorkers = function (logger, configMain) {
 
+  const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
-
-  // Select Rows Using Miner
-  this.selectPoolWorkersWorker = function(pool, worker, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_workers
-      WHERE worker = '${ worker }' AND type = '${ type }';`;
-  };
 
   // Select Rows Using Miner
   this.selectPoolWorkersMiner = function(pool, miner, type) {
@@ -23,74 +17,118 @@ const PoolWorkers = function (logger, configMain) {
       WHERE miner = '${ miner }' AND type = '${ type }';`;
   };
 
-  // Select Rows Using Miner
+  // Select Rows Using Worker
+  this.selectPoolWorkersWorker = function(pool, worker, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_workers
+      WHERE worker = '${ worker }' AND type = '${ type }';`;
+  };
+
+  // Select Rows Using Type
   this.selectPoolWorkersType = function(pool, type) {
     return `
       SELECT * FROM "${ pool }".pool_workers
       WHERE type = '${ type }';`;
   };
 
+  // Build Workers Values String
+  this.buildPoolWorkersHashrate = function(updates) {
+    let values = '';
+    updates.forEach((worker, idx) => {
+      values += `(
+        ${ worker.timestamp },
+        '${ worker.miner }',
+        '${ worker.worker }',
+        ${ worker.hashrate },
+        '${ worker.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
+  };
+
   // Insert Rows Using Hashrate Data
   this.insertPoolWorkersHashrate = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_workers (
-        worker, miner, timestamp,
+        timestamp, miner, worker,
         hashrate, type)
-      VALUES (
-        '${ updates.worker }',
-        '${ updates.miner }',
-        ${ updates.timestamp },
-        ${ updates.hashrate },
-        '${ updates.type }')
-      ON CONFLICT (worker)
+      VALUES ${ _this.buildPoolWorkersHashrate(updates) }
+      ON CONFLICT ON CONSTRAINT pool_workers_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        hashrate = ${ updates.hashrate };`;
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
+  };
+
+  // Build Workers Values String
+  this.buildPoolWorkersRounds = function(updates) {
+    let values = '';
+    updates.forEach((worker, idx) => {
+      values += `(
+        ${ worker.timestamp },
+        '${ worker.miner }',
+        '${ worker.worker }',
+        ${ worker.efficiency },
+        ${ worker.effort },
+        '${ worker.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Round Data
   this.insertPoolWorkersRounds = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_workers (
-        worker, miner, timestamp,
+        timestamp, miner, worker,
         efficiency, effort, type)
-      VALUES (
-        '${ updates.worker }',
-        '${ updates.miner }',
-        ${ updates.timestamp },
-        ${ updates.efficiency },
-        ${ updates.effort },
-        '${ updates.type }')
-      ON CONFLICT (worker)
+      VALUES ${ _this.buildPoolWorkersRounds(updates) }
+      ON CONFLICT ON CONSTRAINT pool_workers_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        efficiency = ${ updates.efficiency },
-        effort = ${ updates.effort };`;
+        timestamp = EXCLUDED.timestamp,
+        efficiency = EXCLUDED.efficiency,
+        effort = EXCLUDED.effort;`;
+  };
+
+  // Build Workers Values String
+  this.buildPoolWorkersPayments = function(updates) {
+    let values = '';
+    updates.forEach((worker, idx) => {
+      values += `(
+        ${ worker.timestamp },
+        '${ worker.miner }',
+        '${ worker.worker }',
+        ${ worker.balance },
+        ${ worker.generate },
+        ${ worker.immature },
+        ${ worker.paid },
+        '${ worker.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Payment Data
   this.insertPoolWorkersPayments = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_workers (
-        worker, miner, timestamp,
+        timestamp, miner, worker,
         balance, generate, immature,
         paid, type)
-      VALUES (
-        '${ updates.worker }',
-        '${ updates.miner }',
-        ${ updates.timestamp },
-        ${ updates.balance },
-        ${ updates.generate },
-        ${ updates.immature },
-        ${ updates.paid },
-        '${ updates.type }')
-      ON CONFLICT (worker)
+      VALUES ${ _this.buildPoolWorkersPayments(updates) }
+      ON CONFLICT ON CONSTRAINT pool_workers_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        balance = ${ updates.balance },
-        generate = ${ updates.generate },
-        immature = ${ updates.immature },
-        paid = ${ updates.paid };`;
+        timestamp = EXCLUDED.timestamp,
+        balance = EXCLUDED.balance,
+        generate = EXCLUDED.generate,
+        immature = EXCLUDED.immature,
+        paid = EXCLUDED.paid;`;
+  };
+
+  // Delete Rows From Current Round
+  this.deletePoolWorkersCurrent = function(pool, timestamp) {
+    return `
+      DELETE FROM "${ pool }".pool_workers
+      WHERE timestamp < ${ timestamp };`;
   };
 };
 

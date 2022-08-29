@@ -111,20 +111,20 @@ describe('Test database rounds functionality', () => {
       valid: 1,
       work: 8
     };
-    const response = rounds.insertPoolRoundsCurrent('Pool-Main', updates);
+    const response = rounds.insertPoolRoundsCurrent('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_rounds (
         timestamp, miner, worker,
-        round, identifier, invalid,
+        identifier, invalid, round,
         solo, stale, times, type,
         valid, work)
       VALUES (
         1,
         'miner1',
         'worker1',
-        'round1',
         'master',
         0,
+        'round1',
         true,
         0,
         100,
@@ -133,16 +133,75 @@ describe('Test database rounds functionality', () => {
         8)
       ON CONFLICT ON CONSTRAINT pool_rounds_unique
       DO UPDATE SET
-        timestamp = 1,
-        invalid = "Pool-Main".pool_rounds.invalid + 0,
-        stale = "Pool-Main".pool_rounds.stale + 0,
-        times = 100,
-        valid = "Pool-Main".pool_rounds.valid + 1,
-        work = "Pool-Main".pool_rounds.work + 8;`;
+        timestamp = EXCLUDED.timestamp,
+        invalid = "Pool-Main".pool_rounds.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".pool_rounds.stale + EXCLUDED.stale,
+        times = EXCLUDED.times,
+        valid = "Pool-Main".pool_rounds.valid + EXCLUDED.valid,
+        work = "Pool-Main".pool_rounds.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [10]', () => {
+    const rounds = new PoolRounds(logger, configMainCopy);
+    const updates = {
+      timestamp: 1,
+      miner: 'miner1',
+      worker: 'worker1',
+      round: 'round1',
+      identifier: 'master',
+      invalid: 0,
+      solo: true,
+      stale: 0,
+      times: 100,
+      type: 'primary',
+      valid: 1,
+      work: 8
+    };
+    const response = rounds.insertPoolRoundsCurrent('Pool-Main', [updates, updates]);
+    const expected = `
+      INSERT INTO "Pool-Main".pool_rounds (
+        timestamp, miner, worker,
+        identifier, invalid, round,
+        solo, stale, times, type,
+        valid, work)
+      VALUES (
+        1,
+        'miner1',
+        'worker1',
+        'master',
+        0,
+        'round1',
+        true,
+        0,
+        100,
+        'primary',
+        1,
+        8), (
+        1,
+        'miner1',
+        'worker1',
+        'master',
+        0,
+        'round1',
+        true,
+        0,
+        100,
+        'primary',
+        1,
+        8)
+      ON CONFLICT ON CONSTRAINT pool_rounds_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        invalid = "Pool-Main".pool_rounds.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".pool_rounds.stale + EXCLUDED.stale,
+        times = EXCLUDED.times,
+        valid = "Pool-Main".pool_rounds.valid + EXCLUDED.valid,
+        work = "Pool-Main".pool_rounds.work + EXCLUDED.work;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test rounds command handling [11]', () => {
     const rounds = new PoolRounds(logger, configMainCopy);
     const response = rounds.updatePoolRoundsCurrentSolo('Pool-Main', 'miner1', 'round1', 'primary');
     const expected = `
@@ -153,7 +212,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [11]', () => {
+  test('Test rounds command handling [12]', () => {
     const rounds = new PoolRounds(logger, configMainCopy);
     const response = rounds.updatePoolRoundsCurrentShared('Pool-Main', 'round1', 'primary');
     const expected = `

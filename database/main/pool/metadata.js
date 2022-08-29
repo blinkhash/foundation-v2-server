@@ -5,6 +5,7 @@ const Text = require('../../../locales/index');
 // Main Schema Function
 const PoolMetadata = function (logger, configMain) {
 
+  const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
@@ -13,8 +14,20 @@ const PoolMetadata = function (logger, configMain) {
   this.selectPoolMetadataType = function(pool, type) {
     return `
       SELECT * FROM "${ pool }".pool_metadata
-      WHERE type = '${ type }'
-      ORDER BY timestamp DESC;`;
+      WHERE type = '${ type }';`;
+  };
+
+  // Build Metadata Values String
+  this.buildPoolMetadataBlocksUpdate = function(updates) {
+    let values = '';
+    updates.forEach((metadata, idx) => {
+      values += `(
+        ${ metadata.timestamp },
+        ${ metadata.blocks },
+        '${ metadata.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Blocks Data
@@ -22,14 +35,26 @@ const PoolMetadata = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, blocks, type)
-      VALUES (
-        ${ updates.timestamp },
-        ${ updates.blocks },
-        '${ updates.type }')
+      VALUES ${ _this.buildPoolMetadataBlocksUpdate(updates) }
       ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        blocks = "${ pool }".pool_metadata.blocks + ${ updates.blocks };`;
+        timestamp = EXCLUDED.timestamp,
+        blocks = "${ pool }".pool_metadata.blocks + EXCLUDED.blocks;`;
+  };
+
+  // Build Metadata Values String
+  this.buildPoolMetadataHashrateUpdate = function(updates) {
+    let values = '';
+    updates.forEach((metadata, idx) => {
+      values += `(
+        ${ metadata.timestamp },
+        ${ metadata.hashrate },
+        ${ metadata.miners },
+        '${ metadata.type }',
+        ${ metadata.workers })`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Hashrate Data
@@ -38,18 +63,25 @@ const PoolMetadata = function (logger, configMain) {
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, hashrate, miners,
         type, workers)
-      VALUES (
-        ${ updates.timestamp },
-        ${ updates.hashrate },
-        ${ updates.miners },
-        '${ updates.type }',
-        ${ updates.workers })
+      VALUES ${ _this.buildPoolMetadataHashrateUpdate(updates) }
       ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        hashrate = ${ updates.hashrate },
-        miners = ${ updates.miners },
-        workers = ${ updates.workers };`;
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate,
+        miners = EXCLUDED.miners,
+        workers = EXCLUDED.workers;`;
+  };
+
+  // Build Metadata Values String
+  this.buildPoolMetadataRoundsReset = function(updates) {
+    let values = '';
+    updates.forEach((metadata, idx) => {
+      values += `(
+        ${ metadata.timestamp },
+        0, 0, 0, 0, '${ metadata.type }', 0, 0)`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Reset
@@ -59,14 +91,30 @@ const PoolMetadata = function (logger, configMain) {
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
-      VALUES (
-        ${ updates.timestamp },
-        0, 0, 0, 0, '${ updates.type }', 0, 0)
+      VALUES ${ _this.buildPoolMetadataRoundsReset(updates) }
       ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
+        timestamp = EXCLUDED.timestamp,
         efficiency = 0, effort = 0, invalid = 0,
         stale = 0, valid = 0, work = 0;`;
+  };
+
+  // Build Metadata Values String
+  this.buildPoolMetadataRoundsUpdate = function(updates) {
+    let values = '';
+    updates.forEach((metadata, idx) => {
+      values += `(
+        ${ metadata.timestamp },
+        ${ metadata.efficiency },
+        ${ metadata.effort },
+        ${ metadata.invalid },
+        ${ metadata.stale },
+        '${ metadata.type }',
+        ${ metadata.valid },
+        ${ metadata.work })`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
   };
 
   // Insert Rows Using Round Data
@@ -76,24 +124,16 @@ const PoolMetadata = function (logger, configMain) {
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
-      VALUES (
-        ${ updates.timestamp },
-        ${ updates.efficiency },
-        ${ updates.effort },
-        ${ updates.invalid },
-        ${ updates.stale },
-        '${ updates.type }',
-        ${ updates.valid },
-        ${ updates.work })
+      VALUES ${ _this.buildPoolMetadataRoundsUpdate(updates) }
       ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        efficiency = ${ updates.efficiency },
-        effort = ${ updates.effort },
-        invalid = "${ pool }".pool_metadata.invalid + ${ updates.invalid },
-        stale = "${ pool }".pool_metadata.stale + ${ updates.stale },
-        valid = "${ pool }".pool_metadata.valid + ${ updates.valid },
-        work = "${ pool }".pool_metadata.work + ${ updates.work };`;
+        timestamp = EXCLUDED.timestamp,
+        efficiency = EXCLUDED.efficiency,
+        effort = EXCLUDED.effort,
+        invalid = "${ pool }".pool_metadata.invalid + EXCLUDED.invalid,
+        stale = "${ pool }".pool_metadata.stale + EXCLUDED.stale,
+        valid = "${ pool }".pool_metadata.valid + EXCLUDED.valid,
+        work = "${ pool }".pool_metadata.work + EXCLUDED.work;`;
   };
 };
 

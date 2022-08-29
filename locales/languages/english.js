@@ -1,7 +1,7 @@
 // Builder Text
-exports.builderWorkersText1 = (forkId) => `Fork ${ forkId } died, starting replacement worker ...`;
-exports.builderWorkersText2 = () => 'No valid pool configs exist or are enabled. Check your configuration files';
-exports.builderWorkersText3 = (numConfigs, numForks) => `Started ${ numConfigs } pool(s) on ${ numForks } thread(s)`;
+exports.builderThreadsText1 = (forkId) => `Fork ${ forkId } died, starting replacement worker ...`;
+exports.builderThreadsText2 = () => 'No valid pool configs exist or are enabled. Check your configuration files';
+exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs } pool(s) on ${ numForks } thread(s)`;
 
 // Database Text
 exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;

@@ -45,20 +45,20 @@ describe('Test database miners functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersHashrate('Pool-Main', updates);
+    const response = miners.insertPoolMinersHashrate('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_miners (
-        miner, timestamp, hashrate,
+        timestamp, miner, hashrate,
         type)
       VALUES (
+        1,
         'miner1',
         1,
-        1,
         'primary')
-      ON CONFLICT (miner)
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
-        timestamp = 1,
-        hashrate = 1;`;
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
     expect(response).toBe(expected);
   });
 
@@ -67,30 +67,92 @@ describe('Test database miners functionality', () => {
     const updates = {
       miner: 'miner1',
       timestamp: 1,
-      efficiency: 100,
-      effort: 100,
+      hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersRounds('Pool-Main', updates);
+    const response = miners.insertPoolMinersHashrate('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_miners (
-        miner, timestamp, efficiency,
-        effort, type)
+        timestamp, miner, hashrate,
+        type)
       VALUES (
+        1,
         'miner1',
         1,
-        100,
-        100,
+        'primary'), (
+        1,
+        'miner1',
+        1,
         'primary')
-      ON CONFLICT (miner)
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
-        timestamp = 1,
-        efficiency = 100,
-        effort = 100;`;
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [5]', () => {
+    const miners = new PoolMiners(logger, configMainCopy);
+    const updates = {
+      miner: 'miner1',
+      timestamp: 1,
+      efficiency: 100,
+      effort: 100,
+      type: 'primary',
+    };
+    const response = miners.insertPoolMinersRounds('Pool-Main', [updates]);
+    const expected = `
+      INSERT INTO "Pool-Main".pool_miners (
+        timestamp, miner, efficiency,
+        effort, type)
+      VALUES (
+        1,
+        'miner1',
+        100,
+        100,
+        'primary')
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        efficiency = EXCLUDED.efficiency,
+        effort = EXCLUDED.effort;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test miners command handling [6]', () => {
+    const miners = new PoolMiners(logger, configMainCopy);
+    const updates = {
+      miner: 'miner1',
+      timestamp: 1,
+      efficiency: 100,
+      effort: 100,
+      type: 'primary',
+    };
+    const response = miners.insertPoolMinersRounds('Pool-Main', [updates, updates]);
+    const expected = `
+      INSERT INTO "Pool-Main".pool_miners (
+        timestamp, miner, efficiency,
+        effort, type)
+      VALUES (
+        1,
+        'miner1',
+        100,
+        100,
+        'primary'), (
+        1,
+        'miner1',
+        100,
+        100,
+        'primary')
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        efficiency = EXCLUDED.efficiency,
+        effort = EXCLUDED.effort;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test miners command handling [7]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -101,27 +163,78 @@ describe('Test database miners functionality', () => {
       paid: 0,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersPayments('Pool-Main', updates);
+    const response = miners.insertPoolMinersPayments('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_miners (
-        miner, timestamp, balance,
+        timestamp, miner, balance,
         generate, immature, paid,
         type)
       VALUES (
-        'miner1',
         1,
+        'miner1',
         0,
         0,
         0,
         0,
         'primary')
-      ON CONFLICT (miner)
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
-        timestamp = 1,
-        balance = 0,
-        generate = 0,
-        immature = 0,
-        paid = 0;`;
+        timestamp = EXCLUDED.timestamp,
+        balance = EXCLUDED.balance,
+        generate = EXCLUDED.generate,
+        immature = EXCLUDED.immature,
+        paid = EXCLUDED.paid;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test miners command handling [8]', () => {
+    const miners = new PoolMiners(logger, configMainCopy);
+    const updates = {
+      miner: 'miner1',
+      timestamp: 1,
+      balance: 0,
+      generate: 0,
+      immature: 0,
+      paid: 0,
+      type: 'primary',
+    };
+    const response = miners.insertPoolMinersPayments('Pool-Main', [updates, updates]);
+    const expected = `
+      INSERT INTO "Pool-Main".pool_miners (
+        timestamp, miner, balance,
+        generate, immature, paid,
+        type)
+      VALUES (
+        1,
+        'miner1',
+        0,
+        0,
+        0,
+        0,
+        'primary'), (
+        1,
+        'miner1',
+        0,
+        0,
+        0,
+        0,
+        'primary')
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        balance = EXCLUDED.balance,
+        generate = EXCLUDED.generate,
+        immature = EXCLUDED.immature,
+        paid = EXCLUDED.paid;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test miners command handling [9]', () => {
+    const miners = new PoolMiners(logger, configMainCopy);
+    const response = miners.deletePoolMinersCurrent('Pool-Main', 1);
+    const expected = `
+      DELETE FROM "Pool-Main".pool_miners
+      WHERE timestamp < 1;`;
     expect(response).toBe(expected);
   });
 });

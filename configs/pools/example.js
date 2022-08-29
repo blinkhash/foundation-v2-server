@@ -41,6 +41,8 @@ config.ports.push(ports1);
 config.settings = {};
 config.settings.blockRefreshInterval = 1000; // ms;
 config.settings.connectionTimeout = 600000; // ms;
+config.settings.hashrateWindow = 300000; // ms;
+config.settings.inactiveWindow = 604800000; // ms;
 config.settings.jobRebroadcastTimeout = 60000; // ms;
 
 // Primary Configuration
@@ -54,6 +56,7 @@ config.primary.address = '[address]';
 config.primary.coin = {};
 config.primary.coin.name = 'Bitcoin';
 config.primary.coin.symbol = 'BTC';
+config.primary.coin.algorithm = 'sha256d';
 
 // Daemon Configuration
 config.primary.daemons = [];

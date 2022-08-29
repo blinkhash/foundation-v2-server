@@ -5,6 +5,7 @@ const Text = require('../../../locales/index');
 // Main Schema Function
 const PoolBlocks = function (logger, configMain) {
 
+  const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
@@ -37,6 +38,29 @@ const PoolBlocks = function (logger, configMain) {
       WHERE type = '${ type }';`;
   };
 
+  // Build Blocks Values String
+  this.buildPoolBlocksCurrent = function(updates) {
+    let values = '';
+    updates.forEach((block, idx) => {
+      values += `(
+        ${ block.timestamp },
+        '${ block.miner }',
+        '${ block.worker }',
+        ${ block.difficulty },
+        '${ block.hash }',
+        ${ block.height },
+        '${ block.identifier }',
+        ${ block.luck },
+        ${ block.orphan },
+        ${ block.reward },
+        '${ block.round }',
+        ${ block.solo },
+        '${ block.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
+  };
+
   // Insert Rows Using Hashrate Data
   this.insertPoolBlocksCurrent = function(pool, updates) {
     return `
@@ -45,35 +69,22 @@ const PoolBlocks = function (logger, configMain) {
         difficulty, hash, height,
         identifier, luck, orphan,
         reward, round, solo, type)
-      VALUES (
-        ${ updates.timestamp },
-        '${ updates.miner }',
-        '${ updates.worker }',
-        ${ updates.difficulty },
-        '${ updates.hash }',
-        ${ updates.height },
-        '${ updates.identifier }',
-        ${ updates.luck },
-        ${ updates.orphan },
-        ${ updates.reward },
-        '${ updates.round }',
-        ${ updates.solo },
-        '${ updates.type }')
+      VALUES ${ _this.buildPoolBlocksCurrent(updates) }
       ON CONFLICT ON CONSTRAINT pool_blocks_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        miner = '${ updates.miner }',
-        worker = '${ updates.worker }',
-        difficulty = ${ updates.difficulty },
-        hash = '${ updates.hash }',
-        height = ${ updates.height },
-        identifier = '${ updates.identifier }',
-        luck = ${ updates.luck },
-        orphan = ${ updates.orphan },
-        reward = ${ updates.reward },
-        round = '${ updates.round }',
-        solo = ${ updates.solo },
-        type = '${ updates.type }';`;
+        timestamp = EXCLUDED.timestamp,
+        miner = EXCLUDED.miner,
+        worker = EXCLUDED.worker,
+        difficulty = EXCLUDED.difficulty,
+        hash = EXCLUDED.hash,
+        height = EXCLUDED.height,
+        identifier = EXCLUDED.identifier,
+        luck = EXCLUDED.luck,
+        orphan = EXCLUDED.orphan,
+        reward = EXCLUDED.reward,
+        round = EXCLUDED.round,
+        solo = EXCLUDED.solo,
+        type = EXCLUDED.type;`;
   };
 };
 

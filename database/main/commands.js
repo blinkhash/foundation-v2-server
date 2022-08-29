@@ -1,7 +1,13 @@
 const Schema = require('./schema');
 const Text = require('../../locales/index');
 
-// Database Table Commands
+// Historical Table Commands
+const HistoricalMetadata = require('./historical/metadata');
+const HistoricalMiners = require('./historical/miners');
+const HistoricalNetwork = require('./historical/network');
+const HistoricalWorkers = require('./historical/workers');
+
+// Current Table Commands
 const PoolBlocks = require('./pool/blocks');
 const PoolHashrate = require('./pool/hashrate');
 const PoolMetadata = require('./pool/metadata');
@@ -39,10 +45,16 @@ const Commands = function (logger, client, configMain) {
     });
   };
 
-  // Build Out Schema Generation for Client
+  // Build Out Schema Generation
   this.schema = new Schema(_this.logger, _this.executor, _this.configMain);
 
-  // Build Out Pool Command Modules for Client
+  // Initialize Historical Commands
+  this.historical.metadata = new HistoricalMetadata(_this.logger, _this.configMain);
+  this.historical.miners = new HistoricalMiners(_this.logger, _this.configMain);
+  this.historical.network = new HistoricalNetwork(_this.logger, _this.configMain);
+  this.historical.workers = new HistoricalWorkers(_this.logger, _this.configMain);
+
+  // Initialize Current Commands
   this.pool.blocks = new PoolBlocks(_this.logger, _this.configMain);
   this.pool.hashrate = new PoolHashrate(_this.logger, _this.configMain);
   this.pool.metadata = new PoolMetadata(_this.logger, _this.configMain);

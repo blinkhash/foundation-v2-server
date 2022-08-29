@@ -5,6 +5,7 @@ const Text = require('../../../locales/index');
 // Main Schema Function
 const PoolRounds = function (logger, configMain) {
 
+  const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
@@ -69,35 +70,45 @@ const PoolRounds = function (logger, configMain) {
       AND round = '${ round }' AND type = '${ type }';`;
   };
 
+  // Build Rounds Values String
+  this.buildPoolRoundsCurrent = function(updates) {
+    let values = '';
+    updates.forEach((round, idx) => {
+      values += `(
+        ${ round.timestamp },
+        '${ round.miner }',
+        '${ round.worker }',
+        '${ round.identifier }',
+        ${ round.invalid },
+        '${ round.round }',
+        ${ round.solo },
+        ${ round.stale },
+        ${ round.times },
+        '${ round.type }',
+        ${ round.valid },
+        ${ round.work })`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
+  };
+
   // Insert Rows Using Worker
   this.insertPoolRoundsCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_rounds (
         timestamp, miner, worker,
-        round, identifier, invalid,
+        identifier, invalid, round,
         solo, stale, times, type,
         valid, work)
-      VALUES (
-        ${ updates.timestamp },
-        '${ updates.miner }',
-        '${ updates.worker }',
-        '${ updates.round }',
-        '${ updates.identifier }',
-        ${ updates.invalid },
-        ${ updates.solo },
-        ${ updates.stale },
-        ${ updates.times },
-        '${ updates.type }',
-        ${ updates.valid },
-        ${ updates.work })
+      VALUES ${ _this.buildPoolRoundsCurrent(updates) }
       ON CONFLICT ON CONSTRAINT pool_rounds_unique
       DO UPDATE SET
-        timestamp = ${ updates.timestamp },
-        invalid = "${ pool }".pool_rounds.invalid + ${ updates.invalid },
-        stale = "${ pool }".pool_rounds.stale + ${ updates.stale },
-        times = ${ updates.times },
-        valid = "${ pool }".pool_rounds.valid + ${ updates.valid },
-        work = "${ pool }".pool_rounds.work + ${ updates.work };`;
+        timestamp = EXCLUDED.timestamp,
+        invalid = "${ pool }".pool_rounds.invalid + EXCLUDED.invalid,
+        stale = "${ pool }".pool_rounds.stale + EXCLUDED.stale,
+        times = EXCLUDED.times,
+        valid = "${ pool }".pool_rounds.valid + EXCLUDED.valid,
+        work = "${ pool }".pool_rounds.work + EXCLUDED.work;`;
   };
 
   // Update Rows Using Round

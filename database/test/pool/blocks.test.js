@@ -72,7 +72,7 @@ describe('Test database blocks functionality', () => {
       solo: false,
       type: 'primary'
     };
-    const response = blocks.insertPoolBlocksCurrent('Pool-Main', updates);
+    const response = blocks.insertPoolBlocksCurrent('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_blocks (
         timestamp, miner, worker,
@@ -95,19 +95,88 @@ describe('Test database blocks functionality', () => {
         'primary')
       ON CONFLICT ON CONSTRAINT pool_blocks_unique
       DO UPDATE SET
-        timestamp = 1,
-        miner = 'miner1',
-        worker = 'worker1',
-        difficulty = 8,
-        hash = 'hash1',
-        height = 1,
-        identifier = 'master',
-        luck = 100,
-        orphan = false,
-        reward = 100,
-        round = 'current',
-        solo = false,
-        type = 'primary';`;
+        timestamp = EXCLUDED.timestamp,
+        miner = EXCLUDED.miner,
+        worker = EXCLUDED.worker,
+        difficulty = EXCLUDED.difficulty,
+        hash = EXCLUDED.hash,
+        height = EXCLUDED.height,
+        identifier = EXCLUDED.identifier,
+        luck = EXCLUDED.luck,
+        orphan = EXCLUDED.orphan,
+        reward = EXCLUDED.reward,
+        round = EXCLUDED.round,
+        solo = EXCLUDED.solo,
+        type = EXCLUDED.type;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test block command handling [6]', () => {
+    const blocks = new PoolBlocks(logger, configMainCopy);
+    const updates = {
+      timestamp: 1,
+      miner: 'miner1',
+      worker: 'worker1',
+      difficulty: 8,
+      hash: 'hash1',
+      height: 1,
+      identifier: 'master',
+      luck: 100,
+      orphan: false,
+      reward: 100,
+      round: 'current',
+      solo: false,
+      type: 'primary'
+    };
+    const response = blocks.insertPoolBlocksCurrent('Pool-Main', [updates, updates]);
+    const expected = `
+      INSERT INTO "Pool-Main".pool_blocks (
+        timestamp, miner, worker,
+        difficulty, hash, height,
+        identifier, luck, orphan,
+        reward, round, solo, type)
+      VALUES (
+        1,
+        'miner1',
+        'worker1',
+        8,
+        'hash1',
+        1,
+        'master',
+        100,
+        false,
+        100,
+        'current',
+        false,
+        'primary'), (
+        1,
+        'miner1',
+        'worker1',
+        8,
+        'hash1',
+        1,
+        'master',
+        100,
+        false,
+        100,
+        'current',
+        false,
+        'primary')
+      ON CONFLICT ON CONSTRAINT pool_blocks_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        miner = EXCLUDED.miner,
+        worker = EXCLUDED.worker,
+        difficulty = EXCLUDED.difficulty,
+        hash = EXCLUDED.hash,
+        height = EXCLUDED.height,
+        identifier = EXCLUDED.identifier,
+        luck = EXCLUDED.luck,
+        orphan = EXCLUDED.orphan,
+        reward = EXCLUDED.reward,
+        round = EXCLUDED.round,
+        solo = EXCLUDED.solo,
+        type = EXCLUDED.type;`;
     expect(response).toBe(expected);
   });
 });
