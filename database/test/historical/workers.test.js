@@ -54,6 +54,7 @@ describe('Test database workers functionality', () => {
       miner: 'miner1',
       worker: 'worker1',
       efficiency: 100,
+      effort: 100,
       hashrate: 1,
       type: 'primary',
     };
@@ -61,13 +62,14 @@ describe('Test database workers functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
-        worker, efficiency, hashrate,
-        type)
+        worker, efficiency, effort,
+        hashrate, type)
       VALUES (
         1,
         1,
         'miner1',
         'worker1',
+        100,
         100,
         1,
         'primary')
@@ -84,6 +86,7 @@ describe('Test database workers functionality', () => {
       miner: 'miner1',
       worker: 'worker1',
       efficiency: 100,
+      effort: 100,
       hashrate: 1,
       type: 'primary',
     };
@@ -91,13 +94,14 @@ describe('Test database workers functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
-        worker, efficiency, hashrate,
-        type)
+        worker, efficiency, effort,
+        hashrate, type)
       VALUES (
         1,
         1,
         'miner1',
         'worker1',
+        100,
         100,
         1,
         'primary'), (
@@ -105,6 +109,7 @@ describe('Test database workers functionality', () => {
         1,
         'miner1',
         'worker1',
+        100,
         100,
         1,
         'primary')

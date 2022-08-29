@@ -7,6 +7,10 @@ exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;
 exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
 
+// Historical Text
+exports.historicalUpdatesText1 = () => 'Attempted to update historical tables with current primary round data';
+exports.historicalUpdatesText2 = () => 'Attempted to update historical tables with current auxiliary round data';
+
 // Shares Text
 exports.sharesSubmissionsText1 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;
 exports.sharesSubmissionsText2 = (error, address, ip) => `A share was rejected (${ error }) from ${ address } [${ ip }]`;

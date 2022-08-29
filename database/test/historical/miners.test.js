@@ -44,6 +44,7 @@ describe('Test database miners functionality', () => {
       recent: 1,
       miner: 'miner1',
       efficiency: 100,
+      effort: 100,
       hashrate: 1,
       type: 'primary',
     };
@@ -51,11 +52,13 @@ describe('Test database miners functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
-        efficiency, hashrate, type)
+        efficiency, effort, hashrate,
+        type)
       VALUES (
         1,
         1,
         'miner1',
+        100,
         100,
         1,
         'primary')
@@ -71,6 +74,7 @@ describe('Test database miners functionality', () => {
       recent: 1,
       miner: 'miner1',
       efficiency: 100,
+      effort: 100,
       hashrate: 1,
       type: 'primary',
     };
@@ -78,17 +82,20 @@ describe('Test database miners functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
-        efficiency, hashrate, type)
+        efficiency, effort, hashrate,
+        type)
       VALUES (
         1,
         1,
         'miner1',
+        100,
         100,
         1,
         'primary'), (
         1,
         1,
         'miner1',
+        100,
         100,
         1,
         'primary')

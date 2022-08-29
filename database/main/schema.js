@@ -114,6 +114,7 @@ const Schema = function (logger, executor, configMain) {
         recent BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         efficiency FLOAT NOT NULL DEFAULT 0,
+        effort FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT historical_miners_recent UNIQUE (recent, miner, type));
@@ -260,10 +261,11 @@ const Schema = function (logger, executor, configMain) {
       CREATE TABLE "${ pool }".historical_workers(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
-        recent BIGINT UNIQUE NOT NULL DEFAULT -1,
+        recent BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         efficiency FLOAT NOT NULL DEFAULT 0,
+        effort FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT historical_workers_recent UNIQUE (recent, worker, type));
@@ -298,7 +300,7 @@ const Schema = function (logger, executor, configMain) {
         luck FLOAT NOT NULL DEFAULT 0,
         orphan BOOLEAN NOT NULL DEFAULT false,
         reward FLOAT NOT NULL DEFAULT 0,
-        round VARCHAR UNIQUE NOT NULL DEFAULT 'unknown',
+        round VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT pool_blocks_unique UNIQUE (round, type));

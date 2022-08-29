@@ -33,6 +33,7 @@ const HistoricalMiners = function (logger, configMain) {
         ${ miner.recent },
         '${ miner.miner }',
         ${ miner.efficiency },
+        ${ miner.effort },
         ${ miner.hashrate },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
@@ -45,7 +46,8 @@ const HistoricalMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".historical_miners (
         timestamp, recent, miner,
-        efficiency, hashrate, type)
+        efficiency, effort, hashrate,
+        type)
       VALUES ${ _this.buildHistoricalMinersCurrentUpdate(updates) }
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
