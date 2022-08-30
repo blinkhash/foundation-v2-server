@@ -17,7 +17,7 @@ config.logger = {};
 config.logger.logColors = true;
 config.logger.logLevel = 'log';
 
-// Database Configuration
+// Database Configuration (SQL)
 config.client = {};
 config.client.host = '127.0.0.1';
 config.client.port = 5432;

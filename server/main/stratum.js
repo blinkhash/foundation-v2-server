@@ -1,3 +1,4 @@
+const Network = require('./network');
 const Shares = require('./shares');
 const Text = require('../../locales/index');
 
@@ -29,6 +30,11 @@ const Stratum = function (logger, client, config, configMain, template) {
     _this.stratum.on('pool.started', () => {});
     _this.stratum.on('pool.log', (severity, text) => {
       _this.logger[severity]('Pool', _this.config.name, [text]);
+    });
+
+    // Handle Stratum Network Events
+    _this.stratum.on('pool.network', (networkData) => {
+      _this.network.handleSubmissions(networkData);
     });
 
     // Handle Stratum Submission Events
@@ -71,10 +77,11 @@ const Stratum = function (logger, client, config, configMain, template) {
   this.setupStratum = function(callback) {
 
     // Build out Initial Functionality
+    _this.network = new Network(logger, _this.client, _this.config, _this.configMain);
     _this.shares = new Shares(logger, _this.client, _this.config, _this.configMain);
-    _this.handleStratum();
 
     // Build Daemon/Stratum Functionality
+    _this.handleStratum();
     _this.stratum.setupDaemons(() => {
     _this.stratum.setupPorts();
     _this.stratum.setupSettings(() => {

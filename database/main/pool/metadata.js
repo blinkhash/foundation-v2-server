@@ -18,7 +18,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildPoolMetadataBlocksUpdate = function(updates) {
+  this.buildPoolMetadataBlocks = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -31,11 +31,11 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Blocks Data
-  this.insertPoolMetadataBlocksUpdate = function(pool, updates) {
+  this.insertPoolMetadataBlocks = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, blocks, type)
-      VALUES ${ _this.buildPoolMetadataBlocksUpdate(updates) }
+      VALUES ${ _this.buildPoolMetadataBlocks(updates) }
       ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
@@ -43,7 +43,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildPoolMetadataHashrateUpdate = function(updates) {
+  this.buildPoolMetadataHashrate = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -58,12 +58,12 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Hashrate Data
-  this.insertPoolMetadataHashrateUpdate = function(pool, updates) {
+  this.insertPoolMetadataHashrate = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, hashrate, miners,
         type, workers)
-      VALUES ${ _this.buildPoolMetadataHashrateUpdate(updates) }
+      VALUES ${ _this.buildPoolMetadataHashrate(updates) }
       ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
@@ -100,7 +100,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildPoolMetadataRoundsUpdate = function(updates) {
+  this.buildPoolMetadataRounds = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -118,13 +118,13 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Round Data
-  this.insertPoolMetadataRoundsUpdate = function(pool, updates) {
+  this.insertPoolMetadataRounds = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
-      VALUES ${ _this.buildPoolMetadataRoundsUpdate(updates) }
+      VALUES ${ _this.buildPoolMetadataRounds(updates) }
       ON CONFLICT ON CONSTRAINT pool_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,

@@ -18,7 +18,7 @@ const HistoricalNetwork = function (logger, configMain) {
   };
 
   // Build Network Values String
-  this.buildHistoricalNetworkCurrentUpdate = function(updates) {
+  this.buildHistoricalNetworkCurrent = function(updates) {
     let values = '';
     updates.forEach((network, idx) => {
       values += `(
@@ -34,12 +34,12 @@ const HistoricalNetwork = function (logger, configMain) {
   };
 
   // Insert Rows Using Current Data
-  this.insertHistoricalNetworkCurrentUpdate = function(pool, updates) {
+  this.insertHistoricalNetworkCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_network (
         timestamp, recent, difficulty,
         hashrate, height, type)
-      VALUES ${ _this.buildHistoricalNetworkCurrentUpdate(updates) }
+      VALUES ${ _this.buildHistoricalNetworkCurrent(updates) }
       ON CONFLICT ON CONSTRAINT historical_network_recent
       DO NOTHING;`;
   };

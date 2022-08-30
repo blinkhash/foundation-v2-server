@@ -16,7 +16,7 @@ describe('Test database miners functionality', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     expect(typeof miners.configMain).toBe('object');
     expect(typeof miners.selectHistoricalMinersMiner).toBe('function');
-    expect(typeof miners.insertHistoricalMinersCurrentUpdate).toBe('function');
+    expect(typeof miners.insertHistoricalMinersCurrent).toBe('function');
   });
 
   test('Test miners command handling [1]', () => {
@@ -48,7 +48,7 @@ describe('Test database miners functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertHistoricalMinersCurrentUpdate('Pool-Main', [updates]);
+    const response = miners.insertHistoricalMinersCurrent('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
@@ -78,7 +78,7 @@ describe('Test database miners functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertHistoricalMinersCurrentUpdate('Pool-Main', [updates, updates]);
+    const response = miners.insertHistoricalMinersCurrent('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,

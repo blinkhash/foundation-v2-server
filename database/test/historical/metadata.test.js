@@ -16,7 +16,7 @@ describe('Test database metadata functionality', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     expect(typeof metadata.configMain).toBe('object');
     expect(typeof metadata.selectHistoricalMetadataType).toBe('function');
-    expect(typeof metadata.insertHistoricalMetadataCurrentUpdate).toBe('function');
+    expect(typeof metadata.insertHistoricalMetadataCurrent).toBe('function');
   });
 
   test('Test metadata command handling [1]', () => {
@@ -45,7 +45,7 @@ describe('Test database metadata functionality', () => {
       work: 8,
       workers: 1,
     };
-    const response = metadata.insertHistoricalMetadataCurrentUpdate('Pool-Main', [updates]);
+    const response = metadata.insertHistoricalMetadataCurrent('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_metadata (
         timestamp, recent, blocks,
@@ -88,7 +88,7 @@ describe('Test database metadata functionality', () => {
       work: 8,
       workers: 1,
     };
-    const response = metadata.insertHistoricalMetadataCurrentUpdate('Pool-Main', [updates, updates]);
+    const response = metadata.insertHistoricalMetadataCurrent('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_metadata (
         timestamp, recent, blocks,

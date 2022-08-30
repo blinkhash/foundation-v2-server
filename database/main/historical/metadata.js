@@ -18,7 +18,7 @@ const HistoricalMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildHistoricalMetadataCurrentUpdate = function(updates) {
+  this.buildHistoricalMetadataCurrent = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -41,14 +41,14 @@ const HistoricalMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Current Data
-  this.insertHistoricalMetadataCurrentUpdate = function(pool, updates) {
+  this.insertHistoricalMetadataCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_metadata (
         timestamp, recent, blocks,
         efficiency, effort, hashrate,
         invalid, miners, stale,
         type, valid, work, workers)
-      VALUES ${ _this.buildHistoricalMetadataCurrentUpdate(updates) }
+      VALUES ${ _this.buildHistoricalMetadataCurrent(updates) }
       ON CONFLICT ON CONSTRAINT historical_metadata_recent
       DO NOTHING;`;
   };

@@ -25,7 +25,7 @@ const HistoricalMiners = function (logger, configMain) {
   };
 
   // Build Miners Values String
-  this.buildHistoricalMinersCurrentUpdate = function(updates) {
+  this.buildHistoricalMinersCurrent = function(updates) {
     let values = '';
     updates.forEach((miner, idx) => {
       values += `(
@@ -42,13 +42,13 @@ const HistoricalMiners = function (logger, configMain) {
   };
 
   // Insert Rows Using Current Data
-  this.insertHistoricalMinersCurrentUpdate = function(pool, updates) {
+  this.insertHistoricalMinersCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
         type)
-      VALUES ${ _this.buildHistoricalMinersCurrentUpdate(updates) }
+      VALUES ${ _this.buildHistoricalMinersCurrent(updates) }
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
   };

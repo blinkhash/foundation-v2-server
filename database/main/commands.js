@@ -12,6 +12,7 @@ const PoolBlocks = require('./pool/blocks');
 const PoolHashrate = require('./pool/hashrate');
 const PoolMetadata = require('./pool/metadata');
 const PoolMiners = require('./pool/miners');
+const PoolNetwork = require('./pool/network');
 const PoolRounds = require('./pool/rounds');
 const PoolWorkers = require('./pool/workers');
 
@@ -59,6 +60,7 @@ const Commands = function (logger, client, configMain) {
   this.pool.hashrate = new PoolHashrate(_this.logger, _this.configMain);
   this.pool.metadata = new PoolMetadata(_this.logger, _this.configMain);
   this.pool.miners = new PoolMiners(_this.logger, _this.configMain);
+  this.pool.network = new PoolNetwork(_this.logger, _this.configMain);
   this.pool.rounds = new PoolRounds(_this.logger, _this.configMain);
   this.pool.workers = new PoolWorkers(_this.logger, _this.configMain);
 };

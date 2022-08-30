@@ -400,6 +400,31 @@ const Schema = function (logger, executor, configMain) {
     _this.executor([command], () => callback());
   };
 
+  // Check if Pool Network Table Exists in Database
+  this.selectPoolNetwork = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'pool_network');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Network Table to Database
+  this.createPoolNetwork = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".pool_network(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        difficulty FLOAT NOT NULL DEFAULT 0,
+        hashrate FLOAT NOT NULL DEFAULT 0,
+        height INT NOT NULL DEFAULT -1,
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT pool_network_unique UNIQUE (type));
+      CREATE INDEX pool_network_type ON "${ pool }".pool_network(type);`;
+    _this.executor([command], () => callback());
+  };
+
   // Check if Pool Rounds Table Exists in Database
   this.selectPoolRounds = function(pool, callback) {
     const command = `
@@ -498,6 +523,7 @@ const Schema = function (logger, executor, configMain) {
         .then(() => _this.handlePromises(pool, _this.selectPoolHashrate, _this.createPoolHashrate))
         .then(() => _this.handlePromises(pool, _this.selectPoolMetadata, _this.createPoolMetadata))
         .then(() => _this.handlePromises(pool, _this.selectPoolMiners, _this.createPoolMiners))
+        .then(() => _this.handlePromises(pool, _this.selectPoolNetwork, _this.createPoolNetwork))
         .then(() => _this.handlePromises(pool, _this.selectPoolRounds, _this.createPoolRounds))
         .then(() => _this.handlePromises(pool, _this.selectPoolWorkers, _this.createPoolWorkers))
         .then(() => resolve());

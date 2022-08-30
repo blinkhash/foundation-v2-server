@@ -65,6 +65,24 @@ const Statistics = function (logger, client, config, configMain, template) {
     });
   };
 
+  // Handle Historical Network Updates
+  this.handleHistoricalNetwork = function(network) {
+
+    // Calculate Features of Network
+    const current = Date.now();
+    const recent = Math.round(current / 600000) * 600000;
+
+    // Return Network Updates
+    return {
+      timestamp: current,
+      recent: recent,
+      difficulty: network.difficulty,
+      hashrate: network.hashrate,
+      height: network.height,
+      type: network.type,
+    };
+  };
+
   // Handle Historical Workers Updates
   this.handleHistoricalWorkers = function(workers) {
 
@@ -98,7 +116,7 @@ const Statistics = function (logger, client, config, configMain, template) {
     // Return Metadata Updates
     return {
       timestamp: Date.now(),
-      hashrate: (multiplier * total) / section,
+      hashrate: (multiplier * total * 1000) / section,
       miners: miners,
       type: blockType,
       workers: workers,
@@ -119,7 +137,7 @@ const Statistics = function (logger, client, config, configMain, template) {
       return {
         timestamp: current,
         miner: miner.miner,
-        hashrate: (multiplier * miner.current_work) / section,
+        hashrate: (multiplier * miner.current_work * 1000) / section,
         type: blockType,
       };
     });
@@ -140,7 +158,7 @@ const Statistics = function (logger, client, config, configMain, template) {
         timestamp: current,
         miner: (worker.worker || '').split('.')[0],
         worker: worker.worker,
-        hashrate: (multiplier * worker.current_work) / section,
+        hashrate: (multiplier * worker.current_work * 1000) / section,
         type: blockType,
       };
     });
@@ -154,53 +172,61 @@ const Statistics = function (logger, client, config, configMain, template) {
 
     // Handle Historical Metadata Updates
     if (lookups[6].rows[0]) {
-      const primaryHistoricalMetadata = lookups[6].rows[0] || {};
-      const primaryHistoricalMetadataUpdates = _this.handleHistoricalMetadata(primaryHistoricalMetadata);
-      transaction.push(_this.historical.metadata.insertHistoricalMetadataCurrentUpdate(
-        _this.pool, [primaryHistoricalMetadataUpdates]));
+      const historicalMetadata = lookups[6].rows[0] || {};
+      const historicalMetadataUpdates = _this.handleHistoricalMetadata(historicalMetadata);
+      transaction.push(_this.historical.metadata.insertHistoricalMetadataCurrent(
+        _this.pool, [historicalMetadataUpdates]));
     }
 
     // Handle Historical Miners Updates
     if (lookups[7].rows.length >= 1) {
-      const primaryHistoricalMiners = lookups[7].rows || [];
-      const primaryHistoricalMinersUpdates = _this.handleHistoricalMiners(primaryHistoricalMiners);
-      transaction.push(_this.historical.miners.insertHistoricalMinersCurrentUpdate(
-        _this.pool, primaryHistoricalMinersUpdates));
+      const historicalMiners = lookups[7].rows || [];
+      const historicalMinersUpdates = _this.handleHistoricalMiners(historicalMiners);
+      transaction.push(_this.historical.miners.insertHistoricalMinersCurrent(
+        _this.pool, historicalMinersUpdates));
+    }
+
+    // Handle Historical Network Updates
+    if (lookups[8].rows[0]) {
+      const historicalNetwork = lookups[8].rows[0] || {};
+      const historicalNetworkUpdates = _this.handleHistoricalNetwork(historicalNetwork);
+      transaction.push(_this.historical.network.insertHistoricalNetworkCurrent(
+        _this.pool, [historicalNetworkUpdates]));
     }
 
     // Handle Historical Workers Updates
-    if (lookups[8].rows.length >= 1) {
-      const primaryHistoricalWorkers = lookups[8].rows || [];
-      const primaryHistoricalWorkersUpdates = _this.handleHistoricalWorkers(primaryHistoricalWorkers);
-      transaction.push(_this.historical.workers.insertHistoricalWorkersCurrentUpdate(
-        _this.pool, primaryHistoricalWorkersUpdates));
+    if (lookups[9].rows.length >= 1) {
+      const historicalWorkers = lookups[9].rows || [];
+      const historicalWorkersUpdates = _this.handleHistoricalWorkers(historicalWorkers);
+      transaction.push(_this.historical.workers.insertHistoricalWorkersCurrent(
+        _this.pool, historicalWorkersUpdates));
     }
 
     // Handle Metadata Hashrate Updates
     if (lookups[1].rows[0] && lookups[2].rows[0] && lookups[5].rows[0]) {
-      const primaryMinersMetadata = (lookups[1].rows[0] || {}).count || 0;
-      const primaryWorkersMetadata = (lookups[2].rows[0] || {}).count || 0;
-      const primaryCurrentMetadata = (lookups[5].rows[0] || {}).current_work || 0;
-      const primaryMetadataUpdates = _this.handleMetadata(
-        primaryMinersMetadata, primaryWorkersMetadata, primaryCurrentMetadata, 'primary');
-      transaction.push(_this.current.metadata.insertPoolMetadataHashrateUpdate(
-        _this.pool, [primaryMetadataUpdates]));
+      const minersMetadata = (lookups[1].rows[0] || {}).count || 0;
+      const workersMetadata = (lookups[2].rows[0] || {}).count || 0;
+      const currentMetadata = (lookups[5].rows[0] || {}).current_work || 0;
+      const metadataUpdates = _this.handleMetadata(
+        minersMetadata, workersMetadata, currentMetadata, 'primary');
+      transaction.push(_this.current.metadata.insertPoolMetadataHashrate(
+        _this.pool, [metadataUpdates]));
     }
 
     // Handle Miners Hashrate Updates
     if (lookups[3].rows.length >= 1) {
-      const primaryMiners = lookups[3].rows || [];
-      const primaryMinersUpdates = _this.handleMiners(primaryMiners, 'primary');
+      const miners = lookups[3].rows || [];
+      const minersUpdates = _this.handleMiners(miners, 'primary');
       transaction.push(_this.current.miners.insertPoolMinersHashrate(
-        _this.pool, primaryMinersUpdates));
+        _this.pool, minersUpdates));
     }
 
     // Handle Workers Hashrate Updates
     if (lookups[4].rows.length >= 1) {
-      const primaryWorkers = lookups[4].rows || [];
-      const primaryWorkersUpdates = _this.handleWorkers(primaryWorkers, 'primary');
+      const workers = lookups[4].rows || [];
+      const workersUpdates = _this.handleWorkers(workers, 'primary');
       transaction.push(_this.current.workers.insertPoolWorkersHashrate(
-        _this.pool, primaryWorkersUpdates));
+        _this.pool, workersUpdates));
     }
 
     // Insert Work into Database
@@ -216,53 +242,61 @@ const Statistics = function (logger, client, config, configMain, template) {
 
     // Handle Historical Metadata Updates
     if (lookups[6].rows[0]) {
-      const auxiliaryHistoricalMetadata = lookups[6].rows[0] || {};
-      const auxiliaryHistoricalMetadataUpdates = _this.handleHistoricalMetadata(auxiliaryHistoricalMetadata);
-      transaction.push(_this.historical.metadata.insertHistoricalMetadataCurrentUpdate(
-        _this.pool, [auxiliaryHistoricalMetadataUpdates]));
+      const historicalMetadata = lookups[6].rows[0] || {};
+      const historicalMetadataUpdates = _this.handleHistoricalMetadata(historicalMetadata);
+      transaction.push(_this.historical.metadata.insertHistoricalMetadataCurrent(
+        _this.pool, [historicalMetadataUpdates]));
     }
 
     // Handle Historical Miners Updates
     if (lookups[7].rows.length >= 1) {
-      const auxiliaryHistoricalMiners = lookups[7].rows || [];
-      const auxiliaryHistoricalMinersUpdates = _this.handleHistoricalMiners(auxiliaryHistoricalMiners);
-      transaction.push(_this.historical.miners.insertHistoricalMinersCurrentUpdate(
-        _this.pool, auxiliaryHistoricalMinersUpdates));
+      const historicalMiners = lookups[7].rows || [];
+      const historicalMinersUpdates = _this.handleHistoricalMiners(historicalMiners);
+      transaction.push(_this.historical.miners.insertHistoricalMinersCurrent(
+        _this.pool, historicalMinersUpdates));
+    }
+
+    // Handle Historical Network Updates
+    if (lookups[8].rows[0]) {
+      const historicalNetwork = lookups[8].rows[0] || {};
+      const historicalNetworkUpdates = _this.handleHistoricalNetwork(historicalNetwork);
+      transaction.push(_this.historical.network.insertHistoricalNetworkCurrent(
+        _this.pool, [historicalNetworkUpdates]));
     }
 
     // Handle Historical Workers Updates
-    if (lookups[8].rows.length >= 1) {
-      const auxiliaryHistoricalWorkers = lookups[8].rows || [];
-      const auxiliaryHistoricalWorkersUpdates = _this.handleHistoricalWorkers(auxiliaryHistoricalWorkers);
-      transaction.push(_this.historical.workers.insertHistoricalWorkersCurrentUpdate(
-        _this.pool, auxiliaryHistoricalWorkersUpdates));
+    if (lookups[9].rows.length >= 1) {
+      const historicalWorkers = lookups[9].rows || [];
+      const historicalWorkersUpdates = _this.handleHistoricalWorkers(historicalWorkers);
+      transaction.push(_this.historical.workers.insertHistoricalWorkersCurrent(
+        _this.pool, historicalWorkersUpdates));
     }
 
     // Handle Metadata Hashrate Updates
     if (lookups[1].rows[0] && lookups[2].rows[0] && lookups[5].rows[0]) {
-      const auxiliaryMinersMetadata = (lookups[1].rows[0] || {}).count || 0;
-      const auxiliaryWorkersMetadata = (lookups[2].rows[0] || {}).count || 0;
-      const auxiliaryCurrentMetadata = (lookups[5].rows[0] || {}).current_work || 0;
-      const auxiliaryMetadataUpdates = _this.handleMetadata(
-        auxiliaryMinersMetadata, auxiliaryWorkersMetadata, auxiliaryCurrentMetadata, 'auxiliary');
-      transaction.push(_this.current.metadata.insertPoolMetadataHashrateUpdate(
-        _this.pool, [auxiliaryMetadataUpdates]));
+      const minersMetadata = (lookups[1].rows[0] || {}).count || 0;
+      const workersMetadata = (lookups[2].rows[0] || {}).count || 0;
+      const currentMetadata = (lookups[5].rows[0] || {}).current_work || 0;
+      const metadataUpdates = _this.handleMetadata(
+        minersMetadata, workersMetadata, currentMetadata, 'auxiliary');
+      transaction.push(_this.current.metadata.insertPoolMetadataHashrate(
+        _this.pool, [metadataUpdates]));
     }
 
     // Handle Miners Hashrate Updates
     if (lookups[3].rows.length >= 1) {
-      const auxiliaryMiners = lookups[3].rows || [];
-      const auxiliaryMinersUpdates = _this.handleMiners(auxiliaryMiners, 'auxiliary');
+      const miners = lookups[3].rows || [];
+      const minersUpdates = _this.handleMiners(miners, 'auxiliary');
       transaction.push(_this.current.miners.insertPoolMinersHashrate(
-        _this.pool, auxiliaryMinersUpdates));
+        _this.pool, minersUpdates));
     }
 
     // Handle Workers Hashrate Updates
     if (lookups[4].rows.length >= 1) {
-      const auxiliaryWorkers = lookups[4].rows || [];
-      const auxiliaryWorkersUpdates = _this.handleWorkers(auxiliaryWorkers, 'auxiliary');
+      const workers = lookups[4].rows || [];
+      const workersUpdates = _this.handleWorkers(workers, 'auxiliary');
       transaction.push(_this.current.workers.insertPoolWorkersHashrate(
-        _this.pool, auxiliaryWorkersUpdates));
+        _this.pool, workersUpdates));
     }
 
     // Insert Work into Database
@@ -286,6 +320,7 @@ const Statistics = function (logger, client, config, configMain, template) {
       _this.current.hashrate.sumPoolHashrateType(_this.pool, hashrateWindow, blockType),
       _this.current.metadata.selectPoolMetadataType(_this.pool, blockType),
       _this.current.miners.selectPoolMinersType(_this.pool, blockType),
+      _this.current.network.selectPoolNetworkType(_this.pool, blockType),
       _this.current.workers.selectPoolWorkersType(_this.pool, blockType),
       'COMMIT;'];
 

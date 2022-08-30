@@ -32,7 +32,7 @@ const HistoricalWorkers = function (logger, configMain) {
   };
 
   // Build Workers Values String
-  this.buildHistoricalWorkersCurrentUpdate = function(updates) {
+  this.buildHistoricalWorkersCurrent = function(updates) {
     let values = '';
     updates.forEach((worker, idx) => {
       values += `(
@@ -50,13 +50,13 @@ const HistoricalWorkers = function (logger, configMain) {
   };
 
   // Insert Rows Using Current Data
-  this.insertHistoricalWorkersCurrentUpdate = function(pool, updates) {
+  this.insertHistoricalWorkersCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, type)
-      VALUES ${ _this.buildHistoricalWorkersCurrentUpdate(updates) }
+      VALUES ${ _this.buildHistoricalWorkersCurrent(updates) }
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
   };

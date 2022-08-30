@@ -16,7 +16,7 @@ describe('Test database workers functionality', () => {
     const workers = new HistoricalWorkers(logger, configMainCopy);
     expect(typeof workers.configMain).toBe('object');
     expect(typeof workers.selectHistoricalWorkersMiner).toBe('function');
-    expect(typeof workers.insertHistoricalWorkersCurrentUpdate).toBe('function');
+    expect(typeof workers.insertHistoricalWorkersCurrent).toBe('function');
   });
 
   test('Test workers command handling [1]', () => {
@@ -58,7 +58,7 @@ describe('Test database workers functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = workers.insertHistoricalWorkersCurrentUpdate('Pool-Main', [updates]);
+    const response = workers.insertHistoricalWorkersCurrent('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
@@ -90,7 +90,7 @@ describe('Test database workers functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = workers.insertHistoricalWorkersCurrentUpdate('Pool-Main', [updates, updates]);
+    const response = workers.insertHistoricalWorkersCurrent('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,

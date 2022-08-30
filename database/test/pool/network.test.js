@@ -1,4 +1,4 @@
-const HistoricalNetwork = require('../../main/historical/network');
+const PoolNetwork = require('../../main/pool/network');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main.js');
 const logger = new Logger(configMain);
@@ -13,65 +13,65 @@ describe('Test database network functionality', () => {
   });
 
   test('Test initialization of network commands', () => {
-    const network = new HistoricalNetwork(logger, configMainCopy);
+    const network = new PoolNetwork(logger, configMainCopy);
     expect(typeof network.configMain).toBe('object');
-    expect(typeof network.selectHistoricalNetworkType).toBe('function');
-    expect(typeof network.insertHistoricalNetworkCurrent).toBe('function');
+    expect(typeof network.selectPoolNetworkType).toBe('function');
+    expect(typeof network.insertPoolNetworkCurrent).toBe('function');
   });
 
   test('Test network command handling [1]', () => {
-    const network = new HistoricalNetwork(logger, configMainCopy);
-    const response = network.selectHistoricalNetworkType('Pool-Main', 'primary');
+    const network = new PoolNetwork(logger, configMainCopy);
+    const response = network.selectPoolNetworkType('Pool-Main', 'primary');
     const expected = `
-      SELECT * FROM "Pool-Main".historical_network
-      WHERE type = 'primary'`;
+      SELECT * FROM "Pool-Main".pool_network
+      WHERE type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test network command handling [2]', () => {
-    const network = new HistoricalNetwork(logger, configMainCopy);
+    const network = new PoolNetwork(logger, configMainCopy);
     const updates = {
       timestamp: 1,
-      recent: 1,
       difficulty: 1,
       hashrate: 1,
       height: 1,
       type: 'primary',
     };
-    const response = network.insertHistoricalNetworkCurrent('Pool-Main', [updates]);
+    const response = network.insertPoolNetworkCurrent('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".historical_network (
-        timestamp, recent, difficulty,
+      INSERT INTO "Pool-Main".pool_network (
+        timestamp, difficulty,
         hashrate, height, type)
       VALUES (
-        1,
         1,
         1,
         1,
         1,
         'primary')
-      ON CONFLICT ON CONSTRAINT historical_network_recent
-      DO NOTHING;`;
+      ON CONFLICT ON CONSTRAINT pool_network_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        difficulty = EXCLUDED.difficulty,
+        hashrate = EXCLUDED.hashrate,
+        height = EXCLUDED.height;`;
     expect(response).toBe(expected);
   });
 
   test('Test network command handling [3]', () => {
-    const network = new HistoricalNetwork(logger, configMainCopy);
+    const network = new PoolNetwork(logger, configMainCopy);
     const updates = {
       timestamp: 1,
-      recent: 1,
       difficulty: 1,
       hashrate: 1,
       height: 1,
       type: 'primary',
     };
-    const response = network.insertHistoricalNetworkCurrent('Pool-Main', [updates, updates]);
+    const response = network.insertPoolNetworkCurrent('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".historical_network (
-        timestamp, recent, difficulty,
+      INSERT INTO "Pool-Main".pool_network (
+        timestamp, difficulty,
         hashrate, height, type)
       VALUES (
-        1,
         1,
         1,
         1,
@@ -81,10 +81,13 @@ describe('Test database network functionality', () => {
         1,
         1,
         1,
-        1,
         'primary')
-      ON CONFLICT ON CONSTRAINT historical_network_recent
-      DO NOTHING;`;
+      ON CONFLICT ON CONSTRAINT pool_network_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        difficulty = EXCLUDED.difficulty,
+        hashrate = EXCLUDED.hashrate,
+        height = EXCLUDED.height;`;
     expect(response).toBe(expected);
   });
 });

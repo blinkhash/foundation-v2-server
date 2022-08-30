@@ -182,32 +182,32 @@ const Shares = function (logger, client, config, configMain) {
   this.handlePrimary = function(lookups, shareData, shareType, minerType, callback) {
 
     // Build Round Update Data
-    const round = uuid.v4();
+    const identifier = uuid.v4();
     const miner = (shareData.addrPrimary || '').split('.')[0];
 
     // Establish Specific Lookups
-    const primaryMetadata = lookups[2].rows[0] || {};
-    const primaryRound = lookups[4].rows[0] || {};
-    const primaryWork = minerType ? (primaryRound.work || 0) : (primaryMetadata.work || 0);
+    const metadata = lookups[2].rows[0] || {};
+    const round = lookups[4].rows[0] || {};
+    const work = minerType ? (round.work || 0) : (metadata.work || 0);
 
     // Build Round Block to Submit
-    const primaryBlocks = _this.handleBlocks(
-      primaryWork, shareData.addrPrimary, shareData.blockDiffPrimary, round, shareData,
+    const blocks = _this.handleBlocks(
+      work, shareData.addrPrimary, shareData.blockDiffPrimary, identifier, shareData,
       shareType, minerType, 'primary');
 
     // Build Round Update Transactions
-    const primaryMetadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'primary' };
-    const primaryMetadataReset = { timestamp: Date.now(), type: 'primary' };
+    const metadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'primary' };
+    const metadataReset = { timestamp: Date.now(), type: 'primary' };
     const primaryUpdate = (minerType) ? (
-      _this.current.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, round, 'primary')) : (
-      _this.current.rounds.updatePoolRoundsCurrentShared(_this.pool, round, 'primary'));
+      _this.current.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, identifier, 'primary')) : (
+      _this.current.rounds.updatePoolRoundsCurrentShared(_this.pool, identifier, 'primary'));
 
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.blocks.insertPoolBlocksCurrent(_this.pool, [primaryBlocks]),
-      _this.current.metadata.insertPoolMetadataBlocksUpdate(_this.pool, [primaryMetadataBlocks]),
-      _this.current.metadata.insertPoolMetadataRoundsReset(_this.pool, [primaryMetadataReset]),
+      _this.current.blocks.insertPoolBlocksCurrent(_this.pool, [blocks]),
+      _this.current.metadata.insertPoolMetadataBlocks(_this.pool, [metadataBlocks]),
+      _this.current.metadata.insertPoolMetadataRoundsReset(_this.pool, [metadataReset]),
       primaryUpdate,
       'COMMIT;'];
 
@@ -219,32 +219,32 @@ const Shares = function (logger, client, config, configMain) {
   this.handleAuxiliary = function(lookups, shareData, shareType, minerType, callback) {
 
     // Build Round Update Data
-    const round = uuid.v4();
+    const identifier = uuid.v4();
     const miner = (shareData.addrAuxiliary || '').split('.')[0];
 
     // Establish Specific Lookups
-    const auxiliaryMetadata = lookups[3].rows[0] || {};
-    const auxiliaryRound = lookups[5].rows[0] || {};
-    const auxiliaryWork = minerType ? (auxiliaryRound.work || 0) : (auxiliaryMetadata.work || 0);
+    const metadata = lookups[3].rows[0] || {};
+    const round = lookups[5].rows[0] || {};
+    const work = minerType ? (round.work || 0) : (metadata.work || 0);
 
     // Build Round Block to Submit
-    const auxiliaryBlocks = _this.handleBlocks(
-      auxiliaryWork, shareData.addrAuxiliary, shareData.blockDiffAuxiliary, round, shareData,
+    const blocks = _this.handleBlocks(
+      work, shareData.addrAuxiliary, shareData.blockDiffAuxiliary, identifier, shareData,
       shareType, minerType, 'auxiliary');
 
     // Build Round Update Transactions
-    const auxiliaryMetadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'auxiliary' };
-    const auxiliaryMetadataReset = { timestamp: Date.now(), type: 'auxiliary' };
+    const metadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'auxiliary' };
+    const metadataReset = { timestamp: Date.now(), type: 'auxiliary' };
     const auxiliaryUpdate = (minerType) ? (
-      _this.current.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, round, 'auxiliary')) : (
-      _this.current.rounds.updatePoolRoundsCurrentShared(_this.pool, round, 'auxiliary'));
+      _this.current.rounds.updatePoolRoundsCurrentSolo(_this.pool, miner, identifier, 'auxiliary')) : (
+      _this.current.rounds.updatePoolRoundsCurrentShared(_this.pool, identifier, 'auxiliary'));
 
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.blocks.insertPoolBlocksCurrent(_this.pool, [auxiliaryBlocks]),
-      _this.current.metadata.insertPoolMetadataBlocksUpdate(_this.pool, [auxiliaryMetadataBlocks]),
-      _this.current.metadata.insertPoolMetadataRoundsReset(_this.pool, [auxiliaryMetadataReset]),
+      _this.current.blocks.insertPoolBlocksCurrent(_this.pool, [blocks]),
+      _this.current.metadata.insertPoolMetadataBlocks(_this.pool, [metadataBlocks]),
+      _this.current.metadata.insertPoolMetadataRoundsReset(_this.pool, [metadataReset]),
       auxiliaryUpdate,
       'COMMIT;'];
 
@@ -256,61 +256,61 @@ const Shares = function (logger, client, config, configMain) {
   this.handleShares = function(lookups, shareData, shareType, minerType, callback) {
 
     // Establish Specific Lookups
-    const primaryMetadata = lookups[4].rows[0] || {};
-    const auxiliaryMetadata = lookups[5].rows[0] || {};
-    const primaryRound = lookups[6].rows[0] || {};
-    const auxiliaryRound = lookups[7].rows[0] || {};
+    const metadata = lookups[4].rows[0] || {};
+    const round = lookups[6].rows[0] || {};
+    const auxMetadata = lookups[5].rows[0] || {};
+    const auxRound = lookups[7].rows[0] || {};
 
     // Calculate Current Round Work
-    const primaryWork = minerType ? (primaryRound.work || 0) : (primaryMetadata.work || 0);
-    const auxiliaryWork = minerType ? (auxiliaryRound.work || 0) : (auxiliaryMetadata.work || 0);
+    const work = minerType ? (round.work || 0) : (metadata.work || 0);
+    const auxWork = minerType ? (auxRound.work || 0) : (auxMetadata.work || 0);
 
     // Handle Hashrate Updates
-    const primaryHashrateUpdates = _this.handleHashrate(
+    const hashrateUpdates = _this.handleHashrate(
       shareData.addrPrimary, shareData.difficulty, shareType, 'primary');
-    const auxiliaryHashrateUpdates = _this.handleHashrate(
+    const auxHashrateUpdates = _this.handleHashrate(
       shareData.addrAuxiliary, shareData.difficulty, shareType, 'auxiliary');
 
     // Handle Metadata Updates
-    const primaryMetadataUpdates = _this.handleMetadata(
-      primaryWork, shareData.blockDiffPrimary, primaryMetadata, shareData, shareType, minerType, 'primary');
-    const auxiliaryMetadataUpdates = _this.handleMetadata(
-      auxiliaryWork, shareData.blockDiffAuxiliary, auxiliaryMetadata, shareData, shareType, minerType, 'auxiliary');
+    const metadataUpdates = _this.handleMetadata(
+      work, shareData.blockDiffPrimary, metadata, shareData, shareType, minerType, 'primary');
+    const auxMetadataUpdates = _this.handleMetadata(
+      auxWork, shareData.blockDiffAuxiliary, auxMetadata, shareData, shareType, minerType, 'auxiliary');
 
     // Handle Miner Updates
-    const primaryMinerUpdates = _this.handleMiners(
-      shareData.addrPrimary, shareData.blockDiffPrimary, primaryRound, shareData, shareType, 'primary');
-    const auxiliaryMinerUpdates = _this.handleMiners(
-      shareData.addrAuxiliary, shareData.blockDiffAuxiliary, auxiliaryRound, shareData, shareType, 'auxiliary');
+    const minerUpdates = _this.handleMiners(
+      shareData.addrPrimary, shareData.blockDiffPrimary, round, shareData, shareType, 'primary');
+    const auxMinerUpdates = _this.handleMiners(
+      shareData.addrAuxiliary, shareData.blockDiffAuxiliary, auxRound, shareData, shareType, 'auxiliary');
 
     // Handle Round Updates
-    const primaryRoundUpdates = _this.handleRounds(
-      shareData.addrPrimary, primaryRound, shareData, shareType, minerType, 'primary');
-    const auxiliaryRoundUpdates = _this.handleRounds(
-      shareData.addrAuxiliary, auxiliaryRound, shareData, shareType, minerType, 'auxiliary');
+    const roundUpdates = _this.handleRounds(
+      shareData.addrPrimary, round, shareData, shareType, minerType, 'primary');
+    const auxRoundUpdates = _this.handleRounds(
+      shareData.addrAuxiliary, auxRound, shareData, shareType, minerType, 'auxiliary');
 
     // Handle Miner/Worker Updates
-    const primaryWorkerUpdates = _this.handleWorkers(
-      shareData.addrPrimary, shareData.blockDiffPrimary, primaryRound, shareData, shareType, 'primary');
-    const auxiliaryWorkerUpdates = _this.handleWorkers(
-      shareData.addrAuxiliary, shareData.blockDiffAuxiliary, auxiliaryRound, shareData, shareType, 'auxiliary');
+    const workerUpdates = _this.handleWorkers(
+      shareData.addrPrimary, shareData.blockDiffPrimary, round, shareData, shareType, 'primary');
+    const auxWorkerUpdates = _this.handleWorkers(
+      shareData.addrAuxiliary, shareData.blockDiffAuxiliary, auxRound, shareData, shareType, 'auxiliary');
 
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.hashrate.insertPoolHashrateCurrent(_this.pool, [primaryHashrateUpdates]),
-      _this.current.metadata.insertPoolMetadataRoundsUpdate(_this.pool, [primaryMetadataUpdates]),
-      _this.current.miners.insertPoolMinersRounds(_this.pool, [primaryMinerUpdates]),
-      _this.current.rounds.insertPoolRoundsCurrent(_this.pool, [primaryRoundUpdates]),
-      _this.current.workers.insertPoolWorkersRounds(_this.pool, [primaryWorkerUpdates])];
+      _this.current.hashrate.insertPoolHashrateCurrent(_this.pool, [hashrateUpdates]),
+      _this.current.metadata.insertPoolMetadataRounds(_this.pool, [metadataUpdates]),
+      _this.current.miners.insertPoolMinersRounds(_this.pool, [minerUpdates]),
+      _this.current.rounds.insertPoolRoundsCurrent(_this.pool, [roundUpdates]),
+      _this.current.workers.insertPoolWorkersRounds(_this.pool, [workerUpdates])];
 
     // Add Support for Auxiliary Handling
     if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
-      transaction.push(_this.current.hashrate.insertPoolHashrateCurrent(_this.pool, [auxiliaryHashrateUpdates]));
-      transaction.push(_this.current.metadata.insertPoolMetadataRoundsUpdate(_this.pool, [auxiliaryMetadataUpdates]));
-      transaction.push(_this.current.miners.insertPoolMinersRounds(_this.pool, [auxiliaryMinerUpdates]));
-      transaction.push(_this.current.rounds.insertPoolRoundsCurrent(_this.pool, [auxiliaryRoundUpdates]));
-      transaction.push(_this.current.workers.insertPoolWorkersRounds(_this.pool, [auxiliaryWorkerUpdates]));
+      transaction.push(_this.current.hashrate.insertPoolHashrateCurrent(_this.pool, [auxHashrateUpdates]));
+      transaction.push(_this.current.metadata.insertPoolMetadataRounds(_this.pool, [auxMetadataUpdates]));
+      transaction.push(_this.current.miners.insertPoolMinersRounds(_this.pool, [auxMinerUpdates]));
+      transaction.push(_this.current.rounds.insertPoolRoundsCurrent(_this.pool, [auxRoundUpdates]));
+      transaction.push(_this.current.workers.insertPoolWorkersRounds(_this.pool, [auxWorkerUpdates]));
     }
 
     // Insert Work into Database

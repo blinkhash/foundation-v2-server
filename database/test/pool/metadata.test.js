@@ -16,7 +16,7 @@ describe('Test database metadata functionality', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     expect(typeof metadata.configMain).toBe('object');
     expect(typeof metadata.selectPoolMetadataType).toBe('function');
-    expect(typeof metadata.insertPoolMetadataHashrateUpdate).toBe('function');
+    expect(typeof metadata.insertPoolMetadataHashrate).toBe('function');
   });
 
   test('Test metadata command handling [1]', () => {
@@ -35,7 +35,7 @@ describe('Test database metadata functionality', () => {
       blocks: 1,
       type: 'primary',
     };
-    const response = metadata.insertPoolMetadataBlocksUpdate('Pool-Main', [updates]);
+    const response = metadata.insertPoolMetadataBlocks('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_metadata (
         timestamp, blocks, type)
@@ -57,7 +57,7 @@ describe('Test database metadata functionality', () => {
       blocks: 1,
       type: 'primary',
     };
-    const response = metadata.insertPoolMetadataBlocksUpdate('Pool-Main', [updates, updates]);
+    const response = metadata.insertPoolMetadataBlocks('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_metadata (
         timestamp, blocks, type)
@@ -84,7 +84,7 @@ describe('Test database metadata functionality', () => {
       type: 'primary',
       workers: 1,
     };
-    const response = metadata.insertPoolMetadataHashrateUpdate('Pool-Main', [updates]);
+    const response = metadata.insertPoolMetadataHashrate('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_metadata (
         timestamp, hashrate, miners,
@@ -113,7 +113,7 @@ describe('Test database metadata functionality', () => {
       type: 'primary',
       workers: 1,
     };
-    const response = metadata.insertPoolMetadataHashrateUpdate('Pool-Main', [updates, updates]);
+    const response = metadata.insertPoolMetadataHashrate('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_metadata (
         timestamp, hashrate, miners,
@@ -192,7 +192,7 @@ describe('Test database metadata functionality', () => {
       valid: 1,
       work: 8,
     };
-    const response = metadata.insertPoolMetadataRoundsUpdate('Pool-Main', [updates]);
+    const response = metadata.insertPoolMetadataRounds('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_metadata (
         timestamp, efficiency, effort,
@@ -231,7 +231,7 @@ describe('Test database metadata functionality', () => {
       valid: 1,
       work: 8,
     };
-    const response = metadata.insertPoolMetadataRoundsUpdate('Pool-Main', [updates, updates]);
+    const response = metadata.insertPoolMetadataRounds('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".pool_metadata (
         timestamp, efficiency, effort,
