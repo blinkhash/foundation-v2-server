@@ -1,3 +1,4 @@
+const Rounds = require('./rounds');
 const Statistics = require('./statistics');
 const Stratum = require('./stratum');
 
@@ -19,10 +20,13 @@ const Workers = function (logger, client) {
     return new Promise((resolve) => {
       const config = _this.configs[pool];
       const template = require('foundation-v2-' + config.template);
+      const rounds = new Rounds(_this.logger, _this.client, config, _this.configMain);
       const statistics = new Statistics(_this.logger, _this.client, config, _this.configMain, template);
       const stratum = new Stratum(_this.logger, _this.client, config, _this.configMain, template);
       stratum.setupStratum(() => {
-        statistics.setupStatistics(() => {});
+        rounds.setupRounds(stratum, () => {
+          statistics.setupStatistics(() => {});
+        });
         resolve(stratum);
       });
     });

@@ -43,6 +43,7 @@ config.settings.blockRefreshInterval = 1000; // ms;
 config.settings.connectionTimeout = 600000; // ms;
 config.settings.hashrateWindow = 300000; // ms;
 config.settings.inactiveWindow = 604800000; // ms;
+config.settings.updateWindow = 300000; // ms;
 config.settings.jobRebroadcastTimeout = 60000; // ms;
 
 // Primary Configuration
@@ -67,6 +68,18 @@ daemons1.port = 8332;
 daemons1.username = '';
 daemons1.password = '';
 config.primary.daemons.push(daemons1);
+
+// Payment Configuration
+config.primary.payments = {};
+config.primary.payments.enabled = true;
+config.primary.payments.minConfirmations = 10;
+config.primary.payments.minPayment = 0.005;
+config.primary.payments.transactionFee = 0.004;
+config.primary.payments.daemon = {};
+config.primary.payments.daemon.host = '127.0.0.1';
+config.primary.payments.daemon.port = 8332;
+config.primary.payments.daemon.username = '';
+config.primary.payments.daemon.password = '';
 
 // Recipients Configuration
 config.primary.recipients = [];

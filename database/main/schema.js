@@ -44,15 +44,17 @@ const Schema = function (logger, executor, configMain) {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
+        category VARCHAR NOT NULL DEFAULT 'pending',
+        confirmations INT NOT NULL DEFAULT -1,
         difficulty FLOAT NOT NULL DEFAULT -1,
         hash VARCHAR NOT NULL DEFAULT 'unknown',
         height INT NOT NULL DEFAULT -1,
         identifier VARCHAR NOT NULL DEFAULT 'master',
         luck FLOAT NOT NULL DEFAULT 0,
-        orphan BOOLEAN NOT NULL DEFAULT false,
         reward FLOAT NOT NULL DEFAULT 0,
         round VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
+        transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT historical_blocks_unique UNIQUE (round, type));
       CREATE INDEX historical_blocks_miner ON "${ pool }".historical_blocks(miner, type);
@@ -165,14 +167,12 @@ const Schema = function (logger, executor, configMain) {
       CREATE TABLE "${ pool }".historical_payments(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
-        recent BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         amount FLOAT NOT NULL DEFAULT 0,
         round VARCHAR NOT NULL DEFAULT 'unknown',
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT historical_payments_recent UNIQUE (recent, miner, type));
+        type VARCHAR NOT NULL DEFAULT 'primary');
       CREATE INDEX historical_payments_miner ON "${ pool }".historical_payments(miner, type);
       CREATE INDEX historical_payments_worker ON "${ pool }".historical_payments(worker, type);
       CREATE INDEX historical_payments_round ON "${ pool }".historical_payments(round, type);
@@ -199,9 +199,9 @@ const Schema = function (logger, executor, configMain) {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
-        round VARCHAR NOT NULL DEFAULT 'unknown',
         identifier VARCHAR NOT NULL DEFAULT 'master',
         invalid INT NOT NULL DEFAULT 0,
+        round VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
         stale INT NOT NULL DEFAULT 0,
         times FLOAT NOT NULL DEFAULT 0,
@@ -293,15 +293,17 @@ const Schema = function (logger, executor, configMain) {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
+        category VARCHAR NOT NULL DEFAULT 'pending',
+        confirmations INT NOT NULL DEFAULT -1,
         difficulty FLOAT NOT NULL DEFAULT -1,
         hash VARCHAR NOT NULL DEFAULT 'unknown',
         height INT NOT NULL DEFAULT -1,
         identifier VARCHAR NOT NULL DEFAULT 'master',
         luck FLOAT NOT NULL DEFAULT 0,
-        orphan BOOLEAN NOT NULL DEFAULT false,
         reward FLOAT NOT NULL DEFAULT 0,
         round VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
+        transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT pool_blocks_unique UNIQUE (round, type));
       CREATE INDEX pool_blocks_miner ON "${ pool }".pool_blocks(miner, type);
@@ -329,11 +331,12 @@ const Schema = function (logger, executor, configMain) {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
+        solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
         work FLOAT NOT NULL DEFAULT 0);
-      CREATE INDEX pool_hashrate_miner ON "${ pool }".pool_hashrate(timestamp, miner, type);
-      CREATE INDEX pool_hashrate_worker ON "${ pool }".pool_hashrate(timestamp, worker, type);
-      CREATE INDEX pool_hashrate_type ON "${ pool }".pool_hashrate(timestamp, type);`;
+      CREATE INDEX pool_hashrate_miner ON "${ pool }".pool_hashrate(timestamp, miner, solo, type);
+      CREATE INDEX pool_hashrate_worker ON "${ pool }".pool_hashrate(timestamp, worker, solo, type);
+      CREATE INDEX pool_hashrate_type ON "${ pool }".pool_hashrate(timestamp, solo, type);`;
     _this.executor([command], () => callback());
   };
 
@@ -393,9 +396,12 @@ const Schema = function (logger, executor, configMain) {
         hashrate FLOAT NOT NULL DEFAULT 0,
         immature FLOAT NOT NULL DEFAULT 0,
         paid FLOAT NOT NULL DEFAULT 0,
+        solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_miners_unique UNIQUE (miner, type));
+        CONSTRAINT pool_miners_unique UNIQUE (miner, solo, type));
+      CREATE INDEX pool_miners_balance ON "${ pool }".pool_miners(balance, type);
       CREATE INDEX pool_miners_miner ON "${ pool }".pool_miners(miner, type);
+      CREATE INDEX pool_miners_solo ON "${ pool }".pool_miners(solo, type);
       CREATE INDEX pool_miners_type ON "${ pool }".pool_miners(type);`;
     _this.executor([command], () => callback());
   };
@@ -462,6 +468,29 @@ const Schema = function (logger, executor, configMain) {
     _this.executor([command], () => callback());
   };
 
+  // Check if Pool Transactions Table Exists in Database
+  this.selectPoolTransactions = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'pool_transactions');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Pool Transactions Table to Database
+  this.createPoolTransactions = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".pool_transactions(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        round VARCHAR NOT NULL DEFAULT 'unknown',
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT pool_transactions_unique UNIQUE (round, type));
+      CREATE INDEX pool_transactions_type ON "${ pool }".pool_transactions(type);`;
+    _this.executor([command], () => callback());
+  };
+
   // Check if Pool Workers Table Exists in Database
   this.selectPoolWorkers = function(pool, callback) {
     const command = `
@@ -480,16 +509,14 @@ const Schema = function (logger, executor, configMain) {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
-        balance FLOAT NOT NULL DEFAULT 0,
         efficiency FLOAT NOT NULL DEFAULT 0,
         effort FLOAT NOT NULL DEFAULT 0,
-        generate FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
-        immature FLOAT NOT NULL DEFAULT 0,
-        paid FLOAT NOT NULL DEFAULT 0,
+        solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_workers_unique UNIQUE (worker, type));
+        CONSTRAINT pool_workers_unique UNIQUE (worker, solo, type));
       CREATE INDEX pool_workers_miner ON "${ pool }".pool_workers(miner, type);
+      CREATE INDEX pool_workers_solo ON "${ pool }".pool_workers(solo, type);
       CREATE INDEX pool_workers_worker ON "${ pool }".pool_workers(worker, type);
       CREATE INDEX pool_workers_type ON "${ pool }".pool_workers(type);`;
     _this.executor([command], () => callback());
@@ -525,6 +552,7 @@ const Schema = function (logger, executor, configMain) {
         .then(() => _this.handlePromises(pool, _this.selectPoolMiners, _this.createPoolMiners))
         .then(() => _this.handlePromises(pool, _this.selectPoolNetwork, _this.createPoolNetwork))
         .then(() => _this.handlePromises(pool, _this.selectPoolRounds, _this.createPoolRounds))
+        .then(() => _this.handlePromises(pool, _this.selectPoolTransactions, _this.createPoolTransactions))
         .then(() => _this.handlePromises(pool, _this.selectPoolWorkers, _this.createPoolWorkers))
         .then(() => resolve());
     });

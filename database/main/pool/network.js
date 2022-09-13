@@ -32,7 +32,7 @@ const PoolNetwork = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Blocks Data
+  // Insert Rows Using Network Data
   this.insertPoolNetworkCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_network (

@@ -2,9 +2,13 @@ const Schema = require('./schema');
 const Text = require('../../locales/index');
 
 // Historical Table Commands
+const HistoricalBlocks = require('./historical/blocks');
 const HistoricalMetadata = require('./historical/metadata');
 const HistoricalMiners = require('./historical/miners');
 const HistoricalNetwork = require('./historical/network');
+const HistoricalPayments = require('./historical/payments');
+const HistoricalRounds = require('./historical/rounds');
+const HistoricalTransactions = require('./historical/transactions');
 const HistoricalWorkers = require('./historical/workers');
 
 // Current Table Commands
@@ -14,6 +18,7 @@ const PoolMetadata = require('./pool/metadata');
 const PoolMiners = require('./pool/miners');
 const PoolNetwork = require('./pool/network');
 const PoolRounds = require('./pool/rounds');
+const PoolTransactions = require('./pool/transactions');
 const PoolWorkers = require('./pool/workers');
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,9 +55,13 @@ const Commands = function (logger, client, configMain) {
   this.schema = new Schema(_this.logger, _this.executor, _this.configMain);
 
   // Initialize Historical Commands
+  this.historical.blocks = new HistoricalBlocks(_this.logger, _this.configMain);
   this.historical.metadata = new HistoricalMetadata(_this.logger, _this.configMain);
   this.historical.miners = new HistoricalMiners(_this.logger, _this.configMain);
   this.historical.network = new HistoricalNetwork(_this.logger, _this.configMain);
+  this.historical.payments = new HistoricalPayments(_this.logger, _this.configMain);
+  this.historical.rounds = new HistoricalRounds(_this.logger, _this.configMain);
+  this.historical.transactions = new HistoricalTransactions(_this.logger, _this.configMain);
   this.historical.workers = new HistoricalWorkers(_this.logger, _this.configMain);
 
   // Initialize Current Commands
@@ -62,6 +71,7 @@ const Commands = function (logger, client, configMain) {
   this.pool.miners = new PoolMiners(_this.logger, _this.configMain);
   this.pool.network = new PoolNetwork(_this.logger, _this.configMain);
   this.pool.rounds = new PoolRounds(_this.logger, _this.configMain);
+  this.pool.transactions = new PoolTransactions(_this.logger, _this.configMain);
   this.pool.workers = new PoolWorkers(_this.logger, _this.configMain);
 };
 

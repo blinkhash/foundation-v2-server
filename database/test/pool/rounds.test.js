@@ -136,7 +136,7 @@ describe('Test database rounds functionality', () => {
         timestamp = EXCLUDED.timestamp,
         invalid = "Pool-Main".pool_rounds.invalid + EXCLUDED.invalid,
         stale = "Pool-Main".pool_rounds.stale + EXCLUDED.stale,
-        times = EXCLUDED.times,
+        times = GREATEST("Pool-Main".pool_rounds.times, EXCLUDED.times),
         valid = "Pool-Main".pool_rounds.valid + EXCLUDED.valid,
         work = "Pool-Main".pool_rounds.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
@@ -195,7 +195,7 @@ describe('Test database rounds functionality', () => {
         timestamp = EXCLUDED.timestamp,
         invalid = "Pool-Main".pool_rounds.invalid + EXCLUDED.invalid,
         stale = "Pool-Main".pool_rounds.stale + EXCLUDED.stale,
-        times = EXCLUDED.times,
+        times = GREATEST("Pool-Main".pool_rounds.times, EXCLUDED.times),
         valid = "Pool-Main".pool_rounds.valid + EXCLUDED.valid,
         work = "Pool-Main".pool_rounds.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
@@ -220,6 +220,15 @@ describe('Test database rounds functionality', () => {
       SET round = 'round1'
       WHERE round = 'current' AND solo = false
       AND type = 'primary';`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test rounds command handling [13]', () => {
+    const rounds = new PoolRounds(logger, configMainCopy);
+    const response = rounds.deletePoolRoundsCurrent('Pool-Main', ['round1']);
+    const expected = `
+      DELETE FROM "Pool-Main".pool_rounds
+      WHERE round IN (round1);`;
     expect(response).toBe(expected);
   });
 });

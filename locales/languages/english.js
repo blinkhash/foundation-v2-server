@@ -5,11 +5,13 @@ exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 
 // Database Text
 exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;
+exports.databaseCommandsText2 = (error) => `An error was thrown when trying to handle checks and validations: ${ error }`;
 exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
-
-// Historical Text
-exports.historicalUpdatesText1 = () => 'Attempted to update historical tables with current primary round data';
-exports.historicalUpdatesText2 = () => 'Attempted to update historical tables with current auxiliary round data';
+exports.databaseStartingText1 = (type, miners) => `Started updating tables with ${ type } round data for ${ miners } miners`;
+exports.databaseStartingText2 = (type) => `Started handling checks and validation for ${ type } rounds`;
+exports.databaseUpdatesText1 = (type, miners) => `Finished updating tables with ${ type } round data for ${ miners } miners`;
+exports.databaseUpdatesText2 = (type, rounds) => `Finished handling checks and validation for ${ type } rounds: (${ rounds })`;
+exports.databaseUpdatesText3 = (type) => `Finished handling checks and validation for ${ type } rounds: ()`;
 
 // Shares Text
 exports.sharesSubmissionsText1 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;

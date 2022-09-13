@@ -10,6 +10,13 @@ const PoolMiners = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
+  // Select Rows Using Balance
+  this.selectPoolMinersBalance = function(pool, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_miners
+      WHERE balance > 0 AND type = '${ type }';`;
+  };
+
   // Select Rows Using Miner
   this.selectPoolMinersMiner = function(pool, miner, type) {
     return `
@@ -17,11 +24,11 @@ const PoolMiners = function (logger, configMain) {
       WHERE miner = '${ miner }' AND type = '${ type }';`;
   };
 
-  // Select Rows Using Miner
-  this.selectPoolMinersType = function(pool, type) {
+  // Select Rows Using Type
+  this.selectPoolMinersType = function(pool, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_miners
-      WHERE type = '${ type }';`;
+      WHERE solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Build Miners Values String
@@ -32,6 +39,7 @@ const PoolMiners = function (logger, configMain) {
         ${ miner.timestamp },
         '${ miner.miner }',
         ${ miner.hashrate },
+        ${ miner.solo },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -43,7 +51,7 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         timestamp, miner, hashrate,
-        type)
+        solo, type)
       VALUES ${ _this.buildPoolMinersHashrate(updates) }
       ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
@@ -60,6 +68,7 @@ const PoolMiners = function (logger, configMain) {
         '${ miner.miner }',
         ${ miner.efficiency },
         ${ miner.effort },
+        ${ miner.solo },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -71,13 +80,14 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         timestamp, miner, efficiency,
-        effort, type)
+        effort, solo, type)
       VALUES ${ _this.buildPoolMinersRounds(updates) }
       ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
-        effort = EXCLUDED.effort;`;
+        effort = EXCLUDED.effort,
+        solo = EXCLUDED.solo;`;
   };
 
   // Build Miners Values String
@@ -88,9 +98,8 @@ const PoolMiners = function (logger, configMain) {
         ${ miner.timestamp },
         '${ miner.miner }',
         ${ miner.balance },
-        ${ miner.generate },
-        ${ miner.immature },
         ${ miner.paid },
+        ${ miner.solo },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -102,23 +111,59 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         timestamp, miner, balance,
-        generate, immature, paid,
-        type)
+        paid, solo, type)
       VALUES ${ _this.buildPoolMinersPayments(updates) }
       ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         balance = EXCLUDED.balance,
+        paid = "${ pool }".pool_rounds.paid + EXCLUDED.paid;`;
+  };
+
+  // Build Miners Values String
+  this.buildPoolMinersUpdates = function(updates) {
+    let values = '';
+    updates.forEach((miner, idx) => {
+      values += `(
+        ${ miner.timestamp },
+        '${ miner.miner }',
+        ${ miner.generate },
+        ${ miner.immature },
+        ${ miner.solo },
+        '${ miner.type }')`;
+      if (idx < updates.length - 1) values += ', ';
+    });
+    return values;
+  };
+
+  // Insert Rows Using Payment Data
+  this.insertPoolMinersUpdates = function(pool, updates) {
+    return `
+      INSERT INTO "${ pool }".pool_miners (
+        timestamp, miner, generate,
+        immature, solo, type)
+      VALUES ${ _this.buildPoolMinersUpdates(updates) }
+      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
         generate = EXCLUDED.generate,
-        immature = EXCLUDED.immature,
-        paid = EXCLUDED.paid;`;
+        immature = EXCLUDED.immature;`;
+  };
+
+  // Insert Rows Using Reset
+  this.insertPoolMinersReset = function(pool, type) {
+    return `
+      UPDATE "${ pool }".pool_miners
+      SET generate = 0, immature = 0
+      WHERE type = '${ type }';`;
   };
 
   // Delete Rows From Current Round
-  this.deletePoolMinersCurrent = function(pool, timestamp) {
+  this.deletePoolMinersInactive = function(pool, timestamp) {
     return `
       DELETE FROM "${ pool }".pool_miners
-      WHERE timestamp < ${ timestamp };`;
+      WHERE timestamp < ${ timestamp } AND balance = 0
+      AND generate = 0 AND immature = 0 AND paid = 0;`;
   };
 };
 

@@ -92,7 +92,7 @@ const PoolRounds = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Worker
+  // Insert Rows Using Round Data
   this.insertPoolRoundsCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".pool_rounds (
@@ -106,7 +106,7 @@ const PoolRounds = function (logger, configMain) {
         timestamp = EXCLUDED.timestamp,
         invalid = "${ pool }".pool_rounds.invalid + EXCLUDED.invalid,
         stale = "${ pool }".pool_rounds.stale + EXCLUDED.stale,
-        times = EXCLUDED.times,
+        times = GREATEST("${ pool }".pool_rounds.times, EXCLUDED.times),
         valid = "${ pool }".pool_rounds.valid + EXCLUDED.valid,
         work = "${ pool }".pool_rounds.work + EXCLUDED.work;`;
   };
@@ -127,6 +127,13 @@ const PoolRounds = function (logger, configMain) {
       SET round = '${ round }'
       WHERE round = 'current' AND solo = false
       AND type = '${ type }';`;
+  };
+
+  // Delete Rows From Current Round
+  this.deletePoolRoundsCurrent = function(pool, rounds) {
+    return `
+      DELETE FROM "${ pool }".pool_rounds
+      WHERE round IN (${ rounds.join(', ') });`;
   };
 };
 

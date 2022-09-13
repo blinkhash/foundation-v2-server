@@ -11,72 +11,76 @@ const PoolHashrate = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Select Rows Using Miner
-  this.selectPoolHashrateMiner = function(pool, timestamp, miner, type) {
+  this.selectPoolHashrateMiner = function(pool, timestamp, miner, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND miner = '${ miner }' AND type = '${ type }';`;
+      AND miner = '${ miner }' AND solo = ${ solo }
+      AND type = '${ type }';`;
   };
 
   // Select Count of Distinct Miners
-  this.countPoolHashrateMiner = function(pool, timestamp, type) {
+  this.countPoolHashrateMiner = function(pool, timestamp, solo, type) {
     return `
       SELECT CAST(COUNT(DISTINCT miner) AS INT)
       FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND type = '${ type }';`;
+      AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Select Sum of Rows Using Miners
-  this.sumPoolHashrateMiner = function(pool, timestamp, type) {
+  this.sumPoolHashrateMiner = function(pool, timestamp, solo, type) {
     return `
       SELECT miner, SUM(work) as current_work
       FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND type = '${ type }' GROUP BY miner;`;
+      AND solo = ${ solo } AND type = '${ type }'
+      GROUP BY miner;`;
   };
 
   // Select Rows Using Miner
-  this.selectPoolHashrateWorker = function(pool, timestamp, worker, type) {
+  this.selectPoolHashrateWorker = function(pool, timestamp, worker, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND worker = '${ worker }' AND type = '${ type }';`;
+      AND worker = '${ worker }' AND solo = ${ solo }
+      AND type = '${ type }';`;
   };
 
   // Select Count of Distinct Workers
-  this.countPoolHashrateWorker = function(pool, timestamp, type) {
+  this.countPoolHashrateWorker = function(pool, timestamp, solo, type) {
     return `
       SELECT CAST(COUNT(DISTINCT worker) AS INT)
       FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND type = '${ type }';`;
+      AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Select Sum of Rows Using Workers
-  this.sumPoolHashrateWorker = function(pool, timestamp, type) {
+  this.sumPoolHashrateWorker = function(pool, timestamp, solo, type) {
     return `
       SELECT worker, SUM(work) as current_work
       FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND type = '${ type }' GROUP BY worker;`;
+      AND solo = ${ solo } AND type = '${ type }'
+      GROUP BY worker;`;
   };
 
   // Select Rows Using Miner
-  this.selectPoolHashrateType = function(pool, timestamp, type) {
+  this.selectPoolHashrateType = function(pool, timestamp, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND type = '${ type }';`;
+      AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Select Sum of Rows Using Types
-  this.sumPoolHashrateType = function(pool, timestamp, type) {
+  this.sumPoolHashrateType = function(pool, timestamp, solo, type) {
     return `
       SELECT SUM(work) as current_work
       FROM "${ pool }".pool_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND type = '${ type }';`;
+      AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Build Hashrate Values String
@@ -87,6 +91,7 @@ const PoolHashrate = function (logger, configMain) {
         ${ hashrate.timestamp },
         '${ hashrate.miner }',
         '${ hashrate.worker }',
+        ${ hashrate.solo },
         '${ hashrate.type }',
         ${ hashrate.work })`;
       if (idx < updates.length - 1) values += ', ';
@@ -99,12 +104,12 @@ const PoolHashrate = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_hashrate (
         timestamp, miner, worker,
-        type, work)
+        solo, type, work)
       VALUES ${ _this.buildPoolHashrateCurrent(updates) };`;
   };
 
   // Delete Rows From Current Round
-  this.deletePoolHashrateCurrent = function(pool, timestamp) {
+  this.deletePoolHashrateInactive = function(pool, timestamp) {
     return `
       DELETE FROM "${ pool }".pool_hashrate
       WHERE timestamp < ${ timestamp };`;
