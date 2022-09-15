@@ -39,15 +39,6 @@ describe('Test database payments functionality', () => {
 
   test('Test payment command handling [3]', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
-    const response = payments.selectHistoricalPaymentsRound('Pool-Main', 'round1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_payments
-      WHERE round = 'round1' AND type = 'primary';`;
-    expect(response).toBe(expected);
-  });
-
-  test('Test payment command handling [4]', () => {
-    const payments = new HistoricalPayments(logger, configMainCopy);
     const response = payments.selectHistoricalPaymentsTransaction('Pool-Main', 'transaction1', 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".historical_payments
@@ -55,12 +46,38 @@ describe('Test database payments functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test payment command handling [5]', () => {
+  test('Test payment command handling [4]', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
     const response = payments.selectHistoricalPaymentsType('Pool-Main', 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".historical_payments
       WHERE type = 'primary';`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test payment command handling [5]', () => {
+    const payments = new HistoricalPayments(logger, configMainCopy);
+    const updates = {
+      timestamp: 1,
+      miner: 'miner1',
+      worker: 'worker1',
+      amount: 1,
+      transaction: 'transaction1',
+      type: 'primary'
+    };
+    const response = payments.insertHistoricalPaymentsCurrent('Pool-Main', [updates]);
+    const expected = `
+      INSERT INTO "Pool-Main".historical_payments (
+        timestamp, miner, worker,
+        amount, transaction, type)
+      VALUES (
+        1,
+        'miner1',
+        'worker1',
+        1,
+        'transaction1',
+        'primary')
+      ON CONFLICT DO NOTHING;`;
     expect(response).toBe(expected);
   });
 
@@ -71,36 +88,6 @@ describe('Test database payments functionality', () => {
       miner: 'miner1',
       worker: 'worker1',
       amount: 1,
-      round: 'round1',
-      transaction: 'transaction1',
-      type: 'primary'
-    };
-    const response = payments.insertHistoricalPaymentsCurrent('Pool-Main', [updates]);
-    const expected = `
-      INSERT INTO "Pool-Main".historical_payments (
-        timestamp, miner, worker,
-        amount, round, transaction,
-        type)
-      VALUES (
-        1,
-        'miner1',
-        'worker1',
-        1,
-        'round1',
-        'transaction1',
-        'primary')
-      ON CONFLICT DO NOTHING;`;
-    expect(response).toBe(expected);
-  });
-
-  test('Test payment command handling [7]', () => {
-    const payments = new HistoricalPayments(logger, configMainCopy);
-    const updates = {
-      timestamp: 1,
-      miner: 'miner1',
-      worker: 'worker1',
-      amount: 1,
-      round: 'round1',
       transaction: 'transaction1',
       type: 'primary'
     };
@@ -108,21 +95,18 @@ describe('Test database payments functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".historical_payments (
         timestamp, miner, worker,
-        amount, round, transaction,
-        type)
+        amount, transaction, type)
       VALUES (
         1,
         'miner1',
         'worker1',
         1,
-        'round1',
         'transaction1',
         'primary'), (
         1,
         'miner1',
         'worker1',
         1,
-        'round1',
         'transaction1',
         'primary')
       ON CONFLICT DO NOTHING;`;

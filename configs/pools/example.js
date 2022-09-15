@@ -39,12 +39,19 @@ config.ports.push(ports1);
 
 // Settings Configuration
 config.settings = {};
-config.settings.blockRefreshInterval = 1000; // ms;
 config.settings.connectionTimeout = 600000; // ms;
+config.settings.jobRebroadcastTimeout = 60000; // ms;
+
+// Interval Configuration
+config.settings.blockRefreshInterval = 1000; // ms;
+config.settings.checksInterval = 90000; // ms
+config.settings.paymentsInterval = 7200000; // ms
+config.settings.statisticsInterval = 90000; // ms
+
+// Window Configuration
 config.settings.hashrateWindow = 300000; // ms;
 config.settings.inactiveWindow = 604800000; // ms;
 config.settings.updateWindow = 300000; // ms;
-config.settings.jobRebroadcastTimeout = 60000; // ms;
 
 // Primary Configuration
 ////////////////////////////////////////////////////////////////////////////////

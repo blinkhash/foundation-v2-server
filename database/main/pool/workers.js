@@ -11,10 +11,19 @@ const PoolWorkers = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Select Rows Using Miner
-  this.selectPoolWorkersMiner = function(pool, miner, type) {
+  this.selectPoolWorkersMiner = function(pool, miner, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_workers
-      WHERE miner = '${ miner }' AND type = '${ type }';`;
+      WHERE miner = '${ miner }' AND solo = ${ solo }
+      AND type = '${ type }';`;
+  };
+
+  // Select Rows Using Worker
+  this.selectPoolWorkersWorker = function(pool, worker, solo, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_workers
+      WHERE worker = '${ worker }' AND solo = ${ solo }
+      AND type = '${ type }';`;
   };
 
   // Select Rows Using Type
@@ -22,13 +31,6 @@ const PoolWorkers = function (logger, configMain) {
     return `
       SELECT * FROM "${ pool }".pool_workers
       WHERE solo = ${ solo } AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Worker
-  this.selectPoolWorkersWorker = function(pool, worker, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_workers
-      WHERE worker = '${ worker }' AND type = '${ type }';`;
   };
 
   // Build Workers Values String

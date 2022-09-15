@@ -378,14 +378,16 @@ const Statistics = function (logger, client, config, configMain, template) {
   // Start Statistics Interval Management
   /* istanbul ignore next */
   this.handleInterval = function(minerType) {
-    const random = Math.floor(Math.random() * (180 - 60) + 60);
+    const minInterval = _this.config.settings.statisticsInterval * 0.75;
+    const maxInterval = _this.config.settings.statisticsInterval * 1.25;
+    const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval(minerType);
       _this.handleStatistics(minerType, 'primary');
       if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
         _this.handleStatistics(minerType, 'auxiliary');
       }
-    }, random * 1000);
+    }, random);
   };
 
   // Start Statistics Capabilities

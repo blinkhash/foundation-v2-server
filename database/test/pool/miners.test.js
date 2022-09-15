@@ -21,19 +21,20 @@ describe('Test database miners functionality', () => {
 
   test('Test miners command handling [1]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
-    const response = miners.selectPoolMinersBalance('Pool-Main', 'primary');
+    const response = miners.selectPoolMinersMiner('Pool-Main', 'miner1', false, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_miners
-      WHERE balance > 0 AND type = 'primary';`;
+      WHERE miner = 'miner1' AND solo = false
+      AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [2]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
-    const response = miners.selectPoolMinersMiner('Pool-Main', 'miner1', 'primary');
+    const response = miners.selectPoolMinersBalance('Pool-Main', 0, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_miners
-      WHERE miner = 'miner1' AND type = 'primary';`;
+      WHERE balance >= 0 AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
@@ -310,7 +311,7 @@ describe('Test database miners functionality', () => {
     const response = miners.insertPoolMinersReset('Pool-Main', 'primary');
     const expected = `
       UPDATE "Pool-Main".pool_miners
-      SET generate = 0, immature = 0
+      SET immature = 0, generate = 0
       WHERE type = 'primary';`;
     expect(response).toBe(expected);
   });

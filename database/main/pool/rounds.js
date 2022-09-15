@@ -11,24 +11,27 @@ const PoolRounds = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Select Rows Using Miner
-  this.selectPoolRoundsMiner = function(pool, miner, type) {
+  this.selectPoolRoundsMiner = function(pool, miner, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_rounds
-      WHERE miner = '${ miner }' AND type = '${ type }';`;
+      WHERE miner = '${ miner }' AND solo = ${ solo }
+      AND type = '${ type }';`;
   };
 
   // Select Rows Using Worker
-  this.selectPoolRoundsWorker = function(pool, worker, type) {
+  this.selectPoolRoundsWorker = function(pool, worker, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND type = '${ type }';`;
+      WHERE worker = '${ worker }' AND solo = ${ solo }
+      AND type = '${ type }';`;
   };
 
   // Select Rows Using Identifier
-  this.selectPoolRoundsIdentifier = function(pool, identifier, type) {
+  this.selectPoolRoundsIdentifier = function(pool, identifier, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_rounds
-      WHERE identifier = '${ identifier } AND type = '${ type }';`;
+      WHERE identifier = '${ identifier } AND solo = ${ solo }
+      AND type = '${ type }';`;
   };
 
   // Select Rows Using Current Round

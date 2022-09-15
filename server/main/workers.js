@@ -1,4 +1,5 @@
-const Rounds = require('./rounds');
+const Checks = require('./checks');
+const Payments = require('./payments');
 const Statistics = require('./statistics');
 const Stratum = require('./stratum');
 
@@ -20,12 +21,19 @@ const Workers = function (logger, client) {
     return new Promise((resolve) => {
       const config = _this.configs[pool];
       const template = require('foundation-v2-' + config.template);
-      const rounds = new Rounds(_this.logger, _this.client, config, _this.configMain);
+
+      // Build Out Individual Modules
+      const checks = new Checks(_this.logger, _this.client, config, _this.configMain);
+      const payments = new Payments(_this.logger, _this.client, config, _this.configMain);
       const statistics = new Statistics(_this.logger, _this.client, config, _this.configMain, template);
       const stratum = new Stratum(_this.logger, _this.client, config, _this.configMain, template);
+
+      // Initialize Individual Modules
       stratum.setupStratum(() => {
-        rounds.setupRounds(stratum, () => {
-          statistics.setupStatistics(() => {});
+        checks.setupChecks(stratum, () => {
+          payments.setupPayments(stratum, () => {
+            statistics.setupStatistics(() => {});
+          });
         });
         resolve(stratum);
       });

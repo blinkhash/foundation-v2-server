@@ -21,28 +21,31 @@ describe('Test database rounds functionality', () => {
 
   test('Test rounds command handling [1]', () => {
     const rounds = new PoolRounds(logger, configMainCopy);
-    const response = rounds.selectPoolRoundsMiner('Pool-Main', 'miner1', 'primary');
+    const response = rounds.selectPoolRoundsMiner('Pool-Main', 'miner1', false, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_rounds
-      WHERE miner = 'miner1' AND type = 'primary';`;
+      WHERE miner = 'miner1' AND solo = false
+      AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [2]', () => {
     const rounds = new PoolRounds(logger, configMainCopy);
-    const response = rounds.selectPoolRoundsWorker('Pool-Main', 'worker1', 'primary');
+    const response = rounds.selectPoolRoundsWorker('Pool-Main', 'worker1', false, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_rounds
-      WHERE worker = 'worker1' AND type = 'primary';`;
+      WHERE worker = 'worker1' AND solo = false
+      AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [3]', () => {
     const rounds = new PoolRounds(logger, configMainCopy);
-    const response = rounds.selectPoolRoundsIdentifier('Pool-Main', 'master', 'primary');
+    const response = rounds.selectPoolRoundsIdentifier('Pool-Main', 'master', false, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_rounds
-      WHERE identifier = 'master AND type = 'primary';`;
+      WHERE identifier = 'master AND solo = false
+      AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 

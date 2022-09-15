@@ -9,9 +9,12 @@ exports.databaseCommandsText2 = (error) => `An error was thrown when trying to h
 exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
 exports.databaseStartingText1 = (type, miners) => `Started updating tables with ${ type } round data for ${ miners } miners`;
 exports.databaseStartingText2 = (type) => `Started handling checks and validation for ${ type } rounds`;
+exports.databaseStartingText3 = (type) => `Started handling balances and payments for ${ type } rounds`;
 exports.databaseUpdatesText1 = (type, miners) => `Finished updating tables with ${ type } round data for ${ miners } miners`;
 exports.databaseUpdatesText2 = (type, rounds) => `Finished handling checks and validation for ${ type } rounds: (${ rounds })`;
-exports.databaseUpdatesText3 = (type) => `Finished handling checks and validation for ${ type } rounds: ()`;
+exports.databaseUpdatesText3 = (type) => `Finished handling checks and validation for ${ type } rounds: (0)`;
+exports.databaseUpdatesText4 = (type, rounds) => `Finished handling balances and payments for ${ type } rounds: (${ rounds })`;
+exports.databaseUpdatesText5 = (type) => `Finished handling balances and payments for ${ type } rounds: (0)`;
 
 // Shares Text
 exports.sharesSubmissionsText1 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;

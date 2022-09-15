@@ -84,6 +84,7 @@ describe('Test schema functionality', () => {
         CONSTRAINT historical_blocks_unique UNIQUE (round, type));
       CREATE INDEX historical_blocks_miner ON "Pool-Main".historical_blocks(miner, type);
       CREATE INDEX historical_blocks_worker ON "Pool-Main".historical_blocks(worker, type);
+      CREATE INDEX historical_blocks_category ON "Pool-Main".historical_blocks(category, type);
       CREATE INDEX historical_blocks_identifier ON "Pool-Main".historical_blocks(identifier, type);
       CREATE INDEX historical_blocks_type ON "Pool-Main".historical_blocks(type);`;
     const executor = mockExecutor(null, expected);
@@ -215,12 +216,10 @@ describe('Test schema functionality', () => {
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         amount FLOAT NOT NULL DEFAULT 0,
-        round VARCHAR NOT NULL DEFAULT 'unknown',
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary');
       CREATE INDEX historical_payments_miner ON "Pool-Main".historical_payments(miner, type);
       CREATE INDEX historical_payments_worker ON "Pool-Main".historical_payments(worker, type);
-      CREATE INDEX historical_payments_round ON "Pool-Main".historical_payments(round, type);
       CREATE INDEX historical_payments_transaction ON "Pool-Main".historical_payments(transaction, type);
       CREATE INDEX historical_payments_type ON "Pool-Main".historical_payments(type);`;
     const executor = mockExecutor(null, expected);
@@ -290,11 +289,8 @@ describe('Test schema functionality', () => {
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         amount FLOAT NOT NULL DEFAULT 0,
-        round VARCHAR NOT NULL DEFAULT 'unknown',
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT historical_transactions_unique UNIQUE (round, type));
-      CREATE INDEX historical_transactions_round ON "Pool-Main".historical_transactions(round, type);
+        type VARCHAR NOT NULL DEFAULT 'primary');
       CREATE INDEX historical_transactions_transaction ON "Pool-Main".historical_transactions(transaction, type);
       CREATE INDEX historical_transactions_type ON "Pool-Main".historical_transactions(type);`;
     const executor = mockExecutor(null, expected);
@@ -373,6 +369,7 @@ describe('Test schema functionality', () => {
         CONSTRAINT pool_blocks_unique UNIQUE (round, type));
       CREATE INDEX pool_blocks_miner ON "Pool-Main".pool_blocks(miner, type);
       CREATE INDEX pool_blocks_worker ON "Pool-Main".pool_blocks(worker, type);
+      CREATE INDEX pool_blocks_category ON "Pool-Main".pool_blocks(category, type);
       CREATE INDEX pool_blocks_identifier ON "Pool-Main".pool_blocks(identifier, type);
       CREATE INDEX pool_blocks_type ON "Pool-Main".pool_blocks(type);`;
     const executor = mockExecutor(null, expected);
@@ -524,6 +521,34 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
+        AND table_name = 'pool_payments');`;
+    const executor = mockExecutor(results, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.selectPoolPayments('Pool-Main', (results) => {
+      expect(results).toBe(true);
+    });
+  });
+
+  test('Test schema functionality [30]', () => {
+    const expected = `
+      CREATE TABLE "Pool-Main".pool_payments(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        round VARCHAR NOT NULL DEFAULT 'unknown',
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT pool_payments_unique UNIQUE (round, type));
+      CREATE INDEX pool_payments_type ON "Pool-Main".pool_payments(type);`;
+    const executor = mockExecutor(null, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.createPoolPayments('Pool-Main', () => {});
+  });
+
+  test('Test schema functionality [31]', () => {
+    const results = { rows: [{ exists: true }]};
+    const expected = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'Pool-Main'
         AND table_name = 'pool_rounds');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
@@ -532,7 +557,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [30]', () => {
+  test('Test schema functionality [32]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".pool_rounds(
         id BIGSERIAL PRIMARY KEY,
@@ -560,7 +585,7 @@ describe('Test schema functionality', () => {
     schema.createPoolRounds('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [31]', () => {
+  test('Test schema functionality [33]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -574,7 +599,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [32]', () => {
+  test('Test schema functionality [34]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".pool_transactions(
         id BIGSERIAL PRIMARY KEY,
@@ -588,7 +613,7 @@ describe('Test schema functionality', () => {
     schema.createPoolTransactions('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [33]', () => {
+  test('Test schema functionality [35]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -602,7 +627,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [34]', () => {
+  test('Test schema functionality [36]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".pool_workers(
         id BIGSERIAL PRIMARY KEY,

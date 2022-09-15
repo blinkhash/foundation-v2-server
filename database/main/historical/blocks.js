@@ -24,11 +24,18 @@ const HistoricalBlocks = function (logger, configMain) {
       WHERE worker = '${ worker }' AND type = '${ type }';`;
   };
 
+  // Select Rows Using Category
+  this.selectHistoricalBlocksCategory = function(pool, category, type) {
+    return `
+      SELECT * FROM "${ pool }".historical_blocks
+      WHERE category = '${ category }' AND type = '${ type }';`;
+  };
+
   // Select Rows Using Identifier
   this.selectHistoricalBlocksIdentifier = function(pool, identifier, type) {
     return `
       SELECT * FROM "${ pool }".historical_blocks
-      WHERE identifier = '${ identifier } AND type = '${ type }';`;
+      WHERE identifier = '${ identifier }' AND type = '${ type }';`;
   };
 
   // Select Rows Using Miner

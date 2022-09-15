@@ -2,8 +2,8 @@ const Text = require('../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// Main Rounds Function
-const Rounds = function (logger, client, config, configMain) {
+// Main Checks Function
+const Checks = function (logger, client, config, configMain) {
 
   const _this = this;
   this.logger = logger;
@@ -17,33 +17,6 @@ const Rounds = function (logger, client, config, configMain) {
   this.executor = _this.client.commands.executor;
   this.current = _this.client.commands.pool;
   this.historical = _this.client.commands.historical;
-
-  // Handle Historical Rounds Updates
-  this.handleHistoricalRounds = function(workers) {
-
-    // Flatten Nested Worker Array
-    if (workers.length >= 1) {
-      workers = workers.reduce((a, b) => a.concat(b));
-    }
-
-    // Return Rounds Updates
-    return workers.map((worker) => {
-      return {
-        timestamp: Date.now(),
-        miner: worker.miner,
-        worker: worker.worker,
-        identifier: worker.identifier,
-        invalid: worker.invalid,
-        round: worker.round,
-        solo: worker.solo,
-        stale: worker.stale,
-        times: worker.times,
-        type: worker.type,
-        valid: worker.valid,
-        work: worker.work,
-      };
-    });
-  };
 
   // Handle Blocks Updates
   this.handleBlocks = function(blocks) {
@@ -88,25 +61,25 @@ const Rounds = function (logger, client, config, configMain) {
   };
 
   // Handle Round Updates
-  this.handleOrphans = function(workers) {
+  this.handleOrphans = function(rounds) {
 
-    // Flatten Nested Worker Array
+    // Flatten Nested Round Array
     const combined = {};
-    if (workers.length >= 1) {
-      workers = workers.reduce((a, b) => a.concat(b));
+    if (rounds.length >= 1) {
+      rounds = rounds.reduce((a, b) => a.concat(b));
     }
 
-    // Collect All Worker Data
-    workers.forEach((worker) => {
-      const identifier = `${ worker.miner }_${ worker.solo }_${ worker.type }`;
+    // Collect All Round Data
+    rounds.forEach((round) => {
+      const identifier = `${ round.miner }_${ round.solo }_${ round.type }`;
       if (identifier in combined) {
         const current = combined[identifier];
-        current.invalid += worker.invalid;
-        current.stale += worker.stale;
-        current.times = Math.max(current.times, worker.times);
-        current.valid += worker.valid;
-        current.work += worker.work;
-      } else combined[identifier] = worker;
+        current.invalid += round.invalid;
+        current.stale += round.stale;
+        current.times = Math.max(current.times, round.times);
+        current.valid += round.valid;
+        current.work += round.work;
+      } else combined[identifier] = round;
     });
 
     // Return Round Updates
@@ -129,18 +102,70 @@ const Rounds = function (logger, client, config, configMain) {
     });
   };
 
+  // Handle Round Failure Updates
+  this.handleFailures = function(blocks, callback) {
+
+    // Build Combined Transaction
+    const transaction = ['BEGIN;'];
+
+    // Remove Finished Transactions from Table
+    const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
+    transaction.push(_this.current.transactions.deletePoolTransactionsCurrent(
+      _this.pool, transactionsDelete));
+
+    // Insert Work into Database
+    transaction.push('COMMIT;');
+    _this.executor(transaction, () => callback());
+  };
+
+  // Handle Final Round Updates
+  this.handleFinal = function(blocks, callback) {
+
+    // Build Combined Transaction
+    const transaction = ['BEGIN;'];
+
+    // Remove Finished Transactions from Table
+    const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
+    transaction.push(_this.current.transactions.deletePoolTransactionsCurrent(
+      _this.pool, transactionsDelete));
+
+    // Insert Work into Database
+    transaction.push('COMMIT;');
+    _this.executor(transaction, () => callback());
+  };
+
+  // Handle Round Reset Updates
+  this.handleReset = function(blockType, callback) {
+
+    // Build Combined Transaction
+    const transaction = [
+      'BEGIN;',
+      _this.current.miners.insertPoolMinersReset(_this.pool, blockType),
+      'COMMIT;'];
+
+    // Insert Work into Database
+    _this.executor(transaction, () => callback());
+  };
+
   // Handle Round Success Updates
-  this.handleUpdates = function(blocks, workers, payments, blockType, callback) {
+  this.handleUpdates = function(blocks, rounds, payments, blockType, callback) {
 
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
 
     // Handle Block Categories Individually
-    const rounds = blocks.flatMap((block) => block.round);
+    const flattened = blocks.flatMap((block) => block.round);
     const orphanBlocks = blocks.filter((block) => block.category === 'orphan');
-    const orphanWorkers = orphanBlocks.map((orphan) => workers[rounds.indexOf(orphan.round)]);
+    const orphanRounds = orphanBlocks.map((orphan) => rounds[flattened.indexOf(orphan.round)]);
     const immatureBlocks = blocks.filter((block) => block.category === 'immature');
     const generateBlocks = blocks.filter((block) => block.category === 'generate');
+
+    // Handle Historical Orphan Block Updates
+    const orphanBlocksUpdates = _this.handleBlocks(orphanBlocks);
+    if (orphanBlocksUpdates.length >= 1) {
+      transaction.push(_this.historical.blocks.insertHistoricalBlocksCurrent(
+        _this.pool, orphanBlocksUpdates));
+    }
 
     // Handle Orphan Block Delete Updates
     const orphanBlocksDelete = orphanBlocks.map((block) => `'${ block.round }'`);
@@ -178,23 +203,11 @@ const Rounds = function (logger, client, config, configMain) {
     }
 
     // Handle Orphan Round Updates
-    const orphanRoundsUpdates = _this.handleOrphans(orphanWorkers);
+    const orphanRoundsUpdates = _this.handleOrphans(orphanRounds);
     if (orphanRoundsUpdates.length >= 1) {
       transaction.push(_this.current.rounds.insertPoolRoundsCurrent(
         _this.pool, orphanRoundsUpdates));
     }
-
-    // Handle Historical Orphan Block Updates
-    const orphanBlocksUpdates = _this.handleBlocks(orphanBlocks);
-    if (orphanBlocksUpdates.length >= 1) {
-      transaction.push(_this.historical.blocks.insertHistoricalBlocksCurrent(
-        _this.pool, orphanBlocksUpdates));
-    }
-
-    // Remove Finished Transactions from Table
-    const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.current.transactions.deletePoolTransactionsCurrent(
-      _this.pool, transactionsDelete));
 
     // Insert Work into Database
     transaction.push('COMMIT;');
@@ -207,7 +220,7 @@ const Rounds = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
 
-    // Add Worker Lookups to Transaction
+    // Add Round Lookups to Transaction
     blocks.forEach((block) => {
       transaction.push(_this.current.rounds.selectPoolRoundsSpecific(
         _this.pool, block.solo, block.round, 'primary'));
@@ -216,11 +229,11 @@ const Rounds = function (logger, client, config, configMain) {
     // Determine Workers for Rounds
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
-      const workers = results.slice(1, -1).map((round) => round.rows);
+      const rounds = results.slice(1, -1).map((round) => round.rows);
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
-        if (error) callback(error);
-        else _this.stratum.stratum.handlePrimaryWorkers(blocks, workers, (results) => {
-          _this.handleUpdates(updates, workers, results, 'primary', () => callback(null));
+        if (error) _this.handleFailures(updates, () => callback(error));
+        else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
+          _this.handleUpdates(updates, rounds, results, 'primary', () => callback(null));
         });
       });
     });
@@ -232,7 +245,7 @@ const Rounds = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
 
-    // Add Worker Lookups to Transaction
+    // Add Round Lookups to Transaction
     blocks.forEach((block) => {
       transaction.push(_this.current.rounds.selectPoolRoundsSpecific(
         _this.pool, block.solo, block.round, 'auxiliary'));
@@ -241,18 +254,18 @@ const Rounds = function (logger, client, config, configMain) {
     // Determine Workers for Rounds
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
-      const workers = results.slice(1, -1).map((round) => round.rows);
+      const rounds = results.slice(1, -1).map((round) => round.rows);
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
-        if (error) callback(error);
-        else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, workers, (results) => {
-          _this.handleUpdates(updates, workers, results, 'auxiliary', () => callback(null));
+        if (error) _this.handleFailures(updates, () => callback(error));
+        else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
+          _this.handleUpdates(updates, rounds, results, 'auxiliary', () => callback(null));
         });
       });
     });
   };
 
   // Handle Payment Updates
-  this.handleChecks = function(lookups, blockType) {
+  this.handleRounds = function(lookups, blockType) {
 
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
@@ -279,19 +292,24 @@ const Rounds = function (logger, client, config, configMain) {
       _this.executor(transaction, (results) => {
         results = results[1].rows.map((block) => block.round);
         const blocks = lookups[1].rows.filter((block) => results.includes((block || {}).round));
+
+        // Blocks Exist to Validate
         if (blocks.length >= 1) {
           _this.handlePrimary(blocks, (error) => {
-            const rounds = blocks.map((block) => block.round);
-            const updates = [(error) ?
-              _this.text.databaseCommandsText2(JSON.stringify(error)) :
-              _this.text.databaseUpdatesText2(blockType, rounds.join(', '))];
-            _this.logger.log('Rounds', _this.config.name, updates);
+            _this.handleFinal(blocks, () => {
+              const updates = [(error) ?
+                _this.text.databaseCommandsText2(JSON.stringify(error)) :
+                _this.text.databaseUpdatesText2(blockType, blocks.length)];
+              _this.logger.log('Checks', _this.config.name, updates);
+            });
           });
 
         // No Blocks Exist to Validate
         } else {
-          const updates = [_this.text.databaseUpdatesText3(blockType)];
-          _this.logger.log('Rounds', _this.config.name, updates);
+          _this.handleReset(blockType, () => {
+            const updates = [_this.text.databaseUpdatesText3(blockType)];
+            _this.logger.log('Checks', _this.config.name, updates);
+          });
         }
       });
       break;
@@ -302,20 +320,23 @@ const Rounds = function (logger, client, config, configMain) {
         results = results[1].rows.map((block) => block.round);
         const blocks = lookups[1].rows.filter((block) => results.includes((block || {}).round));
 
-        // Block Exist to Validate
+        // Blocks Exist to Validate
         if (blocks.length >= 1) {
           _this.handleAuxiliary(blocks, (error) => {
-            const rounds = blocks.map((block) => block.round);
-            const updates = [(error) ?
-              _this.text.databaseCommandsText2(JSON.stringify(error)) :
-              _this.text.databaseUpdatesText2(blockType, rounds.join(', '))];
-            _this.logger.log('Rounds', _this.config.name, updates);
+            _this.handleFinal(blocks, () => {
+              const updates = [(error) ?
+                _this.text.databaseCommandsText2(JSON.stringify(error)) :
+                _this.text.databaseUpdatesText2(blockType, blocks.length)];
+              _this.logger.log('Checks', _this.config.name, updates);
+            });
           });
 
         // No Blocks Exist to Validate
         } else {
-          const updates = [_this.text.databaseUpdatesText3(blockType)];
-          _this.logger.log('Rounds', _this.config.name, updates);
+          _this.handleReset(blockType, () => {
+            const updates = [_this.text.databaseUpdatesText3(blockType)];
+            _this.logger.log('Checks', _this.config.name, updates);
+          });
         }
       });
       break;
@@ -326,12 +347,12 @@ const Rounds = function (logger, client, config, configMain) {
     }
   };
 
-  // Handle Rounds Updates
-  this.handleRounds = function(blockType) {
+  // Handle Checks Updates
+  this.handleChecks = function(blockType) {
 
     // Handle Initial Logging
     const starting = [_this.text.databaseStartingText2(blockType)];
-    _this.logger.log('Rounds', _this.config.name, starting);
+    _this.logger.log('Checks', _this.config.name, starting);
 
     // Build Combined Transaction
     const transaction = [
@@ -341,30 +362,32 @@ const Rounds = function (logger, client, config, configMain) {
 
     // Establish Separate Behavior
     _this.executor(transaction, (lookups) => {
-      _this.handleChecks(lookups, blockType);
+      _this.handleRounds(lookups, blockType);
     });
   };
 
-  // Start Rounds Interval Management
+  // Start Checks Interval Management
   /* istanbul ignore next */
   this.handleInterval = function() {
-    const random = Math.floor(Math.random() * (180 - 60) + 60);
+    const minInterval = _this.config.settings.checksInterval * 0.75;
+    const maxInterval = _this.config.settings.checksInterval * 1.25;
+    const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval();
-      _this.handleRounds('primary');
+      _this.handleChecks('primary');
       if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
-        _this.handleRounds('auxiliary');
+        _this.handleChecks('auxiliary');
       }
-    }, random * 1000);
+    }, random);
   };
 
-  // Start Rounds Capabilities
+  // Start Checks Capabilities
   /* istanbul ignore next */
-  this.setupRounds = function(stratum, callback) {
+  this.setupChecks = function(stratum, callback) {
     _this.stratum = stratum;
     _this.handleInterval();
     callback();
   };
 };
 
-module.exports = Rounds;
+module.exports = Checks;

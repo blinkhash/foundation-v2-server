@@ -10,18 +10,19 @@ const PoolMiners = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Select Rows Using Balance
-  this.selectPoolMinersBalance = function(pool, type) {
+  // Select Rows Using Miner
+  this.selectPoolMinersMiner = function(pool, miner, solo, type) {
     return `
       SELECT * FROM "${ pool }".pool_miners
-      WHERE balance > 0 AND type = '${ type }';`;
+      WHERE miner = '${ miner }' AND solo = ${ solo }
+      AND type = '${ type }';`;
   };
 
-  // Select Rows Using Miner
-  this.selectPoolMinersMiner = function(pool, miner, type) {
+  // Select Rows Using Balance
+  this.selectPoolMinersBalance = function(pool, balance, type) {
     return `
       SELECT * FROM "${ pool }".pool_miners
-      WHERE miner = '${ miner }' AND type = '${ type }';`;
+      WHERE balance >= ${ balance } AND type = '${ type }';`;
   };
 
   // Select Rows Using Type
@@ -154,7 +155,7 @@ const PoolMiners = function (logger, configMain) {
   this.insertPoolMinersReset = function(pool, type) {
     return `
       UPDATE "${ pool }".pool_miners
-      SET generate = 0, immature = 0
+      SET immature = 0, generate = 0
       WHERE type = '${ type }';`;
   };
 

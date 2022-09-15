@@ -59,6 +59,7 @@ const Schema = function (logger, executor, configMain) {
         CONSTRAINT historical_blocks_unique UNIQUE (round, type));
       CREATE INDEX historical_blocks_miner ON "${ pool }".historical_blocks(miner, type);
       CREATE INDEX historical_blocks_worker ON "${ pool }".historical_blocks(worker, type);
+      CREATE INDEX historical_blocks_category ON "${ pool }".historical_blocks(category, type);
       CREATE INDEX historical_blocks_identifier ON "${ pool }".historical_blocks(identifier, type);
       CREATE INDEX historical_blocks_type ON "${ pool }".historical_blocks(type);`;
     _this.executor([command], () => callback());
@@ -170,12 +171,10 @@ const Schema = function (logger, executor, configMain) {
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         amount FLOAT NOT NULL DEFAULT 0,
-        round VARCHAR NOT NULL DEFAULT 'unknown',
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary');
       CREATE INDEX historical_payments_miner ON "${ pool }".historical_payments(miner, type);
       CREATE INDEX historical_payments_worker ON "${ pool }".historical_payments(worker, type);
-      CREATE INDEX historical_payments_round ON "${ pool }".historical_payments(round, type);
       CREATE INDEX historical_payments_transaction ON "${ pool }".historical_payments(transaction, type);
       CREATE INDEX historical_payments_type ON "${ pool }".historical_payments(type);`;
     _this.executor([command], () => callback());
@@ -235,11 +234,8 @@ const Schema = function (logger, executor, configMain) {
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         amount FLOAT NOT NULL DEFAULT 0,
-        round VARCHAR NOT NULL DEFAULT 'unknown',
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT historical_transactions_unique UNIQUE (round, type));
-      CREATE INDEX historical_transactions_round ON "${ pool }".historical_transactions(round, type);
+        type VARCHAR NOT NULL DEFAULT 'primary');
       CREATE INDEX historical_transactions_transaction ON "${ pool }".historical_transactions(transaction, type);
       CREATE INDEX historical_transactions_type ON "${ pool }".historical_transactions(type);`;
     _this.executor([command], () => callback());
@@ -308,6 +304,7 @@ const Schema = function (logger, executor, configMain) {
         CONSTRAINT pool_blocks_unique UNIQUE (round, type));
       CREATE INDEX pool_blocks_miner ON "${ pool }".pool_blocks(miner, type);
       CREATE INDEX pool_blocks_worker ON "${ pool }".pool_blocks(worker, type);
+      CREATE INDEX pool_blocks_category ON "${ pool }".pool_blocks(category, type);
       CREATE INDEX pool_blocks_identifier ON "${ pool }".pool_blocks(identifier, type);
       CREATE INDEX pool_blocks_type ON "${ pool }".pool_blocks(type);`;
     _this.executor([command], () => callback());
@@ -431,6 +428,29 @@ const Schema = function (logger, executor, configMain) {
     _this.executor([command], () => callback());
   };
 
+  // Check if Pool Payments Table Exists in Database
+  this.selectPoolPayments = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'pool_payments');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Pool Payments Table to Database
+  this.createPoolPayments = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".pool_payments(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        round VARCHAR NOT NULL DEFAULT 'unknown',
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT pool_payments_unique UNIQUE (round, type));
+      CREATE INDEX pool_payments_type ON "${ pool }".pool_payments(type);`;
+    _this.executor([command], () => callback());
+  };
+
   // Check if Pool Rounds Table Exists in Database
   this.selectPoolRounds = function(pool, callback) {
     const command = `
@@ -551,6 +571,7 @@ const Schema = function (logger, executor, configMain) {
         .then(() => _this.handlePromises(pool, _this.selectPoolMetadata, _this.createPoolMetadata))
         .then(() => _this.handlePromises(pool, _this.selectPoolMiners, _this.createPoolMiners))
         .then(() => _this.handlePromises(pool, _this.selectPoolNetwork, _this.createPoolNetwork))
+        .then(() => _this.handlePromises(pool, _this.selectPoolPayments, _this.createPoolPayments))
         .then(() => _this.handlePromises(pool, _this.selectPoolRounds, _this.createPoolRounds))
         .then(() => _this.handlePromises(pool, _this.selectPoolTransactions, _this.createPoolTransactions))
         .then(() => _this.handlePromises(pool, _this.selectPoolWorkers, _this.createPoolWorkers))

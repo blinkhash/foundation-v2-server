@@ -10,13 +10,6 @@ const HistoricalTransactions = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Select Rows Using Round
-  this.selectHistoricalTransactionsRound = function(pool, round, type) {
-    return `
-      SELECT * FROM "${ pool }".historical_transactions
-      WHERE round = '${ round }' AND type = '${ type }';`;
-  };
-
   // Select Rows Using Transaction
   this.selectHistoricalTransactionsTransaction = function(pool, transaction, type) {
     return `
@@ -38,7 +31,6 @@ const HistoricalTransactions = function (logger, configMain) {
       values += `(
         ${ transaction.timestamp },
         ${ transaction.amount },
-        '${ transaction.round }',
         '${ transaction.transaction }',
         '${ transaction.type }')`;
       if (idx < updates.length - 1) values += ', ';
@@ -50,7 +42,7 @@ const HistoricalTransactions = function (logger, configMain) {
   this.insertHistoricalTransactionsCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_transactions (
-        timestamp, amount, round,
+        timestamp, amount,
         transaction, type)
       VALUES ${ _this.buildHistoricalTransactionsCurrent(updates) }
       ON CONFLICT DO NOTHING;`;

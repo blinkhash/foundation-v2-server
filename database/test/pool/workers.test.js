@@ -21,28 +21,30 @@ describe('Test database workers functionality', () => {
 
   test('Test workers command handling [1]', () => {
     const workers = new PoolWorkers(logger, configMainCopy);
-    const response = workers.selectPoolWorkersMiner('Pool-Main', 'miner1', 'primary');
+    const response = workers.selectPoolWorkersMiner('Pool-Main', 'miner1', false, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_workers
-      WHERE miner = 'miner1' AND type = 'primary';`;
+      WHERE miner = 'miner1' AND solo = false
+      AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [2]', () => {
     const workers = new PoolWorkers(logger, configMainCopy);
-    const response = workers.selectPoolWorkersType('Pool-Main', false, 'primary');
+    const response = workers.selectPoolWorkersWorker('Pool-Main', 'worker1', false, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_workers
-      WHERE solo = false AND type = 'primary';`;
+      WHERE worker = 'worker1' AND solo = false
+      AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [3]', () => {
     const workers = new PoolWorkers(logger, configMainCopy);
-    const response = workers.selectPoolWorkersWorker('Pool-Main', 'worker1', 'primary');
+    const response = workers.selectPoolWorkersType('Pool-Main', false, 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_workers
-      WHERE worker = 'worker1' AND type = 'primary';`;
+      WHERE solo = false AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 

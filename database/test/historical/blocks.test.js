@@ -39,14 +39,23 @@ describe('Test database blocks functionality', () => {
 
   test('Test block command handling [3]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
-    const response = blocks.selectHistoricalBlocksIdentifier('Pool-Main', 'master', 'primary');
+    const response = blocks.selectHistoricalBlocksCategory('Pool-Main', 'generate', 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".historical_blocks
-      WHERE identifier = 'master AND type = 'primary';`;
+      WHERE category = 'generate' AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test block command handling [4]', () => {
+    const blocks = new HistoricalBlocks(logger, configMainCopy);
+    const response = blocks.selectHistoricalBlocksIdentifier('Pool-Main', 'master', 'primary');
+    const expected = `
+      SELECT * FROM "Pool-Main".historical_blocks
+      WHERE identifier = 'master' AND type = 'primary';`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test block command handling [5]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const response = blocks.selectHistoricalBlocksType('Pool-Main', 'primary');
     const expected = `
@@ -55,7 +64,7 @@ describe('Test database blocks functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test block command handling [5]', () => {
+  test('Test block command handling [6]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -103,7 +112,7 @@ describe('Test database blocks functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test block command handling [6]', () => {
+  test('Test block command handling [7]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,

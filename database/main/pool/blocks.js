@@ -24,11 +24,18 @@ const PoolBlocks = function (logger, configMain) {
       WHERE worker = '${ worker }' AND type = '${ type }';`;
   };
 
+  // Select Rows Using Category
+  this.selectPoolBlocksCategory = function(pool, category, type) {
+    return `
+      SELECT * FROM "${ pool }".pool_blocks
+      WHERE category = '${ category }' AND type = '${ type }';`;
+  };
+
   // Select Rows Using Identifier
   this.selectPoolBlocksIdentifier = function(pool, identifier, type) {
     return `
       SELECT * FROM "${ pool }".pool_blocks
-      WHERE identifier = '${ identifier } AND type = '${ type }';`;
+      WHERE identifier = '${ identifier }' AND type = '${ type }';`;
   };
 
   // Select Rows Using Miner

@@ -39,10 +39,19 @@ describe('Test database blocks functionality', () => {
 
   test('Test block command handling [3]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
+    const response = blocks.selectPoolBlocksCategory('Pool-Main', 'immature', 'primary');
+    const expected = `
+      SELECT * FROM "Pool-Main".pool_blocks
+      WHERE category = 'immature' AND type = 'primary';`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test block command handling [3]', () => {
+    const blocks = new PoolBlocks(logger, configMainCopy);
     const response = blocks.selectPoolBlocksIdentifier('Pool-Main', 'master', 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".pool_blocks
-      WHERE identifier = 'master AND type = 'primary';`;
+      WHERE identifier = 'master' AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
