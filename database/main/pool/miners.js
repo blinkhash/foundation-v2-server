@@ -11,25 +11,24 @@ const PoolMiners = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Select Rows Using Miner
-  this.selectPoolMinersMiner = function(pool, miner, solo, type) {
+  this.selectPoolMinersMiner = function(pool, miner, type) {
     return `
       SELECT * FROM "${ pool }".pool_miners
-      WHERE miner = '${ miner }' AND solo = ${ solo }
-      AND type = '${ type }';`;
+      WHERE miner = '${ miner }' AND type = '${ type }';`;
   };
 
   // Select Rows Using Balance
   this.selectPoolMinersBalance = function(pool, balance, type) {
     return `
       SELECT * FROM "${ pool }".pool_miners
-      WHERE balance >= ${ balance } AND type = '${ type }';`;
+      WHERE balance > ${ balance } AND type = '${ type }';`;
   };
 
   // Select Rows Using Type
-  this.selectPoolMinersType = function(pool, solo, type) {
+  this.selectPoolMinersType = function(pool, type) {
     return `
       SELECT * FROM "${ pool }".pool_miners
-      WHERE solo = ${ solo } AND type = '${ type }';`;
+      WHERE type = '${ type }';`;
   };
 
   // Build Miners Values String
@@ -40,7 +39,6 @@ const PoolMiners = function (logger, configMain) {
         ${ miner.timestamp },
         '${ miner.miner }',
         ${ miner.hashrate },
-        ${ miner.solo },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -52,7 +50,7 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         timestamp, miner, hashrate,
-        solo, type)
+        type)
       VALUES ${ _this.buildPoolMinersHashrate(updates) }
       ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
@@ -69,7 +67,6 @@ const PoolMiners = function (logger, configMain) {
         '${ miner.miner }',
         ${ miner.efficiency },
         ${ miner.effort },
-        ${ miner.solo },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -81,14 +78,13 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         timestamp, miner, efficiency,
-        effort, solo, type)
+        effort, type)
       VALUES ${ _this.buildPoolMinersRounds(updates) }
       ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
-        effort = EXCLUDED.effort,
-        solo = EXCLUDED.solo;`;
+        effort = EXCLUDED.effort;`;
   };
 
   // Build Miners Values String
@@ -100,7 +96,6 @@ const PoolMiners = function (logger, configMain) {
         '${ miner.miner }',
         ${ miner.balance },
         ${ miner.paid },
-        ${ miner.solo },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -112,13 +107,13 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         timestamp, miner, balance,
-        paid, solo, type)
+        paid, type)
       VALUES ${ _this.buildPoolMinersPayments(updates) }
       ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         balance = EXCLUDED.balance,
-        paid = "${ pool }".pool_rounds.paid + EXCLUDED.paid;`;
+        paid = "${ pool }".pool_miners.paid + EXCLUDED.paid;`;
   };
 
   // Build Miners Values String
@@ -130,7 +125,6 @@ const PoolMiners = function (logger, configMain) {
         '${ miner.miner }',
         ${ miner.generate },
         ${ miner.immature },
-        ${ miner.solo },
         '${ miner.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -142,7 +136,7 @@ const PoolMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".pool_miners (
         timestamp, miner, generate,
-        immature, solo, type)
+        immature, type)
       VALUES ${ _this.buildPoolMinersUpdates(updates) }
       ON CONFLICT ON CONSTRAINT pool_miners_unique
       DO UPDATE SET

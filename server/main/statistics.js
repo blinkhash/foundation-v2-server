@@ -140,7 +140,6 @@ const Statistics = function (logger, client, config, configMain, template) {
         timestamp: current,
         miner: miner.miner,
         hashrate: (multiplier * minerHash.current_work * 1000) / section,
-        solo: miner.solo,
         type: blockType,
       };
     });
@@ -339,7 +338,7 @@ const Statistics = function (logger, client, config, configMain, template) {
       _this.current.hashrate.sumPoolHashrateType(_this.pool, hashrateWindow, false, blockType),
       _this.current.metadata.selectPoolMetadataType(_this.pool, blockType),
       _this.current.miners.deletePoolMinersInactive(_this.pool, inactiveWindow),
-      _this.current.miners.selectPoolMinersType(_this.pool, minerType, blockType),
+      _this.current.miners.selectPoolMinersType(_this.pool, blockType),
       _this.current.network.selectPoolNetworkType(_this.pool, blockType),
       _this.current.transactions.deletePoolTransactionsInactive(_this.pool, updateWindow),
       _this.current.workers.deletePoolWorkersInactive(_this.pool, inactiveWindow),

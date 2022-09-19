@@ -169,12 +169,10 @@ const Schema = function (logger, executor, configMain) {
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
-        worker VARCHAR NOT NULL DEFAULT 'unknown',
         amount FLOAT NOT NULL DEFAULT 0,
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary');
       CREATE INDEX historical_payments_miner ON "${ pool }".historical_payments(miner, type);
-      CREATE INDEX historical_payments_worker ON "${ pool }".historical_payments(worker, type);
       CREATE INDEX historical_payments_transaction ON "${ pool }".historical_payments(transaction, type);
       CREATE INDEX historical_payments_type ON "${ pool }".historical_payments(type);`;
     _this.executor([command], () => callback());
@@ -393,12 +391,10 @@ const Schema = function (logger, executor, configMain) {
         hashrate FLOAT NOT NULL DEFAULT 0,
         immature FLOAT NOT NULL DEFAULT 0,
         paid FLOAT NOT NULL DEFAULT 0,
-        solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_miners_unique UNIQUE (miner, solo, type));
+        CONSTRAINT pool_miners_unique UNIQUE (miner, type));
       CREATE INDEX pool_miners_balance ON "${ pool }".pool_miners(balance, type);
       CREATE INDEX pool_miners_miner ON "${ pool }".pool_miners(miner, type);
-      CREATE INDEX pool_miners_solo ON "${ pool }".pool_miners(solo, type);
       CREATE INDEX pool_miners_type ON "${ pool }".pool_miners(type);`;
     _this.executor([command], () => callback());
   };

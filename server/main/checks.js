@@ -44,18 +44,16 @@ const Checks = function (logger, client, config, configMain) {
   };
 
   // Handle Miners Updates
-  this.handleMiners = function(miners) {
+  this.handleMiners = function(miners, blockType) {
 
     // Return Miners Updates
-    return Object.keys(miners).map((identifier) => {
-      const details = identifier.split('_');
+    return Object.keys(miners).map((address) => {
       return {
         timestamp: Date.now(),
-        miner: details[0],
-        generate: miners[identifier].generate,
-        immature: miners[identifier].immature,
-        solo: details[1],
-        type: details[2],
+        miner: address,
+        generate: miners[address].generate,
+        immature: miners[address].immature,
+        type: blockType,
       };
     });
   };
@@ -71,7 +69,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Collect All Round Data
     rounds.forEach((round) => {
-      const identifier = `${ round.miner }_${ round.solo }_${ round.type }`;
+      const identifier = `${ round.miner }_${ round.solo }`;
       if (identifier in combined) {
         const current = combined[identifier];
         current.invalid += round.invalid;
@@ -89,9 +87,9 @@ const Checks = function (logger, client, config, configMain) {
         timestamp: Date.now(),
         miner: current.miner,
         worker: current.worker,
-        round: current.round,
         identifier: current.identifier,
         invalid: current.invalid,
+        round: 'current',
         solo: current.solo,
         stale: current.stale,
         times: current.times,
@@ -230,6 +228,8 @@ const Checks = function (logger, client, config, configMain) {
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
       const rounds = results.slice(1, -1).map((round) => round.rows);
+
+      // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
@@ -255,6 +255,8 @@ const Checks = function (logger, client, config, configMain) {
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
       const rounds = results.slice(1, -1).map((round) => round.rows);
+
+      // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
         else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {

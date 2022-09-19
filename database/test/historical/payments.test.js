@@ -16,7 +16,7 @@ describe('Test database payments functionality', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
     expect(typeof payments.configMain).toBe('object');
     expect(typeof payments.selectHistoricalPaymentsMiner).toBe('function');
-    expect(typeof payments.selectHistoricalPaymentsWorker).toBe('function');
+    expect(typeof payments.selectHistoricalPaymentsTransaction).toBe('function');
   });
 
   test('Test payment command handling [1]', () => {
@@ -30,15 +30,6 @@ describe('Test database payments functionality', () => {
 
   test('Test payment command handling [2]', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
-    const response = payments.selectHistoricalPaymentsWorker('Pool-Main', 'worker1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_payments
-      WHERE worker = 'worker1' AND type = 'primary';`;
-    expect(response).toBe(expected);
-  });
-
-  test('Test payment command handling [3]', () => {
-    const payments = new HistoricalPayments(logger, configMainCopy);
     const response = payments.selectHistoricalPaymentsTransaction('Pool-Main', 'transaction1', 'primary');
     const expected = `
       SELECT * FROM "Pool-Main".historical_payments
@@ -46,7 +37,7 @@ describe('Test database payments functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test payment command handling [4]', () => {
+  test('Test payment command handling [3]', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
     const response = payments.selectHistoricalPaymentsType('Pool-Main', 'primary');
     const expected = `
@@ -55,12 +46,11 @@ describe('Test database payments functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test payment command handling [5]', () => {
+  test('Test payment command handling [4]', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       miner: 'miner1',
-      worker: 'worker1',
       amount: 1,
       transaction: 'transaction1',
       type: 'primary'
@@ -68,12 +58,11 @@ describe('Test database payments functionality', () => {
     const response = payments.insertHistoricalPaymentsCurrent('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_payments (
-        timestamp, miner, worker,
-        amount, transaction, type)
+        timestamp, miner, amount,
+        transaction, type)
       VALUES (
         1,
         'miner1',
-        'worker1',
         1,
         'transaction1',
         'primary')
@@ -81,12 +70,11 @@ describe('Test database payments functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test payment command handling [6]', () => {
+  test('Test payment command handling [5]', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       miner: 'miner1',
-      worker: 'worker1',
       amount: 1,
       transaction: 'transaction1',
       type: 'primary'
@@ -94,18 +82,16 @@ describe('Test database payments functionality', () => {
     const response = payments.insertHistoricalPaymentsCurrent('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_payments (
-        timestamp, miner, worker,
-        amount, transaction, type)
+        timestamp, miner, amount,
+        transaction, type)
       VALUES (
         1,
         'miner1',
-        'worker1',
         1,
         'transaction1',
         'primary'), (
         1,
         'miner1',
-        'worker1',
         1,
         'transaction1',
         'primary')

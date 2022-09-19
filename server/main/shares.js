@@ -116,7 +116,7 @@ const Shares = function (logger, client, config, configMain) {
   };
 
   // Handle Miner Updates
-  this.handleMiners = function(worker, difficulty, roundData, shareData, shareType, minerType, blockType) {
+  this.handleMiners = function(worker, difficulty, roundData, shareData, shareType, blockType) {
 
     // Calculate Efficiency/Effort Metadata
     const efficiency = _this.handleEfficiency(roundData, shareType);
@@ -128,7 +128,6 @@ const Shares = function (logger, client, config, configMain) {
       timestamp: Date.now(),
       efficiency: efficiency,
       effort: effort,
-      solo: minerType,
       type: blockType
     };
   };
@@ -152,9 +151,9 @@ const Shares = function (logger, client, config, configMain) {
       timestamp: Date.now(),
       miner: (worker || '').split('.')[0],
       worker: worker,
-      round: 'current',
       identifier: identifier,
       invalid: invalid,
+      round: 'current',
       solo: minerType,
       stale: stale,
       times: times,
@@ -284,9 +283,9 @@ const Shares = function (logger, client, config, configMain) {
 
     // Handle Miner Updates
     const minerUpdates = _this.handleMiners(
-      shareData.addrPrimary, shareData.blockDiffPrimary, round, shareData, shareType, minerType, 'primary');
+      shareData.addrPrimary, shareData.blockDiffPrimary, round, shareData, shareType, 'primary');
     const auxMinerUpdates = _this.handleMiners(
-      shareData.addrAuxiliary, shareData.blockDiffAuxiliary, auxRound, shareData, shareType, minerType, 'auxiliary');
+      shareData.addrAuxiliary, shareData.blockDiffAuxiliary, auxRound, shareData, shareType, 'auxiliary');
 
     // Handle Round Updates
     const roundUpdates = _this.handleRounds(

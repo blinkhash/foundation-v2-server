@@ -17,13 +17,6 @@ const HistoricalPayments = function (logger, configMain) {
       WHERE miner = '${ miner }' AND type = '${ type }';`;
   };
 
-  // Select Rows Using Worker
-  this.selectHistoricalPaymentsWorker = function(pool, worker, type) {
-    return `
-      SELECT * FROM "${ pool }".historical_payments
-      WHERE worker = '${ worker }' AND type = '${ type }';`;
-  };
-
   // Select Rows Using Transaction
   this.selectHistoricalPaymentsTransaction = function(pool, transaction, type) {
     return `
@@ -45,7 +38,6 @@ const HistoricalPayments = function (logger, configMain) {
       values += `(
         ${ payment.timestamp },
         '${ payment.miner }',
-        '${ payment.worker }',
         ${ payment.amount },
         '${ payment.transaction }',
         '${ payment.type }')`;
@@ -58,8 +50,8 @@ const HistoricalPayments = function (logger, configMain) {
   this.insertHistoricalPaymentsCurrent = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_payments (
-        timestamp, miner, worker,
-        amount, transaction, type)
+        timestamp, miner, amount,
+        transaction, type)
       VALUES ${ _this.buildHistoricalPaymentsCurrent(updates) }
       ON CONFLICT DO NOTHING;`;
   };

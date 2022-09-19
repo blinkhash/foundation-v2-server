@@ -43,6 +43,21 @@ const Payments = function (logger, client, config, configMain) {
     });
   };
 
+  // Handle Historical Payments Updates
+  this.handleHistoricalPayments = function(amounts, record, blockType) {
+
+    // Return Payments Updates
+    return Object.keys(amounts).map((miner) => {
+      return {
+        timestamp: Date.now(),
+        miner: miner,
+        amount: amounts[miner],
+        transaction: record,
+        type: blockType,
+      };
+    });
+  };
+
   // Handle Historical Rounds Updates
   this.handleHistoricalRounds = function(rounds) {
 
@@ -70,18 +85,64 @@ const Payments = function (logger, client, config, configMain) {
     });
   };
 
+  // Handle Historical Transactions Updates
+  this.handleHistoricalTransactions = function(amounts, record, blockType) {
+
+    // Calculate Total Amount
+    let total = 0;
+    Object.keys(amounts).forEach((address) => {
+      total += amounts[address];
+    });
+
+    // Return Transactions Updates
+    return {
+      timestamp: Date.now(),
+      amount: total,
+      transaction: record,
+      type: blockType,
+    };
+  };
+
   // Combine Balances and Payments
   this.handleCombined = function(balances, payments) {
 
     // Iterate Through Payments
     const combined = Object.assign(balances, {});
-    Object.keys(payments).forEach((identifier) => {
-      if (identifier in combined) combined[identifier] += payments[identifier].generate;
-      else combined[identifier] = payments[identifier];
+    Object.keys(payments).forEach((address) => {
+      if (address in combined) combined[address] += payments[address].generate;
+      else combined[address] = payments[address].generate;
     });
 
     // Return Combined Payments
     return combined;
+  };
+
+  // Handle Miners Updates
+  this.handleMiners = function(amounts, balances, blockType) {
+
+    // Iterate Through Amounts
+    const combined = {};
+    Object.keys(amounts).forEach((address) => {
+      if (address in combined) combined[address].paid += amounts[address];
+      else combined[address] = { balance: 0, paid: amounts[address] };
+    });
+
+    // Iterate Through Balances
+    Object.keys(balances).forEach((address) => {
+      if (address in combined) combined[address].balance += balances[address];
+      else combined[address] = { balance: balances[address], paid: 0 };
+    });
+
+    // Return Miners Updates
+    return Object.keys(combined).map((miner) => {
+      return {
+        timestamp: Date.now(),
+        miner: miner,
+        balance: combined[miner].balance,
+        paid: combined[miner].paid,
+        type: blockType,
+      };
+    });
   };
 
   // Handle Round Failure Updates
@@ -130,7 +191,7 @@ const Payments = function (logger, client, config, configMain) {
   };
 
   // Handle Round Success Updates
-  this.handleUpdates = function(blocks, rounds, payments, blockType, callback) {
+  this.handleUpdates = function(blocks, rounds, amounts, balances, record, blockType, callback) {
 
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
@@ -142,6 +203,13 @@ const Payments = function (logger, client, config, configMain) {
         _this.pool, generateBlocksUpdates));
     }
 
+    // Handle Historical Payments Updates
+    const paymentsUpdates = _this.handleHistoricalPayments(amounts, record, blockType);
+    if (paymentsUpdates.length >= 1) {
+      transaction.push(_this.historical.payments.insertHistoricalPaymentsCurrent(
+        _this.pool, paymentsUpdates));
+    }
+
     // Handle Historical Generate Round Updates
     const generateRoundsUpdates = _this.handleHistoricalRounds(rounds);
     if (generateRoundsUpdates.length >= 1) {
@@ -149,11 +217,25 @@ const Payments = function (logger, client, config, configMain) {
         _this.pool, generateRoundsUpdates));
     }
 
+    // Handle Historical Transactions Updates
+    const transactionsUpdates = _this.handleHistoricalTransactions(amounts, record, blockType);
+    if (record !== null) {
+      transaction.push(_this.historical.transactions.insertHistoricalTransactionsCurrent(
+        _this.pool, [transactionsUpdates]));
+    }
+
     // Handle Generate Block Delete Updates
     const generateBlocksDelete = blocks.map((block) => `'${ block.round }'`);
     if (generateBlocksDelete.length >= 1) {
       transaction.push(_this.current.blocks.deletePoolBlocksCurrent(
         _this.pool, generateBlocksDelete));
+    }
+
+    // Handle Miners Updates
+    const minersUpdates = _this.handleMiners(amounts, balances, blockType);
+    if (minersUpdates.length >= 1) {
+      transaction.push(_this.current.miners.insertPoolMinersPayments(
+        _this.pool, minersUpdates));
     }
 
     // Handle Generate Round Delete Updates
@@ -184,11 +266,21 @@ const Payments = function (logger, client, config, configMain) {
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
       const rounds = results.slice(1, -1).map((round) => round.rows);
+
+      // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
-          // const payments = _this.handleCombined(balances, results);
-          _this.handleUpdates(updates, rounds, results, 'primary', () => callback(null));
+          const payments = _this.handleCombined(balances, results);
+
+          // Validate and Send Out Primary Payments
+          _this.stratum.stratum.handlePrimaryBalances(payments, (error) => {
+            if (error) _this.handleFailures(updates, () => callback(error));
+            else _this.stratum.stratum.handlePrimaryPayments(payments, (error, amounts, balances, transaction) => {
+              if (error) _this.handleFailures(updates, () => callback(error));
+              else _this.handleUpdates(updates, rounds, amounts, balances, transaction, 'primary', () => callback(null));
+            });
+          });
         });
       });
     });
@@ -210,11 +302,21 @@ const Payments = function (logger, client, config, configMain) {
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
       const rounds = results.slice(1, -1).map((round) => round.rows);
+
+      // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
         else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
-          // const payments = _this.handleCombined(balances, results);
-          _this.handleUpdates(updates, rounds, results, 'primary', () => callback(null));
+          const payments = _this.handleCombined(balances, results);
+
+          // Validate and Send Out Auxiliary Payments
+          _this.stratum.stratum.handleAuxiliaryBalances(payments, (error) => {
+            if (error) _this.handleFailures(updates, () => callback(error));
+            else _this.stratum.stratum.handleAuxiliaryPayments(payments, (error, amounts, balances, transaction) => {
+              if (error) _this.handleFailures(updates, () => callback(error));
+              else _this.handleUpdates(updates, rounds, amounts, balances, transaction, 'auxiliary', () => callback(null));
+            });
+          });
         });
       });
     });
@@ -238,9 +340,8 @@ const Payments = function (logger, client, config, configMain) {
     const balances = {};
     if (lookups[2].rows[0]) {
       lookups[2].rows.forEach((miner) => {
-        const identifier = `${ miner.miner }_${ miner.solo }_${ miner.type }`;
-        if (identifier in balances) balances[identifier] += miner.balance;
-        else balances[identifier] = miner.balance;
+        if (miner.miner in balances) balances[miner.miner] += miner.balance;
+        else balances[miner.miner] = miner.balance;
       });
     }
 
@@ -317,7 +418,6 @@ const Payments = function (logger, client, config, configMain) {
   this.handlePayments = function(blockType) {
 
     // Handle Initial Logging
-    const balance = _this.config.primary.payments.minPayment;
     const starting = [_this.text.databaseStartingText3(blockType)];
     _this.logger.log('Payments', _this.config.name, starting);
 
@@ -325,7 +425,7 @@ const Payments = function (logger, client, config, configMain) {
     const transaction = [
       'BEGIN;',
       _this.current.blocks.selectPoolBlocksCategory(_this.pool, 'generate', blockType),
-      _this.current.miners.selectPoolMinersBalance(_this.pool, balance, blockType),
+      _this.current.miners.selectPoolMinersBalance(_this.pool, 0, blockType),
       'COMMIT;'];
 
     // Establish Separate Behavior

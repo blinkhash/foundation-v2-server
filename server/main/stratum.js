@@ -82,7 +82,8 @@ const Stratum = function (logger, client, config, configMain, template) {
 
     // Build Daemon/Stratum Functionality
     _this.handleStratum();
-    _this.stratum.setupDaemons(() => {
+    _this.stratum.setupPrimaryDaemons(() => {
+    _this.stratum.setupAuxiliaryDaemons(() => {
     _this.stratum.setupPorts();
     _this.stratum.setupSettings(() => {
     _this.stratum.setupRecipients();
@@ -97,7 +98,7 @@ const Stratum = function (logger, client, config, configMain, template) {
     })
 
     // Too Much Indentation
-    })})})})});
+    })})})})})});
   }
 };
 

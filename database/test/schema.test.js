@@ -214,12 +214,10 @@ describe('Test schema functionality', () => {
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
-        worker VARCHAR NOT NULL DEFAULT 'unknown',
         amount FLOAT NOT NULL DEFAULT 0,
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary');
       CREATE INDEX historical_payments_miner ON "Pool-Main".historical_payments(miner, type);
-      CREATE INDEX historical_payments_worker ON "Pool-Main".historical_payments(worker, type);
       CREATE INDEX historical_payments_transaction ON "Pool-Main".historical_payments(transaction, type);
       CREATE INDEX historical_payments_type ON "Pool-Main".historical_payments(type);`;
     const executor = mockExecutor(null, expected);
@@ -473,12 +471,10 @@ describe('Test schema functionality', () => {
         hashrate FLOAT NOT NULL DEFAULT 0,
         immature FLOAT NOT NULL DEFAULT 0,
         paid FLOAT NOT NULL DEFAULT 0,
-        solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_miners_unique UNIQUE (miner, solo, type));
+        CONSTRAINT pool_miners_unique UNIQUE (miner, type));
       CREATE INDEX pool_miners_balance ON "Pool-Main".pool_miners(balance, type);
       CREATE INDEX pool_miners_miner ON "Pool-Main".pool_miners(miner, type);
-      CREATE INDEX pool_miners_solo ON "Pool-Main".pool_miners(solo, type);
       CREATE INDEX pool_miners_type ON "Pool-Main".pool_miners(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
