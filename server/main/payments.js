@@ -437,10 +437,11 @@ const Payments = function (logger, client, config, configMain) {
   // Start Payments Interval Management
   /* istanbul ignore next */
   this.handleInterval = function() {
-    const minInterval = _this.config.settings.paymentsInterval * 0.75;
-    const maxInterval = _this.config.settings.paymentsInterval * 1.25;
+    const minInterval = _this.config.settings.interval.payments * 0.75;
+    const maxInterval = _this.config.settings.interval.payments * 1.25;
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
+      _this.handleInterval();
       _this.handlePayments('primary');
       if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
         _this.handlePayments('auxiliary');

@@ -12,13 +12,35 @@ const config = {};
 config.enabled = false;
 config.name = 'Pool-Bitcoin';
 config.template = 'bitcoin';
+config.settings = {};
 
 // Banning Configuration
-config.banning = {};
-config.banning.banLength = 600000; // ms;
-config.banning.checkThreshold = 500;
-config.banning.invalidPercent = 50;
-config.banning.purgeInterval = 300000; // ms;
+config.settings.banning = {};
+config.settings.banning.banLength = 600000; // ms;
+config.settings.banning.checkThreshold = 500;
+config.settings.banning.invalidPercent = 50;
+config.settings.banning.purgeInterval = 300000; // ms;
+
+// Timeout Configuration
+config.settings.timeout = {};
+config.settings.timeout.connection = 600000; // ms
+config.settings.timeout.rebroadcast = 60000; // ms
+
+// Interval Configuration
+config.settings.interval = {};
+config.settings.interval.blocks = 1000; // ms
+config.settings.interval.checks = 90000; // ms
+config.settings.interval.payments = 7200000; // ms
+config.settings.interval.statistics = 90000; // ms
+
+// Window Configuration
+config.settings.window = {};
+config.settings.window.hashrate = 300000; // ms;
+config.settings.window.inactive = 604800000; // ms;
+config.settings.window.updates = 300000; // ms;
+
+// Shared Configuration
+////////////////////////////////////////////////////////////////////////////////
 
 // Port Configuration
 config.ports = [];
@@ -36,22 +58,6 @@ ports1.difficulty.targetTime = 15;
 ports1.difficulty.retargetTime = 90;
 ports1.difficulty.variance = 0.3;
 config.ports.push(ports1);
-
-// Settings Configuration
-config.settings = {};
-config.settings.connectionTimeout = 600000; // ms;
-config.settings.jobRebroadcastTimeout = 60000; // ms;
-
-// Interval Configuration
-config.settings.blockRefreshInterval = 1000; // ms;
-config.settings.checksInterval = 90000; // ms
-config.settings.paymentsInterval = 7200000; // ms
-config.settings.statisticsInterval = 90000; // ms
-
-// Window Configuration
-config.settings.hashrateWindow = 300000; // ms;
-config.settings.inactiveWindow = 604800000; // ms;
-config.settings.updateWindow = 300000; // ms;
 
 // Primary Configuration
 ////////////////////////////////////////////////////////////////////////////////

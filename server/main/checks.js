@@ -371,8 +371,8 @@ const Checks = function (logger, client, config, configMain) {
   // Start Checks Interval Management
   /* istanbul ignore next */
   this.handleInterval = function() {
-    const minInterval = _this.config.settings.checksInterval * 0.75;
-    const maxInterval = _this.config.settings.checksInterval * 1.25;
+    const minInterval = _this.config.settings.interval.checks * 0.75;
+    const maxInterval = _this.config.settings.interval.checks * 1.25;
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval();

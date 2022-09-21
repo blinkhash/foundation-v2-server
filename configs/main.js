@@ -37,5 +37,22 @@ config.tls.ca = '';
 config.tls.key = '';
 config.tls.cert = '';
 
+// Server Configuration
+config.server = {};
+config.server.host = '127.0.0.1';
+config.server.port = 3001;
+config.server.tls = false;
+
+// Cache Configuration
+config.server.cache = {};
+config.server.cache.enabled = true;
+config.server.cache.timing = '1 minute';
+
+// Limiter Configuration
+config.server.limiter = {};
+config.server.limiter.enabled = true;
+config.server.limiter.window = 900000; // ms
+config.server.limiter.maximum = 100;
+
 // Export Configuration
 module.exports = config;

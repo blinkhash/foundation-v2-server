@@ -16,6 +16,27 @@ const Builder = function(logger, configMain) {
   this.workers = {};
   this.numWorkers = 0;
 
+  // Handle Pool Server Creation
+  /* istanbul ignore next */
+  this.setupPoolServer = function() {
+
+    // Establish Pool Server
+    const worker = cluster.fork({
+      configs: JSON.stringify(_this.configs),
+      configMain: JSON.stringify(_this.configMain),
+      type: 'server',
+    });
+
+    // Establish Worker Exit
+    worker.on('exit', () => {
+      const lines = [_this.text.builderThreadsText1(0)];
+      _this.logger.error('Builder', 'Workers', lines);
+      setTimeout(() => {
+        _this.setupPoolServer();
+      }, 2000);
+    });
+  };
+
   // Handle Pool Worker Creation
   /* istanbul ignore next */
   this.createPoolWorkers = function(forkId) {

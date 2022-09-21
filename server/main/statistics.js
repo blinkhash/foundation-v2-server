@@ -111,7 +111,7 @@ const Statistics = function (logger, client, config, configMain, template) {
     // Calculate Features of Metadata
     const algorithm = _this.config.primary.coin.algorithm || 'sha256d';
     const multiplier = Math.pow(2, 32) / _this.template.algorithms[algorithm].multiplier;
-    const section = _this.config.settings.hashrateWindow;
+    const section = _this.config.settings.window.hashrate;
 
     // Return Metadata Updates
     return {
@@ -130,7 +130,7 @@ const Statistics = function (logger, client, config, configMain, template) {
     const current = Date.now();
     const algorithm = _this.config.primary.coin.algorithm || 'sha256d';
     const multiplier = Math.pow(2, 32) / _this.template.algorithms[algorithm].multiplier;
-    const section = _this.config.settings.hashrateWindow;
+    const section = _this.config.settings.window.hashrate;
 
     // Return Miners Updates
     return miners.map((miner) => {
@@ -152,7 +152,7 @@ const Statistics = function (logger, client, config, configMain, template) {
     const current = Date.now();
     const algorithm = _this.config.primary.coin.algorithm || 'sha256d';
     const multiplier = Math.pow(2, 32) / _this.template.algorithms[algorithm].multiplier;
-    const section = _this.config.settings.hashrateWindow;
+    const section = _this.config.settings.window.hashrate;
 
     // Return Workers Updates
     return workers.map((worker) => {
@@ -323,9 +323,9 @@ const Statistics = function (logger, client, config, configMain, template) {
     _this.logger.log('Statistics', _this.config.name, starting);
 
     // Calculate Statistics Features
-    const hashrateWindow = Date.now() - _this.config.settings.hashrateWindow;
-    const inactiveWindow = Date.now() - _this.config.settings.inactiveWindow;
-    const updateWindow = Date.now() - _this.config.settings.updateWindow;
+    const hashrateWindow = Date.now() - _this.config.settings.window.hashrate;
+    const inactiveWindow = Date.now() - _this.config.settings.window.inactive;
+    const updateWindow = Date.now() - _this.config.settings.window.updates;
 
     // Build Combined Transaction
     const transaction = [
@@ -377,8 +377,8 @@ const Statistics = function (logger, client, config, configMain, template) {
   // Start Statistics Interval Management
   /* istanbul ignore next */
   this.handleInterval = function(minerType) {
-    const minInterval = _this.config.settings.statisticsInterval * 0.75;
-    const maxInterval = _this.config.settings.statisticsInterval * 1.25;
+    const minInterval = _this.config.settings.interval.payments * 0.75;
+    const maxInterval = _this.config.settings.interval.payments * 1.25;
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval(minerType);
