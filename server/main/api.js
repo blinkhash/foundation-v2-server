@@ -5,7 +5,6 @@ const Text = require('../../locales/index');
 // Main API Function
 const Api = function (logger, client, configs, configMain) {
 
-  console.log(configMain);
   const _this = this;
   this.logger = logger;
   this.client = client;

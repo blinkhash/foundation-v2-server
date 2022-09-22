@@ -331,13 +331,17 @@ const Shares = function (logger, client, config, configMain) {
     if (shareData.error && shareData.error === 'job not found') shareType = 'stale';
     else if (!shareValid || shareData.error) shareType = 'invalid';
 
+    // Build Round Parameters
+    const parameters = { worker: shareData.addrPrimary, solo: minerType, type: 'primary' };
+    const auxParameters = { worker: shareData.addrAuxiliary, solo: minerType, type: 'auxiliary' };
+
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.metadata.selectPoolMetadataType(_this.pool, 'primary'),
-      _this.current.metadata.selectPoolMetadataType(_this.pool, 'auxiliary'),
-      _this.current.rounds.selectPoolRoundsCombinedCurrent(_this.pool, shareData.addrPrimary, minerType, 'primary'),
-      _this.current.rounds.selectPoolRoundsCombinedCurrent(_this.pool, shareData.addrAuxiliary, minerType, 'auxiliary'),
+      _this.current.metadata.selectPoolMetadataCurrent(_this.pool, { type: 'primary' }),
+      _this.current.metadata.selectPoolMetadataCurrent(_this.pool, { type: 'auxiliary' }),
+      _this.current.rounds.selectPoolRoundsCurrent(_this.pool, parameters),
+      _this.current.rounds.selectPoolRoundsCurrent(_this.pool, auxParameters),
       'COMMIT;'];
 
     // Establish Separate Behavior

@@ -15,20 +15,51 @@ describe('Test database transactions functionality', () => {
   test('Test initialization of transactions commands', () => {
     const transactions = new PoolTransactions(logger, configMainCopy);
     expect(typeof transactions.configMain).toBe('object');
-    expect(typeof transactions.selectPoolTransactionsType).toBe('function');
+    expect(typeof transactions.selectPoolTransactionsCurrent).toBe('function');
     expect(typeof transactions.insertPoolTransactionsCurrent).toBe('function');
   });
 
-  test('Test transaction command handling [1]', () => {
+  test('Test query handling [1]', () => {
     const transactions = new PoolTransactions(logger, configMainCopy);
-    const response = transactions.selectPoolTransactionsType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_transactions
-      WHERE type = 'primary';`;
+    expect(transactions.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(transactions.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const transactions = new PoolTransactions(logger, configMainCopy);
+    expect(transactions.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(transactions.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(transactions.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(transactions.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(transactions.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(transactions.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
+  });
+
+  test('Test transactions command handling [1]', () => {
+    const transactions = new PoolTransactions(logger, configMainCopy);
+    const parameters = { type: 'primary' };
+    const response = transactions.selectPoolTransactionsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_transactions WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
-  test('Test transaction command handling [2]', () => {
+  test('Test transactions command handling [2]', () => {
+    const transactions = new PoolTransactions(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary' };
+    const response = transactions.selectPoolTransactionsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_transactions WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test transactions command handling [3]', () => {
+    const transactions = new PoolTransactions(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
+    const response = transactions.selectPoolTransactionsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_transactions WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test transaction command handling [4]', () => {
     const transactions = new PoolTransactions(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -48,7 +79,7 @@ describe('Test database transactions functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test transaction command handling [3]', () => {
+  test('Test transaction command handling [5]', () => {
     const transactions = new PoolTransactions(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -71,7 +102,7 @@ describe('Test database transactions functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test transaction command handling [4]', () => {
+  test('Test transaction command handling [6]', () => {
     const transactions = new PoolTransactions(logger, configMainCopy);
     const response = transactions.deletePoolTransactionsCurrent('Pool-Main', ['round1']);
     const expected = `
@@ -80,7 +111,7 @@ describe('Test database transactions functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test transaction command handling [5]', () => {
+  test('Test transaction command handling [7]', () => {
     const transactions = new PoolTransactions(logger, configMainCopy);
     const response = transactions.deletePoolTransactionsInactive('Pool-Main', 1);
     const expected = `

@@ -15,20 +15,51 @@ describe('Test database payments functionality', () => {
   test('Test initialization of payments commands', () => {
     const payments = new PoolPayments(logger, configMainCopy);
     expect(typeof payments.configMain).toBe('object');
-    expect(typeof payments.selectPoolPaymentsType).toBe('function');
+    expect(typeof payments.selectPoolPaymentsCurrent).toBe('function');
     expect(typeof payments.insertPoolPaymentsCurrent).toBe('function');
   });
 
-  test('Test transaction command handling [1]', () => {
+  test('Test query handling [1]', () => {
     const payments = new PoolPayments(logger, configMainCopy);
-    const response = payments.selectPoolPaymentsType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_payments
-      WHERE type = 'primary';`;
+    expect(payments.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(payments.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const payments = new PoolPayments(logger, configMainCopy);
+    expect(payments.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(payments.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(payments.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(payments.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(payments.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(payments.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
+  });
+
+  test('Test payments command handling [1]', () => {
+    const payments = new PoolPayments(logger, configMainCopy);
+    const parameters = { type: 'primary' };
+    const response = payments.selectPoolPaymentsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_payments WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
-  test('Test transaction command handling [2]', () => {
+  test('Test payments command handling [2]', () => {
+    const payments = new PoolPayments(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary' };
+    const response = payments.selectPoolPaymentsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_payments WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test payments command handling [3]', () => {
+    const payments = new PoolPayments(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
+    const response = payments.selectPoolPaymentsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_payments WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test payments command handling [4]', () => {
     const payments = new PoolPayments(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -48,7 +79,7 @@ describe('Test database payments functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test transaction command handling [3]', () => {
+  test('Test payments command handling [5]', () => {
     const payments = new PoolPayments(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -71,7 +102,7 @@ describe('Test database payments functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test transaction command handling [4]', () => {
+  test('Test payments command handling [6]', () => {
     const payments = new PoolPayments(logger, configMainCopy);
     const response = payments.deletePoolPaymentsCurrent('Pool-Main', ['round1']);
     const expected = `

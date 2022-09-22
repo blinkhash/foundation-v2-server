@@ -258,8 +258,9 @@ const Payments = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      transaction.push(_this.current.rounds.selectPoolRoundsSpecific(
-        _this.pool, block.solo, block.round, 'primary'));
+      const parameters = { solo: block.solo, round: block.round, type: 'primary' };
+      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+        _this.pool, parameters));
     });
 
     // Determine Workers for Rounds
@@ -294,8 +295,9 @@ const Payments = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      transaction.push(_this.current.rounds.selectPoolRoundsSpecific(
-        _this.pool, block.solo, block.round, 'auxiliary'));
+      const parameters = { solo: block.solo, round: block.round, type: 'auxiliary' };
+      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+        _this.pool, parameters));
     });
 
     // Determine Workers for Rounds
@@ -424,8 +426,8 @@ const Payments = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.blocks.selectPoolBlocksCategory(_this.pool, 'generate', blockType),
-      _this.current.miners.selectPoolMinersBalance(_this.pool, 0, blockType),
+      _this.current.blocks.selectPoolBlocksCurrent(_this.pool, { category: 'generate', type: blockType }),
+      _this.current.miners.selectPoolMinersCurrent(_this.pool, { balance: 'gt0', type: blockType }),
       'COMMIT;'];
 
     // Establish Separate Behavior

@@ -15,20 +15,51 @@ describe('Test database metadata functionality', () => {
   test('Test initialization of metadata commands', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     expect(typeof metadata.configMain).toBe('object');
-    expect(typeof metadata.selectHistoricalMetadataType).toBe('function');
+    expect(typeof metadata.selectHistoricalMetadataCurrent).toBe('function');
     expect(typeof metadata.insertHistoricalMetadataCurrent).toBe('function');
+  });
+
+  test('Test query handling [1]', () => {
+    const metadata = new HistoricalMetadata(logger, configMainCopy);
+    expect(metadata.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(metadata.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const metadata = new HistoricalMetadata(logger, configMainCopy);
+    expect(metadata.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(metadata.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(metadata.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(metadata.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(metadata.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(metadata.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
   test('Test metadata command handling [1]', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
-    const response = metadata.selectHistoricalMetadataType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_metadata
-      WHERE type = 'primary'`;
+    const parameters = { type: 'primary' };
+    const response = metadata.selectHistoricalMetadataCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_metadata WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [2]', () => {
+    const metadata = new HistoricalMetadata(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary' };
+    const response = metadata.selectHistoricalMetadataCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_metadata WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test metadata command handling [3]', () => {
+    const metadata = new HistoricalMetadata(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
+    const response = metadata.selectHistoricalMetadataCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_metadata WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test metadata command handling [4]', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -71,7 +102,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [3]', () => {
+  test('Test metadata command handling [5]', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,

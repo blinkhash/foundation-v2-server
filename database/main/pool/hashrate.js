@@ -10,13 +10,46 @@ const PoolHashrate = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Select Rows Using Miner
-  this.selectPoolHashrateMiner = function(pool, timestamp, miner, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_hashrate
-      WHERE timestamp >= ${ timestamp }
-      AND miner = '${ miner }' AND solo = ${ solo }
-      AND type = '${ type }';`;
+  // Handle Pool Parameters
+  _this.numbers = ['timestamp', 'work'];
+  _this.strings = ['miner', 'worker', 'type'];
+  _this.parameters = ['timestamp', 'miner', 'worker', 'solo', 'type', 'work'];
+
+  // Handle String Parameters
+  this.handleStrings = function(parameters, parameter) {
+    return ` = '${ parameters[parameter] }'`;
+  };
+
+  // Handle Numerical Parameters
+  this.handleNumbers = function(parameters, parameter) {
+    const query = parameters[parameter];
+    if (query.includes('lt')) return ` < ${ query.replace('lt', '') }`;
+    if (query.includes('le')) return ` <= ${ query.replace('le', '') }`;
+    if (query.includes('gt')) return ` > ${ query.replace('gt', '') }`;
+    if (query.includes('ge')) return ` >= ${ query.replace('ge', '') }`;
+    if (query.includes('ne')) return ` != ${ query.replace('ne', '') }`;
+    else return ` = ${ query }`;
+  };
+
+  // Handle Query Parameters
+  /* istanbul ignore next */
+  this.handleQueries = function(parameters, parameter) {
+    if (_this.numbers.includes(parameter)) return _this.handleNumbers(parameters, parameter);
+    if (_this.strings.includes(parameter)) return _this.handleStrings(parameters, parameter);
+    else return ` = ${ parameters[parameter] }`;
+  };
+
+  // Select Pool Hashrate Using Parameters
+  this.selectPoolHashrateCurrent = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".pool_hashrate`;
+    const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
+    filtered.forEach((parameter, idx) => {
+      if (idx === 0) output += ' WHERE ';
+      else output += ' AND ';
+      output += `${ parameter }`;
+      output += _this.handleQueries(parameters, parameter);
+    });
+    return output + ';';
   };
 
   // Select Count of Distinct Miners
@@ -38,15 +71,6 @@ const PoolHashrate = function (logger, configMain) {
       GROUP BY miner;`;
   };
 
-  // Select Rows Using Miner
-  this.selectPoolHashrateWorker = function(pool, timestamp, worker, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_hashrate
-      WHERE timestamp >= ${ timestamp }
-      AND worker = '${ worker }' AND solo = ${ solo }
-      AND type = '${ type }';`;
-  };
-
   // Select Count of Distinct Workers
   this.countPoolHashrateWorker = function(pool, timestamp, solo, type) {
     return `
@@ -64,14 +88,6 @@ const PoolHashrate = function (logger, configMain) {
       WHERE timestamp >= ${ timestamp }
       AND solo = ${ solo } AND type = '${ type }'
       GROUP BY worker;`;
-  };
-
-  // Select Rows Using Miner
-  this.selectPoolHashrateType = function(pool, timestamp, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_hashrate
-      WHERE timestamp >= ${ timestamp }
-      AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Select Sum of Rows Using Types

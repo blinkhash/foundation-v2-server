@@ -220,8 +220,9 @@ const Checks = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      transaction.push(_this.current.rounds.selectPoolRoundsSpecific(
-        _this.pool, block.solo, block.round, 'primary'));
+      const parameters = { solo: block.solo, round: block.round, type: 'primary' };
+      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+        _this.pool, parameters));
     });
 
     // Determine Workers for Rounds
@@ -247,8 +248,9 @@ const Checks = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      transaction.push(_this.current.rounds.selectPoolRoundsSpecific(
-        _this.pool, block.solo, block.round, 'auxiliary'));
+      const parameters = { solo: block.solo, round: block.round, type: 'auxiliary' };
+      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+        _this.pool, parameters));
     });
 
     // Determine Workers for Rounds
@@ -359,7 +361,7 @@ const Checks = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.blocks.selectPoolBlocksType(_this.pool, blockType),
+      _this.current.blocks.selectPoolBlocksCurrent(_this.pool, { type: blockType }),
       'COMMIT;'];
 
     // Establish Separate Behavior

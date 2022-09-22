@@ -15,29 +15,51 @@ describe('Test database miners functionality', () => {
   test('Test initialization of miners commands', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     expect(typeof miners.configMain).toBe('object');
-    expect(typeof miners.selectHistoricalMinersMiner).toBe('function');
+    expect(typeof miners.selectHistoricalMinersCurrent).toBe('function');
     expect(typeof miners.insertHistoricalMinersCurrent).toBe('function');
+  });
+
+  test('Test query handling [1]', () => {
+    const miners = new HistoricalMiners(logger, configMainCopy);
+    expect(miners.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(miners.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const miners = new HistoricalMiners(logger, configMainCopy);
+    expect(miners.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(miners.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(miners.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(miners.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(miners.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(miners.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
   test('Test miners command handling [1]', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
-    const response = miners.selectHistoricalMinersMiner('Pool-Main', 'miner1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_miners
-      WHERE miner = 'miner1' AND type = 'primary';`;
+    const parameters = { miner: 'miner1', type: 'primary' };
+    const response = miners.selectHistoricalMinersCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_miners WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [2]', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
-    const response = miners.selectHistoricalMinersType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_miners
-      WHERE type = 'primary';`;
+    const parameters = { type: 'primary' };
+    const response = miners.selectHistoricalMinersCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_miners WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [3]', () => {
+    const miners = new HistoricalMiners(logger, configMainCopy);
+    const parameters = { type: 'primary', hmm: 'test' };
+    const response = miners.selectHistoricalMinersCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_miners WHERE type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test miners command handling [4]', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -67,7 +89,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [4]', () => {
+  test('Test miners command handling [5]', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     const updates = {
       timestamp: 1,

@@ -336,13 +336,13 @@ const Statistics = function (logger, client, config, configMain, template) {
       _this.current.hashrate.sumPoolHashrateMiner(_this.pool, hashrateWindow, minerType, blockType),
       _this.current.hashrate.sumPoolHashrateWorker(_this.pool, hashrateWindow, minerType, blockType),
       _this.current.hashrate.sumPoolHashrateType(_this.pool, hashrateWindow, false, blockType),
-      _this.current.metadata.selectPoolMetadataType(_this.pool, blockType),
+      _this.current.metadata.selectPoolMetadataCurrent(_this.pool, { type: blockType }),
       _this.current.miners.deletePoolMinersInactive(_this.pool, inactiveWindow),
-      _this.current.miners.selectPoolMinersType(_this.pool, blockType),
-      _this.current.network.selectPoolNetworkType(_this.pool, blockType),
+      _this.current.miners.selectPoolMinersCurrent(_this.pool, { type: blockType }),
+      _this.current.network.selectPoolNetworkCurrent(_this.pool, { type: blockType }),
       _this.current.transactions.deletePoolTransactionsInactive(_this.pool, updateWindow),
       _this.current.workers.deletePoolWorkersInactive(_this.pool, inactiveWindow),
-      _this.current.workers.selectPoolWorkersType(_this.pool, minerType, blockType),
+      _this.current.workers.selectPoolWorkersCurrent(_this.pool, { solo: minerType, type: blockType }),
       'COMMIT;'];
 
     // Establish Separate Behavior

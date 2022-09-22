@@ -15,56 +15,83 @@ describe('Test database blocks functionality', () => {
   test('Test initialization of blocks commands', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
     expect(typeof blocks.configMain).toBe('object');
-    expect(typeof blocks.selectPoolBlocksMiner).toBe('function');
-    expect(typeof blocks.selectPoolBlocksWorker).toBe('function');
+    expect(typeof blocks.selectPoolBlocksCurrent).toBe('function');
+    expect(typeof blocks.insertPoolBlocksCurrent).toBe('function');
+  });
+
+  test('Test query handling [1]', () => {
+    const blocks = new PoolBlocks(logger, configMainCopy);
+    expect(blocks.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(blocks.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const blocks = new PoolBlocks(logger, configMainCopy);
+    expect(blocks.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(blocks.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(blocks.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(blocks.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(blocks.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(blocks.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
   test('Test block command handling [1]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
-    const response = blocks.selectPoolBlocksMiner('Pool-Main', 'miner1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_blocks
-      WHERE miner = 'miner1' AND type = 'primary';`;
+    const parameters = { miner: 'miner1', type: 'primary' };
+    const response = blocks.selectPoolBlocksCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_blocks WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test block command handling [2]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
-    const response = blocks.selectPoolBlocksWorker('Pool-Main', 'worker1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_blocks
-      WHERE worker = 'worker1' AND type = 'primary';`;
+    const parameters = { worker: 'worker1', type: 'primary' };
+    const response = blocks.selectPoolBlocksCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_blocks WHERE worker = \'worker1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test block command handling [3]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
-    const response = blocks.selectPoolBlocksCategory('Pool-Main', 'immature', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_blocks
-      WHERE category = 'immature' AND type = 'primary';`;
-    expect(response).toBe(expected);
-  });
-
-  test('Test block command handling [3]', () => {
-    const blocks = new PoolBlocks(logger, configMainCopy);
-    const response = blocks.selectPoolBlocksIdentifier('Pool-Main', 'master', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_blocks
-      WHERE identifier = 'master' AND type = 'primary';`;
+    const parameters = { category: 'immature', type: 'primary' };
+    const response = blocks.selectPoolBlocksCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_blocks WHERE category = \'immature\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test block command handling [4]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
-    const response = blocks.selectPoolBlocksType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_blocks
-      WHERE type = 'primary';`;
+    const parameters = { identifier: 'master', type: 'primary' };
+    const response = blocks.selectPoolBlocksCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_blocks WHERE identifier = \'master\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test block command handling [5]', () => {
+    const blocks = new PoolBlocks(logger, configMainCopy);
+    const parameters = { type: 'primary' };
+    const response = blocks.selectPoolBlocksCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_blocks WHERE type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test block command handling [6]', () => {
+    const blocks = new PoolBlocks(logger, configMainCopy);
+    const parameters = { confirmations: 'gt100', solo: false };
+    const response = blocks.selectPoolBlocksCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_blocks WHERE confirmations > 100 AND solo = false;';
+    expect(response).toBe(expected);
+  });
+
+  test('Test block command handling [7]', () => {
+    const blocks = new PoolBlocks(logger, configMainCopy);
+    const parameters = { confirmations: 'gt100', solo: false, hmm: 'test' };
+    const response = blocks.selectPoolBlocksCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_blocks WHERE confirmations > 100 AND solo = false;';
+    expect(response).toBe(expected);
+  });
+
+  test('Test block command handling [8]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -127,7 +154,7 @@ describe('Test database blocks functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test block command handling [6]', () => {
+  test('Test block command handling [9]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -205,7 +232,7 @@ describe('Test database blocks functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test block command handling [7]', () => {
+  test('Test block command handling [10]', () => {
     const blocks = new PoolBlocks(logger, configMainCopy);
     const response = blocks.deletePoolBlocksCurrent('Pool-Main', ['round1']);
     const expected = `

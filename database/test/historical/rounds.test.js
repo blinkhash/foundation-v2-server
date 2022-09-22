@@ -15,68 +15,83 @@ describe('Test database rounds functionality', () => {
   test('Test initialization of rounds commands', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
     expect(typeof rounds.configMain).toBe('object');
-    expect(typeof rounds.selectHistoricalRoundsMiner).toBe('function');
-    expect(typeof rounds.selectHistoricalRoundsWorker).toBe('function');
+    expect(typeof rounds.selectHistoricalRoundsCurrent).toBe('function');
+    expect(typeof rounds.insertHistoricalRoundsCurrent).toBe('function');
+  });
+
+  test('Test query handling [1]', () => {
+    const rounds = new HistoricalRounds(logger, configMainCopy);
+    expect(rounds.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(rounds.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const rounds = new HistoricalRounds(logger, configMainCopy);
+    expect(rounds.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(rounds.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(rounds.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(rounds.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(rounds.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(rounds.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
   test('Test rounds command handling [1]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
-    const response = rounds.selectHistoricalRoundsMiner('Pool-Main', 'miner1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_rounds
-      WHERE miner = 'miner1' AND type = 'primary';`;
+    const parameters = { miner: 'miner1', type: 'primary' };
+    const response = rounds.selectHistoricalRoundsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_rounds WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [2]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
-    const response = rounds.selectHistoricalRoundsWorker('Pool-Main', 'worker1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_rounds
-      WHERE worker = 'worker1' AND type = 'primary';`;
+    const parameters = { worker: 'worker1', type: 'primary' };
+    const response = rounds.selectHistoricalRoundsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_rounds WHERE worker = \'worker1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [3]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
-    const response = rounds.selectHistoricalRoundsIdentifier('Pool-Main', 'master', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_rounds
-      WHERE identifier = 'master AND type = 'primary';`;
+    const parameters = { identifier: 'master', type: 'primary' };
+    const response = rounds.selectHistoricalRoundsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_rounds WHERE identifier = \'master\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [4]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
-    const response = rounds.selectHistoricalRoundsSpecific('Pool-Main', true, 'round1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_rounds
-      WHERE solo = true AND round = 'round1'
-      AND type = 'primary';`;
+    const parameters = { solo: true, round: 'round1', type: 'primary' };
+    const response = rounds.selectHistoricalRoundsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_rounds WHERE solo = true AND round = \'round1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [5]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
-    const response = rounds.selectHistoricalRoundsHistorical('Pool-Main', 'worker1', true, 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_rounds
-      WHERE worker = 'worker1' AND solo = true
-      AND type = 'primary';`;
+    const parameters = { worker: 'worker1', solo: true, type: 'primary' };
+    const response = rounds.selectHistoricalRoundsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_rounds WHERE worker = \'worker1\' AND solo = true AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [6]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
-    const response = rounds.selectHistoricalRoundsCombinedSpecific('Pool-Main', 'worker1', true, 'round1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".historical_rounds
-      WHERE worker = 'worker1' AND solo = true
-      AND round = 'round1' AND type = 'primary';`;
+    const parameters = { worker: 'worker1', solo: true, round: 'round1', type: 'primary' };
+    const response = rounds.selectHistoricalRoundsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_rounds WHERE worker = \'worker1\' AND solo = true AND round = \'round1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [7]', () => {
+    const rounds = new HistoricalRounds(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
+    const response = rounds.selectHistoricalRoundsCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".historical_rounds WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test rounds command handling [8]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -116,7 +131,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [8]', () => {
+  test('Test rounds command handling [9]', () => {
     const rounds = new HistoricalRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,

@@ -10,67 +10,47 @@ const PoolRounds = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Select Rows Using Miner
-  this.selectPoolRoundsMiner = function(pool, miner, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE miner = '${ miner }' AND solo = ${ solo }
-      AND type = '${ type }';`;
+  // Handle Pool Parameters
+  this.numbers = ['timestamp', 'invalid', 'stale', 'times', 'valid', 'work'];
+  this.strings = ['miner', 'worker', 'identifier', 'round', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
+    'stale', 'times', 'type', 'valid', 'work'];
+
+  // Handle String Parameters
+  this.handleStrings = function(parameters, parameter) {
+    return ` = '${ parameters[parameter] }'`;
   };
 
-  // Select Rows Using Worker
-  this.selectPoolRoundsWorker = function(pool, worker, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND solo = ${ solo }
-      AND type = '${ type }';`;
+  // Handle Numerical Parameters
+  this.handleNumbers = function(parameters, parameter) {
+    const query = parameters[parameter];
+    if (query.includes('lt')) return ` < ${ query.replace('lt', '') }`;
+    if (query.includes('le')) return ` <= ${ query.replace('le', '') }`;
+    if (query.includes('gt')) return ` > ${ query.replace('gt', '') }`;
+    if (query.includes('ge')) return ` >= ${ query.replace('ge', '') }`;
+    if (query.includes('ne')) return ` != ${ query.replace('ne', '') }`;
+    else return ` = ${ query }`;
   };
 
-  // Select Rows Using Identifier
-  this.selectPoolRoundsIdentifier = function(pool, identifier, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE identifier = '${ identifier } AND solo = ${ solo }
-      AND type = '${ type }';`;
+  // Handle Query Parameters
+  /* istanbul ignore next */
+  this.handleQueries = function(parameters, parameter) {
+    if (_this.numbers.includes(parameter)) return _this.handleNumbers(parameters, parameter);
+    if (_this.strings.includes(parameter)) return _this.handleStrings(parameters, parameter);
+    else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Rows Using Current Round
-  this.selectPoolRoundsCurrent = function(pool, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE solo = ${ solo } AND round = 'current' AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Specific Round
-  this.selectPoolRoundsSpecific = function(pool, solo, round, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE solo = ${ solo } AND round = '${ round }'
-      AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Historical Data
-  this.selectPoolRoundsHistorical = function(pool, worker, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND solo = ${ solo }
-      AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Current Combined Data
-  this.selectPoolRoundsCombinedCurrent = function(pool, worker, solo, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND solo = ${ solo }
-      AND round = 'current' AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Current Specific Data
-  this.selectPoolRoundsCombinedSpecific = function(pool, worker, solo, round, type) {
-    return `
-      SELECT * FROM "${ pool }".pool_rounds
-      WHERE worker = '${ worker }' AND solo = ${ solo }
-      AND round = '${ round }' AND type = '${ type }';`;
+  // Select Pool Rounds Using Parameters
+  this.selectPoolRoundsCurrent = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".pool_rounds`;
+    const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
+    filtered.forEach((parameter, idx) => {
+      if (idx === 0) output += ' WHERE ';
+      else output += ' AND ';
+      output += `${ parameter }`;
+      output += _this.handleQueries(parameters, parameter);
+    });
+    return output + ';';
   };
 
   // Build Rounds Values String

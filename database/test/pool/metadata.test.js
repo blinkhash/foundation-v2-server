@@ -15,20 +15,51 @@ describe('Test database metadata functionality', () => {
   test('Test initialization of metadata commands', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     expect(typeof metadata.configMain).toBe('object');
-    expect(typeof metadata.selectPoolMetadataType).toBe('function');
+    expect(typeof metadata.selectPoolMetadataCurrent).toBe('function');
     expect(typeof metadata.insertPoolMetadataHashrate).toBe('function');
+  });
+
+  test('Test query handling [1]', () => {
+    const metadata = new PoolMetadata(logger, configMainCopy);
+    expect(metadata.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(metadata.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const metadata = new PoolMetadata(logger, configMainCopy);
+    expect(metadata.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(metadata.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(metadata.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(metadata.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(metadata.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(metadata.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
   test('Test metadata command handling [1]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
-    const response = metadata.selectPoolMetadataType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_metadata
-      WHERE type = 'primary';`;
+    const parameters = { type: 'primary' };
+    const response = metadata.selectPoolMetadataCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_metadata WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [2]', () => {
+    const metadata = new PoolMetadata(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary' };
+    const response = metadata.selectPoolMetadataCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_metadata WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test metadata command handling [3]', () => {
+    const metadata = new PoolMetadata(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
+    const response = metadata.selectPoolMetadataCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_metadata WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test metadata command handling [4]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -50,7 +81,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [3]', () => {
+  test('Test metadata command handling [5]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -75,7 +106,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [4]', () => {
+  test('Test metadata command handling [6]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -104,7 +135,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [5]', () => {
+  test('Test metadata command handling [7]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -138,7 +169,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [6]', () => {
+  test('Test metadata command handling [8]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = { timestamp: 1, type: 'primary' };
     const response = metadata.insertPoolMetadataRoundsReset('Pool-Main', [updates]);
@@ -158,7 +189,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [7]', () => {
+  test('Test metadata command handling [9]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = { timestamp: 1, type: 'primary' };
     const response = metadata.insertPoolMetadataRoundsReset('Pool-Main', [updates, updates]);
@@ -180,7 +211,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [8]', () => {
+  test('Test metadata command handling [10]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -219,7 +250,7 @@ describe('Test database metadata functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test metadata command handling [9]', () => {
+  test('Test metadata command handling [11]', () => {
     const metadata = new PoolMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,

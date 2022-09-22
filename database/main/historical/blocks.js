@@ -10,39 +10,47 @@ const HistoricalBlocks = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Select Rows Using Miner
-  this.selectHistoricalBlocksMiner = function(pool, miner, type) {
-    return `
-      SELECT * FROM "${ pool }".historical_blocks
-      WHERE miner = '${ miner }' AND type = '${ type }';`;
+  // Handle Pool Parameters
+  _this.numbers = ['timestamp', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
+  _this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
+  _this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
+    'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction', 'type'];
+
+  // Handle String Parameters
+  this.handleStrings = function(parameters, parameter) {
+    return ` = '${ parameters[parameter] }'`;
   };
 
-  // Select Rows Using Worker
-  this.selectHistoricalBlocksWorker = function(pool, worker, type) {
-    return `
-      SELECT * FROM "${ pool }".historical_blocks
-      WHERE worker = '${ worker }' AND type = '${ type }';`;
+  // Handle Numerical Parameters
+  this.handleNumbers = function(parameters, parameter) {
+    const query = parameters[parameter];
+    if (query.includes('lt')) return ` < ${ query.replace('lt', '') }`;
+    if (query.includes('le')) return ` <= ${ query.replace('le', '') }`;
+    if (query.includes('gt')) return ` > ${ query.replace('gt', '') }`;
+    if (query.includes('ge')) return ` >= ${ query.replace('ge', '') }`;
+    if (query.includes('ne')) return ` != ${ query.replace('ne', '') }`;
+    else return ` = ${ query }`;
   };
 
-  // Select Rows Using Category
-  this.selectHistoricalBlocksCategory = function(pool, category, type) {
-    return `
-      SELECT * FROM "${ pool }".historical_blocks
-      WHERE category = '${ category }' AND type = '${ type }';`;
+  // Handle Query Parameters
+  /* istanbul ignore next */
+  this.handleQueries = function(parameters, parameter) {
+    if (_this.numbers.includes(parameter)) return _this.handleNumbers(parameters, parameter);
+    if (_this.strings.includes(parameter)) return _this.handleStrings(parameters, parameter);
+    else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Rows Using Identifier
-  this.selectHistoricalBlocksIdentifier = function(pool, identifier, type) {
-    return `
-      SELECT * FROM "${ pool }".historical_blocks
-      WHERE identifier = '${ identifier }' AND type = '${ type }';`;
-  };
-
-  // Select Rows Using Miner
-  this.selectHistoricalBlocksType = function(pool, type) {
-    return `
-      SELECT * FROM "${ pool }".historical_blocks
-      WHERE type = '${ type }';`;
+  // Select Pool Blocks Using Parameters
+  this.selectHistoricalBlocksCurrent = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_blocks`;
+    const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
+    filtered.forEach((parameter, idx) => {
+      if (idx === 0) output += ' WHERE ';
+      else output += ' AND ';
+      output += `${ parameter }`;
+      output += _this.handleQueries(parameters, parameter);
+    });
+    return output + ';';
   };
 
   // Build Blocks Values String

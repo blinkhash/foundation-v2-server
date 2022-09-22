@@ -15,20 +15,51 @@ describe('Test database network functionality', () => {
   test('Test initialization of network commands', () => {
     const network = new PoolNetwork(logger, configMainCopy);
     expect(typeof network.configMain).toBe('object');
-    expect(typeof network.selectPoolNetworkType).toBe('function');
+    expect(typeof network.selectPoolNetworkCurrent).toBe('function');
     expect(typeof network.insertPoolNetworkCurrent).toBe('function');
+  });
+
+  test('Test query handling [1]', () => {
+    const network = new PoolNetwork(logger, configMainCopy);
+    expect(network.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(network.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const network = new PoolNetwork(logger, configMainCopy);
+    expect(network.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(network.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(network.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(network.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(network.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(network.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
   test('Test network command handling [1]', () => {
     const network = new PoolNetwork(logger, configMainCopy);
-    const response = network.selectPoolNetworkType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_network
-      WHERE type = 'primary';`;
+    const parameters = { type: 'primary' };
+    const response = network.selectPoolNetworkCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_network WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test network command handling [2]', () => {
+    const network = new PoolNetwork(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary' };
+    const response = network.selectPoolNetworkCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_network WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test network command handling [3]', () => {
+    const network = new PoolNetwork(logger, configMainCopy);
+    const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
+    const response = network.selectPoolNetworkCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_network WHERE timestamp >= 1 AND type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test network command handling [4]', () => {
     const network = new PoolNetwork(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -57,7 +88,7 @@ describe('Test database network functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test network command handling [3]', () => {
+  test('Test network command handling [5]', () => {
     const network = new PoolNetwork(logger, configMainCopy);
     const updates = {
       timestamp: 1,

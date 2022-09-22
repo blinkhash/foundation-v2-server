@@ -15,38 +15,59 @@ describe('Test database miners functionality', () => {
   test('Test initialization of miners commands', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     expect(typeof miners.configMain).toBe('object');
-    expect(typeof miners.selectPoolMinersMiner).toBe('function');
+    expect(typeof miners.selectPoolMinersCurrent).toBe('function');
     expect(typeof miners.insertPoolMinersHashrate).toBe('function');
+  });
+
+  test('Test query handling [1]', () => {
+    const miners = new PoolMiners(logger, configMainCopy);
+    expect(miners.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
+    expect(miners.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
+  });
+
+  test('Test query handling [2]', () => {
+    const miners = new PoolMiners(logger, configMainCopy);
+    expect(miners.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
+    expect(miners.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
+    expect(miners.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
+    expect(miners.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
+    expect(miners.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
+    expect(miners.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
   test('Test miners command handling [1]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
-    const response = miners.selectPoolMinersMiner('Pool-Main', 'miner1', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_miners
-      WHERE miner = 'miner1' AND type = 'primary';`;
+    const parameters = { miner: 'miner1', type: 'primary' };
+    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [2]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
-    const response = miners.selectPoolMinersBalance('Pool-Main', 0, 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_miners
-      WHERE balance > 0 AND type = 'primary';`;
+    const parameters = { balance: 'gt0', type: 'primary' };
+    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE balance > 0 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [3]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
-    const response = miners.selectPoolMinersType('Pool-Main', 'primary');
-    const expected = `
-      SELECT * FROM "Pool-Main".pool_miners
-      WHERE type = 'primary';`;
+    const parameters = { type: 'primary' };
+    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [4]', () => {
+    const miners = new PoolMiners(logger, configMainCopy);
+    const parameters = { type: 'primary', hmm: 'test' };
+    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE type = \'primary\';';
+    expect(response).toBe(expected);
+  });
+
+  test('Test miners command handling [5]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -71,7 +92,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [5]', () => {
+  test('Test miners command handling [6]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -100,7 +121,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [6]', () => {
+  test('Test miners command handling [7]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -128,7 +149,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [7]', () => {
+  test('Test miners command handling [8]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -161,7 +182,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [8]', () => {
+  test('Test miners command handling [9]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -189,7 +210,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [9]', () => {
+  test('Test miners command handling [10]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -222,7 +243,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [10]', () => {
+  test('Test miners command handling [11]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -250,7 +271,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [11]', () => {
+  test('Test miners command handling [12]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
@@ -283,7 +304,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [12]', () => {
+  test('Test miners command handling [13]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const response = miners.insertPoolMinersReset('Pool-Main', 'primary');
     const expected = `
@@ -293,7 +314,7 @@ describe('Test database miners functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test miners command handling [13]', () => {
+  test('Test miners command handling [14]', () => {
     const miners = new PoolMiners(logger, configMainCopy);
     const response = miners.deletePoolMinersInactive('Pool-Main', 1);
     const expected = `
