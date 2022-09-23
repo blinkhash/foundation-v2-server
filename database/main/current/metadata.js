@@ -3,14 +3,14 @@ const Text = require('../../../locales/index');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const PoolMetadata = function (logger, configMain) {
+const CurrentMetadata = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Current Parameters
   _this.numbers = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
     'stale', 'valid', 'work', 'workers'];
   _this.strings = ['type'];
@@ -41,9 +41,9 @@ const PoolMetadata = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Metadata Using Parameters
-  this.selectPoolMetadataCurrent = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".pool_metadata`;
+  // Select Current Metadata Using Parameters
+  this.selectCurrentMetadataMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_metadata`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -55,7 +55,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildPoolMetadataBlocks = function(updates) {
+  this.buildCurrentMetadataBlocks = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -68,19 +68,19 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Blocks Data
-  this.insertPoolMetadataBlocks = function(pool, updates) {
+  this.insertCurrentMetadataBlocks = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_metadata (
+      INSERT INTO "${ pool }".current_metadata (
         timestamp, blocks, type)
-      VALUES ${ _this.buildPoolMetadataBlocks(updates) }
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      VALUES ${ _this.buildCurrentMetadataBlocks(updates) }
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = "${ pool }".pool_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "${ pool }".current_metadata.blocks + EXCLUDED.blocks;`;
   };
 
   // Build Metadata Values String
-  this.buildPoolMetadataHashrate = function(updates) {
+  this.buildCurrentMetadataHashrate = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -95,13 +95,13 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Hashrate Data
-  this.insertPoolMetadataHashrate = function(pool, updates) {
+  this.insertCurrentMetadataHashrate = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_metadata (
+      INSERT INTO "${ pool }".current_metadata (
         timestamp, hashrate, miners,
         type, workers)
-      VALUES ${ _this.buildPoolMetadataHashrate(updates) }
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      VALUES ${ _this.buildCurrentMetadataHashrate(updates) }
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate,
@@ -110,7 +110,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildPoolMetadataRoundsReset = function(updates) {
+  this.buildCurrentMetadataRoundsReset = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -122,14 +122,14 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Reset
-  this.insertPoolMetadataRoundsReset = function(pool, updates) {
+  this.insertCurrentMetadataRoundsReset = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_metadata (
+      INSERT INTO "${ pool }".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
-      VALUES ${ _this.buildPoolMetadataRoundsReset(updates) }
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      VALUES ${ _this.buildCurrentMetadataRoundsReset(updates) }
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = 0, effort = 0, invalid = 0,
@@ -137,7 +137,7 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildPoolMetadataRounds = function(updates) {
+  this.buildCurrentMetadataRounds = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -155,23 +155,23 @@ const PoolMetadata = function (logger, configMain) {
   };
 
   // Insert Rows Using Round Data
-  this.insertPoolMetadataRounds = function(pool, updates) {
+  this.insertCurrentMetadataRounds = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_metadata (
+      INSERT INTO "${ pool }".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
-      VALUES ${ _this.buildPoolMetadataRounds(updates) }
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      VALUES ${ _this.buildCurrentMetadataRounds(updates) }
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
         effort = EXCLUDED.effort,
-        invalid = "${ pool }".pool_metadata.invalid + EXCLUDED.invalid,
-        stale = "${ pool }".pool_metadata.stale + EXCLUDED.stale,
-        valid = "${ pool }".pool_metadata.valid + EXCLUDED.valid,
-        work = "${ pool }".pool_metadata.work + EXCLUDED.work;`;
+        invalid = "${ pool }".current_metadata.invalid + EXCLUDED.invalid,
+        stale = "${ pool }".current_metadata.stale + EXCLUDED.stale,
+        valid = "${ pool }".current_metadata.valid + EXCLUDED.valid,
+        work = "${ pool }".current_metadata.work + EXCLUDED.work;`;
   };
 };
 
-module.exports = PoolMetadata;
+module.exports = CurrentMetadata;

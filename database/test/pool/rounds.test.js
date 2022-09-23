@@ -1,4 +1,4 @@
-const PoolRounds = require('../../main/pool/rounds');
+const CurrentRounds = require('../../main/current/rounds');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main.js');
 const logger = new Logger(configMain);
@@ -13,20 +13,20 @@ describe('Test database rounds functionality', () => {
   });
 
   test('Test initialization of rounds commands', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     expect(typeof rounds.configMain).toBe('object');
-    expect(typeof rounds.selectPoolRoundsCurrent).toBe('function');
-    expect(typeof rounds.insertPoolRoundsCurrent).toBe('function');
+    expect(typeof rounds.selectCurrentRoundsMain).toBe('function');
+    expect(typeof rounds.insertCurrentRoundsMain).toBe('function');
   });
 
   test('Test query handling [1]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     expect(rounds.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
     expect(rounds.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
   });
 
   test('Test query handling [2]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     expect(rounds.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
     expect(rounds.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
     expect(rounds.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
@@ -36,63 +36,63 @@ describe('Test database rounds functionality', () => {
   });
 
   test('Test rounds command handling [1]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };
-    const response = rounds.selectPoolRoundsCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_rounds WHERE miner = \'miner1\' AND type = \'primary\';';
+    const response = rounds.selectCurrentRoundsMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_rounds WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [2]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { worker: 'worker1', type: 'primary' };
-    const response = rounds.selectPoolRoundsCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_rounds WHERE worker = \'worker1\' AND type = \'primary\';';
+    const response = rounds.selectCurrentRoundsMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_rounds WHERE worker = \'worker1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [3]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { identifier: 'master', type: 'primary' };
-    const response = rounds.selectPoolRoundsCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_rounds WHERE identifier = \'master\' AND type = \'primary\';';
+    const response = rounds.selectCurrentRoundsMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_rounds WHERE identifier = \'master\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [4]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { solo: true, round: 'round1', type: 'primary' };
-    const response = rounds.selectPoolRoundsCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_rounds WHERE solo = true AND round = \'round1\' AND type = \'primary\';';
+    const response = rounds.selectCurrentRoundsMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_rounds WHERE solo = true AND round = \'round1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [5]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { worker: 'worker1', solo: true, type: 'primary' };
-    const response = rounds.selectPoolRoundsCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_rounds WHERE worker = \'worker1\' AND solo = true AND type = \'primary\';';
+    const response = rounds.selectCurrentRoundsMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_rounds WHERE worker = \'worker1\' AND solo = true AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [6]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { worker: 'worker1', solo: true, round: 'round1', type: 'primary' };
-    const response = rounds.selectPoolRoundsCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_rounds WHERE worker = \'worker1\' AND solo = true AND round = \'round1\' AND type = \'primary\';';
+    const response = rounds.selectCurrentRoundsMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_rounds WHERE worker = \'worker1\' AND solo = true AND round = \'round1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [7]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
-    const response = rounds.selectPoolRoundsCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_rounds WHERE timestamp >= 1 AND type = \'primary\';';
+    const response = rounds.selectCurrentRoundsMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_rounds WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [8]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       miner: 'miner1',
@@ -107,9 +107,9 @@ describe('Test database rounds functionality', () => {
       valid: 1,
       work: 8
     };
-    const response = rounds.insertPoolRoundsCurrent('Pool-Main', [updates]);
+    const response = rounds.insertCurrentRoundsMain('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_rounds (
+      INSERT INTO "Pool-Main".current_rounds (
         timestamp, miner, worker,
         identifier, invalid, round,
         solo, stale, times, type,
@@ -127,19 +127,19 @@ describe('Test database rounds functionality', () => {
         'primary',
         1,
         8)
-      ON CONFLICT ON CONSTRAINT pool_rounds_unique
+      ON CONFLICT ON CONSTRAINT current_rounds_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        invalid = "Pool-Main".pool_rounds.invalid + EXCLUDED.invalid,
-        stale = "Pool-Main".pool_rounds.stale + EXCLUDED.stale,
-        times = GREATEST("Pool-Main".pool_rounds.times, EXCLUDED.times),
-        valid = "Pool-Main".pool_rounds.valid + EXCLUDED.valid,
-        work = "Pool-Main".pool_rounds.work + EXCLUDED.work;`;
+        invalid = "Pool-Main".current_rounds.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".current_rounds.stale + EXCLUDED.stale,
+        times = GREATEST("Pool-Main".current_rounds.times, EXCLUDED.times),
+        valid = "Pool-Main".current_rounds.valid + EXCLUDED.valid,
+        work = "Pool-Main".current_rounds.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [9]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       miner: 'miner1',
@@ -154,9 +154,9 @@ describe('Test database rounds functionality', () => {
       valid: 1,
       work: 8
     };
-    const response = rounds.insertPoolRoundsCurrent('Pool-Main', [updates, updates]);
+    const response = rounds.insertCurrentRoundsMain('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_rounds (
+      INSERT INTO "Pool-Main".current_rounds (
         timestamp, miner, worker,
         identifier, invalid, round,
         solo, stale, times, type,
@@ -186,22 +186,22 @@ describe('Test database rounds functionality', () => {
         'primary',
         1,
         8)
-      ON CONFLICT ON CONSTRAINT pool_rounds_unique
+      ON CONFLICT ON CONSTRAINT current_rounds_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        invalid = "Pool-Main".pool_rounds.invalid + EXCLUDED.invalid,
-        stale = "Pool-Main".pool_rounds.stale + EXCLUDED.stale,
-        times = GREATEST("Pool-Main".pool_rounds.times, EXCLUDED.times),
-        valid = "Pool-Main".pool_rounds.valid + EXCLUDED.valid,
-        work = "Pool-Main".pool_rounds.work + EXCLUDED.work;`;
+        invalid = "Pool-Main".current_rounds.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".current_rounds.stale + EXCLUDED.stale,
+        times = GREATEST("Pool-Main".current_rounds.times, EXCLUDED.times),
+        valid = "Pool-Main".current_rounds.valid + EXCLUDED.valid,
+        work = "Pool-Main".current_rounds.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
   });
 
   test('Test rounds command handling [10]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
-    const response = rounds.updatePoolRoundsCurrentSolo('Pool-Main', 'miner1', 'round1', 'primary');
+    const rounds = new CurrentRounds(logger, configMainCopy);
+    const response = rounds.updateCurrentRoundsMainSolo('Pool-Main', 'miner1', 'round1', 'primary');
     const expected = `
-      UPDATE "Pool-Main".pool_rounds
+      UPDATE "Pool-Main".current_rounds
       SET round = 'round1'
       WHERE round = 'current' AND miner = 'miner1'
       AND solo = true AND type = 'primary';`;
@@ -209,10 +209,10 @@ describe('Test database rounds functionality', () => {
   });
 
   test('Test rounds command handling [11]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
-    const response = rounds.updatePoolRoundsCurrentShared('Pool-Main', 'round1', 'primary');
+    const rounds = new CurrentRounds(logger, configMainCopy);
+    const response = rounds.updateCurrentRoundsMainShared('Pool-Main', 'round1', 'primary');
     const expected = `
-      UPDATE "Pool-Main".pool_rounds
+      UPDATE "Pool-Main".current_rounds
       SET round = 'round1'
       WHERE round = 'current' AND solo = false
       AND type = 'primary';`;
@@ -220,10 +220,10 @@ describe('Test database rounds functionality', () => {
   });
 
   test('Test rounds command handling [12]', () => {
-    const rounds = new PoolRounds(logger, configMainCopy);
-    const response = rounds.deletePoolRoundsCurrent('Pool-Main', ['round1']);
+    const rounds = new CurrentRounds(logger, configMainCopy);
+    const response = rounds.deleteCurrentRoundsMain('Pool-Main', ['round1']);
     const expected = `
-      DELETE FROM "Pool-Main".pool_rounds
+      DELETE FROM "Pool-Main".current_rounds
       WHERE round IN (round1);`;
     expect(response).toBe(expected);
   });

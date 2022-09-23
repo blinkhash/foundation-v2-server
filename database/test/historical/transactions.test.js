@@ -15,8 +15,8 @@ describe('Test database transactions functionality', () => {
   test('Test initialization of transactions commands', () => {
     const transactions = new HistoricalTransactions(logger, configMainCopy);
     expect(typeof transactions.configMain).toBe('object');
-    expect(typeof transactions.selectHistoricalTransactionsCurrent).toBe('function');
-    expect(typeof transactions.insertHistoricalTransactionsCurrent).toBe('function');
+    expect(typeof transactions.selectHistoricalTransactionsMain).toBe('function');
+    expect(typeof transactions.insertHistoricalTransactionsMain).toBe('function');
   });
 
   test('Test query handling [1]', () => {
@@ -38,7 +38,7 @@ describe('Test database transactions functionality', () => {
   test('Test transaction command handling [1]', () => {
     const transactions = new HistoricalTransactions(logger, configMainCopy);
     const parameters = { transaction: 'transaction1', type: 'primary' };
-    const response = transactions.selectHistoricalTransactionsCurrent('Pool-Main', parameters);
+    const response = transactions.selectHistoricalTransactionsMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_transactions WHERE transaction = \'transaction1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -46,7 +46,7 @@ describe('Test database transactions functionality', () => {
   test('Test transaction command handling [2]', () => {
     const transactions = new HistoricalTransactions(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = transactions.selectHistoricalTransactionsCurrent('Pool-Main', parameters);
+    const response = transactions.selectHistoricalTransactionsMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_transactions WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -54,7 +54,7 @@ describe('Test database transactions functionality', () => {
   test('Test transaction command handling [3]', () => {
     const transactions = new HistoricalTransactions(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary' };
-    const response = transactions.selectHistoricalTransactionsCurrent('Pool-Main', parameters);
+    const response = transactions.selectHistoricalTransactionsMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_transactions WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -62,7 +62,7 @@ describe('Test database transactions functionality', () => {
   test('Test transaction command handling [4]', () => {
     const transactions = new HistoricalTransactions(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
-    const response = transactions.selectHistoricalTransactionsCurrent('Pool-Main', parameters);
+    const response = transactions.selectHistoricalTransactionsMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_transactions WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -75,7 +75,7 @@ describe('Test database transactions functionality', () => {
       transaction: 'transaction1',
       type: 'primary'
     };
-    const response = transactions.insertHistoricalTransactionsCurrent('Pool-Main', [updates]);
+    const response = transactions.insertHistoricalTransactionsMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_transactions (
         timestamp, amount,
@@ -97,7 +97,7 @@ describe('Test database transactions functionality', () => {
       transaction: 'transaction1',
       type: 'primary'
     };
-    const response = transactions.insertHistoricalTransactionsCurrent('Pool-Main', [updates, updates]);
+    const response = transactions.insertHistoricalTransactionsMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_transactions (
         timestamp, amount,

@@ -48,5 +48,6 @@ exports.stratumRecipientsText1 = () => 'No recipients have been added, which mea
 // Website Text
 exports.websiteErrorText1 = (error) => `The API call threw an unknown error: (${ error })`;
 exports.websiteErrorText2 = () => 'The server was unable to handle your request. Verify your input or try again later';
+exports.websiteErrorText3 = () => 'The requested pool was not found. Verify your input and try again';
 exports.websiteStartingText1 = () => 'Enabling TLS/SSL encryption on API endpoints';
 exports.websiteStartingText2 = (host, port) => `Validated the API configuration, initializing server on ${ host }:${ port } ...`;

@@ -10,7 +10,7 @@ const HistoricalRounds = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Historical Parameters
   this.numbers = ['timestamp', 'invalid', 'stale', 'times', 'valid', 'work'];
   this.strings = ['miner', 'worker', 'identifier', 'round', 'type'];
   this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
@@ -40,8 +40,8 @@ const HistoricalRounds = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Rounds Using Parameters
-  this.selectHistoricalRoundsCurrent = function(pool, parameters) {
+  // Select Historical Rounds Using Parameters
+  this.selectHistoricalRoundsMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_rounds`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
@@ -54,7 +54,7 @@ const HistoricalRounds = function (logger, configMain) {
   };
 
   // Build Rounds Values String
-  this.buildHistoricalRoundsCurrent = function(updates) {
+  this.buildHistoricalRoundsMain = function(updates) {
     let values = '';
     updates.forEach((round, idx) => {
       values += `(
@@ -75,15 +75,15 @@ const HistoricalRounds = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Round Data
-  this.insertHistoricalRoundsCurrent = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalRoundsMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_rounds (
         timestamp, miner, worker,
         identifier, invalid, round,
         solo, stale, times, type,
         valid, work)
-      VALUES ${ _this.buildHistoricalRoundsCurrent(updates) }
+      VALUES ${ _this.buildHistoricalRoundsMain(updates) }
       ON CONFLICT DO NOTHING;`;
   };
 };

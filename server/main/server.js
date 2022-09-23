@@ -57,7 +57,7 @@ const Server = function (logger, client) {
 
     // Handle API Requests
     /* istanbul ignore next */
-    app.get('/api/v2/:pool/:endpoint?', (req, res) => {
+    app.get('/api/v2/:pool/:category/:endpoint', (req, res) => {
       api.handleApiV2(req, (code, message) => {
         api.buildResponse(code, message, res);
       });

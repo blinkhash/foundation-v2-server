@@ -3,14 +3,14 @@ const Text = require('../../../locales/index');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const PoolTransactions = function (logger, configMain) {
+const CurrentTransactions = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Current Parameters
   this.numbers = ['timestamp'];
   this.strings = ['round', 'type'];
   this.parameters = ['timestamp', 'round', 'type'];
@@ -39,9 +39,9 @@ const PoolTransactions = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Transactions Using Parameters
-  this.selectPoolTransactionsCurrent = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".pool_transactions`;
+  // Select Current Transactions Using Parameters
+  this.selectCurrentTransactionsMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_transactions`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -53,7 +53,7 @@ const PoolTransactions = function (logger, configMain) {
   };
 
   // Build Transactions Values String
-  this.buildPoolTransactionsCurrent = function(updates) {
+  this.buildCurrentTransactionsMain = function(updates) {
     let values = '';
     updates.forEach((transaction, idx) => {
       values += `(
@@ -66,28 +66,28 @@ const PoolTransactions = function (logger, configMain) {
   };
 
   // Insert Rows Using Transactions Data
-  this.insertPoolTransactionsCurrent = function(pool, updates) {
+  this.insertCurrentTransactionsMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_transactions (
+      INSERT INTO "${ pool }".current_transactions (
         timestamp, round, type)
-      VALUES ${ _this.buildPoolTransactionsCurrent(updates) }
-      ON CONFLICT ON CONSTRAINT pool_transactions_unique
+      VALUES ${ _this.buildCurrentTransactionsMain(updates) }
+      ON CONFLICT ON CONSTRAINT current_transactions_unique
       DO NOTHING RETURNING round;`;
   };
 
   // Delete Rows From Current Rounds
-  this.deletePoolTransactionsCurrent = function(pool, rounds) {
+  this.deleteCurrentTransactionsMain = function(pool, rounds) {
     return `
-      DELETE FROM "${ pool }".pool_transactions
+      DELETE FROM "${ pool }".current_transactions
       WHERE round IN (${ rounds.join(', ') });`;
   };
 
   // Delete Rows From Current Round
-  this.deletePoolTransactionsInactive = function(pool, timestamp) {
+  this.deleteCurrentTransactionsInactive = function(pool, timestamp) {
     return `
-      DELETE FROM "${ pool }".pool_transactions
+      DELETE FROM "${ pool }".current_transactions
       WHERE timestamp < ${ timestamp };`;
   };
 };
 
-module.exports = PoolTransactions;
+module.exports = CurrentTransactions;

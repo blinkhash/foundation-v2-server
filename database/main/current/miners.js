@@ -3,14 +3,14 @@ const Text = require('../../../locales/index');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const PoolMiners = function (logger, configMain) {
+const CurrentMiners = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Current Parameters
   this.numbers = ['timestamp', 'balance', 'efficiency', 'effort', 'generate', 'hashrate', 'immature', 'paid'];
   this.strings = ['miner', 'type'];
   this.parameters = ['timestamp', 'miner', 'balance', 'efficiency', 'effort', 'generate', 'hashrate',
@@ -40,9 +40,9 @@ const PoolMiners = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Miners Using Parameters
-  this.selectPoolMinersCurrent = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".pool_miners`;
+  // Select Current Miners Using Parameters
+  this.selectCurrentMinersMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_miners`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -54,7 +54,7 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Build Miners Values String
-  this.buildPoolMinersHashrate = function(updates) {
+  this.buildCurrentMinersHashrate = function(updates) {
     let values = '';
     updates.forEach((miner, idx) => {
       values += `(
@@ -68,20 +68,20 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Insert Rows Using Hashrate Data
-  this.insertPoolMinersHashrate = function(pool, updates) {
+  this.insertCurrentMinersHashrate = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_miners (
+      INSERT INTO "${ pool }".current_miners (
         timestamp, miner, hashrate,
         type)
-      VALUES ${ _this.buildPoolMinersHashrate(updates) }
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      VALUES ${ _this.buildCurrentMinersHashrate(updates) }
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
   };
 
   // Build Miners Values String
-  this.buildPoolMinersRounds = function(updates) {
+  this.buildCurrentMinersRounds = function(updates) {
     let values = '';
     updates.forEach((miner, idx) => {
       values += `(
@@ -96,13 +96,13 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Insert Rows Using Round Data
-  this.insertPoolMinersRounds = function(pool, updates) {
+  this.insertCurrentMinersRounds = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_miners (
+      INSERT INTO "${ pool }".current_miners (
         timestamp, miner, efficiency,
         effort, type)
-      VALUES ${ _this.buildPoolMinersRounds(updates) }
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      VALUES ${ _this.buildCurrentMinersRounds(updates) }
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
@@ -110,7 +110,7 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Build Miners Values String
-  this.buildPoolMinersPayments = function(updates) {
+  this.buildCurrentMinersPayments = function(updates) {
     let values = '';
     updates.forEach((miner, idx) => {
       values += `(
@@ -125,21 +125,21 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Insert Rows Using Payment Data
-  this.insertPoolMinersPayments = function(pool, updates) {
+  this.insertCurrentMinersPayments = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_miners (
+      INSERT INTO "${ pool }".current_miners (
         timestamp, miner, balance,
         paid, type)
-      VALUES ${ _this.buildPoolMinersPayments(updates) }
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      VALUES ${ _this.buildCurrentMinersPayments(updates) }
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         balance = EXCLUDED.balance,
-        paid = "${ pool }".pool_miners.paid + EXCLUDED.paid;`;
+        paid = "${ pool }".current_miners.paid + EXCLUDED.paid;`;
   };
 
   // Build Miners Values String
-  this.buildPoolMinersUpdates = function(updates) {
+  this.buildCurrentMinersUpdates = function(updates) {
     let values = '';
     updates.forEach((miner, idx) => {
       values += `(
@@ -154,13 +154,13 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Insert Rows Using Payment Data
-  this.insertPoolMinersUpdates = function(pool, updates) {
+  this.insertCurrentMinersUpdates = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_miners (
+      INSERT INTO "${ pool }".current_miners (
         timestamp, miner, generate,
         immature, type)
-      VALUES ${ _this.buildPoolMinersUpdates(updates) }
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      VALUES ${ _this.buildCurrentMinersUpdates(updates) }
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         generate = EXCLUDED.generate,
@@ -168,20 +168,20 @@ const PoolMiners = function (logger, configMain) {
   };
 
   // Insert Rows Using Reset
-  this.insertPoolMinersReset = function(pool, type) {
+  this.insertCurrentMinersReset = function(pool, type) {
     return `
-      UPDATE "${ pool }".pool_miners
+      UPDATE "${ pool }".current_miners
       SET immature = 0, generate = 0
       WHERE type = '${ type }';`;
   };
 
   // Delete Rows From Current Round
-  this.deletePoolMinersInactive = function(pool, timestamp) {
+  this.deleteCurrentMinersInactive = function(pool, timestamp) {
     return `
-      DELETE FROM "${ pool }".pool_miners
+      DELETE FROM "${ pool }".current_miners
       WHERE timestamp < ${ timestamp } AND balance = 0
       AND generate = 0 AND immature = 0 AND paid = 0;`;
   };
 };
 
-module.exports = PoolMiners;
+module.exports = CurrentMiners;

@@ -10,7 +10,7 @@ const HistoricalPayments = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Historical Parameters
   this.numbers = ['timestamp', 'amount'];
   this.strings = ['miner', 'transaction', 'type'];
   this.parameters = ['timestamp', 'miner', 'amount', 'transaction', 'type'];
@@ -39,8 +39,8 @@ const HistoricalPayments = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Payments Using Parameters
-  this.selectHistoricalPaymentsCurrent = function(pool, parameters) {
+  // Select Historical Payments Using Parameters
+  this.selectHistoricalPaymentsMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_payments`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
@@ -53,7 +53,7 @@ const HistoricalPayments = function (logger, configMain) {
   };
 
   // Build Payments Values String
-  this.buildHistoricalPaymentsCurrent = function(updates) {
+  this.buildHistoricalPaymentsMain = function(updates) {
     let values = '';
     updates.forEach((payment, idx) => {
       values += `(
@@ -67,13 +67,13 @@ const HistoricalPayments = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Payments Data
-  this.insertHistoricalPaymentsCurrent = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalPaymentsMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_payments (
         timestamp, miner, amount,
         transaction, type)
-      VALUES ${ _this.buildHistoricalPaymentsCurrent(updates) }
+      VALUES ${ _this.buildHistoricalPaymentsMain(updates) }
       ON CONFLICT DO NOTHING;`;
   };
 };

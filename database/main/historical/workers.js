@@ -10,7 +10,7 @@ const HistoricalWorkers = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Historical Parameters
   this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate'];
   this.strings = ['miner', 'worker', 'type'];
   this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'type'];
@@ -39,8 +39,8 @@ const HistoricalWorkers = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Workers Using Parameters
-  this.selectHistoricalWorkersCurrent = function(pool, parameters) {
+  // Select Historical Workers Using Parameters
+  this.selectHistoricalWorkersMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_workers`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
@@ -53,7 +53,7 @@ const HistoricalWorkers = function (logger, configMain) {
   };
 
   // Build Workers Values String
-  this.buildHistoricalWorkersCurrent = function(updates) {
+  this.buildHistoricalWorkersMain = function(updates) {
     let values = '';
     updates.forEach((worker, idx) => {
       values += `(
@@ -70,14 +70,14 @@ const HistoricalWorkers = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Current Data
-  this.insertHistoricalWorkersCurrent = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalWorkersMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, type)
-      VALUES ${ _this.buildHistoricalWorkersCurrent(updates) }
+      VALUES ${ _this.buildHistoricalWorkersMain(updates) }
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
   };

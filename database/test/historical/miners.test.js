@@ -15,8 +15,8 @@ describe('Test database miners functionality', () => {
   test('Test initialization of miners commands', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     expect(typeof miners.configMain).toBe('object');
-    expect(typeof miners.selectHistoricalMinersCurrent).toBe('function');
-    expect(typeof miners.insertHistoricalMinersCurrent).toBe('function');
+    expect(typeof miners.selectHistoricalMinersMain).toBe('function');
+    expect(typeof miners.insertHistoricalMinersMain).toBe('function');
   });
 
   test('Test query handling [1]', () => {
@@ -38,7 +38,7 @@ describe('Test database miners functionality', () => {
   test('Test miners command handling [1]', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };
-    const response = miners.selectHistoricalMinersCurrent('Pool-Main', parameters);
+    const response = miners.selectHistoricalMinersMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_miners WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -46,7 +46,7 @@ describe('Test database miners functionality', () => {
   test('Test miners command handling [2]', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = miners.selectHistoricalMinersCurrent('Pool-Main', parameters);
+    const response = miners.selectHistoricalMinersMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_miners WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -54,7 +54,7 @@ describe('Test database miners functionality', () => {
   test('Test miners command handling [3]', () => {
     const miners = new HistoricalMiners(logger, configMainCopy);
     const parameters = { type: 'primary', hmm: 'test' };
-    const response = miners.selectHistoricalMinersCurrent('Pool-Main', parameters);
+    const response = miners.selectHistoricalMinersMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_miners WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -70,7 +70,7 @@ describe('Test database miners functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertHistoricalMinersCurrent('Pool-Main', [updates]);
+    const response = miners.insertHistoricalMinersMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
@@ -100,7 +100,7 @@ describe('Test database miners functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertHistoricalMinersCurrent('Pool-Main', [updates, updates]);
+    const response = miners.insertHistoricalMinersMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,

@@ -15,8 +15,8 @@ describe('Test database metadata functionality', () => {
   test('Test initialization of metadata commands', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     expect(typeof metadata.configMain).toBe('object');
-    expect(typeof metadata.selectHistoricalMetadataCurrent).toBe('function');
-    expect(typeof metadata.insertHistoricalMetadataCurrent).toBe('function');
+    expect(typeof metadata.selectHistoricalMetadataMain).toBe('function');
+    expect(typeof metadata.insertHistoricalMetadataMain).toBe('function');
   });
 
   test('Test query handling [1]', () => {
@@ -38,7 +38,7 @@ describe('Test database metadata functionality', () => {
   test('Test metadata command handling [1]', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = metadata.selectHistoricalMetadataCurrent('Pool-Main', parameters);
+    const response = metadata.selectHistoricalMetadataMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_metadata WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -46,7 +46,7 @@ describe('Test database metadata functionality', () => {
   test('Test metadata command handling [2]', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary' };
-    const response = metadata.selectHistoricalMetadataCurrent('Pool-Main', parameters);
+    const response = metadata.selectHistoricalMetadataMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_metadata WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -54,7 +54,7 @@ describe('Test database metadata functionality', () => {
   test('Test metadata command handling [3]', () => {
     const metadata = new HistoricalMetadata(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
-    const response = metadata.selectHistoricalMetadataCurrent('Pool-Main', parameters);
+    const response = metadata.selectHistoricalMetadataMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_metadata WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -76,7 +76,7 @@ describe('Test database metadata functionality', () => {
       work: 8,
       workers: 1,
     };
-    const response = metadata.insertHistoricalMetadataCurrent('Pool-Main', [updates]);
+    const response = metadata.insertHistoricalMetadataMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_metadata (
         timestamp, recent, blocks,
@@ -119,7 +119,7 @@ describe('Test database metadata functionality', () => {
       work: 8,
       workers: 1,
     };
-    const response = metadata.insertHistoricalMetadataCurrent('Pool-Main', [updates, updates]);
+    const response = metadata.insertHistoricalMetadataMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_metadata (
         timestamp, recent, blocks,

@@ -15,8 +15,8 @@ describe('Test database blocks functionality', () => {
   test('Test initialization of blocks commands', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     expect(typeof blocks.configMain).toBe('object');
-    expect(typeof blocks.selectHistoricalBlocksCurrent).toBe('function');
-    expect(typeof blocks.insertHistoricalBlocksCurrent).toBe('function');
+    expect(typeof blocks.selectHistoricalBlocksMain).toBe('function');
+    expect(typeof blocks.insertHistoricalBlocksMain).toBe('function');
   });
 
   test('Test query handling [1]', () => {
@@ -38,7 +38,7 @@ describe('Test database blocks functionality', () => {
   test('Test block command handling [1]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };
-    const response = blocks.selectHistoricalBlocksCurrent('Pool-Main', parameters);
+    const response = blocks.selectHistoricalBlocksMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_blocks WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -46,7 +46,7 @@ describe('Test database blocks functionality', () => {
   test('Test block command handling [2]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const parameters = { worker: 'worker1', type: 'primary' };
-    const response = blocks.selectHistoricalBlocksCurrent('Pool-Main', parameters);
+    const response = blocks.selectHistoricalBlocksMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_blocks WHERE worker = \'worker1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -54,7 +54,7 @@ describe('Test database blocks functionality', () => {
   test('Test block command handling [3]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const parameters = { category: 'generate', type: 'primary' };
-    const response = blocks.selectHistoricalBlocksCurrent('Pool-Main', parameters);
+    const response = blocks.selectHistoricalBlocksMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_blocks WHERE category = \'generate\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -62,7 +62,7 @@ describe('Test database blocks functionality', () => {
   test('Test block command handling [4]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const parameters = { identifier: 'master', type: 'primary' };
-    const response = blocks.selectHistoricalBlocksCurrent('Pool-Main', parameters);
+    const response = blocks.selectHistoricalBlocksMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_blocks WHERE identifier = \'master\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -70,7 +70,7 @@ describe('Test database blocks functionality', () => {
   test('Test block command handling [5]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = blocks.selectHistoricalBlocksCurrent('Pool-Main', parameters);
+    const response = blocks.selectHistoricalBlocksMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_blocks WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -78,7 +78,7 @@ describe('Test database blocks functionality', () => {
   test('Test block command handling [6]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const parameters = { confirmations: 'gt100', solo: false };
-    const response = blocks.selectHistoricalBlocksCurrent('Pool-Main', parameters);
+    const response = blocks.selectHistoricalBlocksMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_blocks WHERE confirmations > 100 AND solo = false;';
     expect(response).toBe(expected);
   });
@@ -86,7 +86,7 @@ describe('Test database blocks functionality', () => {
   test('Test block command handling [7]', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const parameters = { confirmations: 'gt100', solo: false, hmm: 'test' };
-    const response = blocks.selectHistoricalBlocksCurrent('Pool-Main', parameters);
+    const response = blocks.selectHistoricalBlocksMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_blocks WHERE confirmations > 100 AND solo = false;';
     expect(response).toBe(expected);
   });
@@ -110,7 +110,7 @@ describe('Test database blocks functionality', () => {
       transaction: 'transaction1',
       type: 'primary'
     };
-    const response = blocks.insertHistoricalBlocksCurrent('Pool-Main', [updates]);
+    const response = blocks.insertHistoricalBlocksMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_blocks (
         timestamp, miner, worker,
@@ -158,7 +158,7 @@ describe('Test database blocks functionality', () => {
       transaction: 'transaction1',
       type: 'primary'
     };
-    const response = blocks.insertHistoricalBlocksCurrent('Pool-Main', [updates, updates]);
+    const response = blocks.insertHistoricalBlocksMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_blocks (
         timestamp, miner, worker,

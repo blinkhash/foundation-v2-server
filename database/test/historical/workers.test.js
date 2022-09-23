@@ -15,8 +15,8 @@ describe('Test database workers functionality', () => {
   test('Test initialization of workers commands', () => {
     const workers = new HistoricalWorkers(logger, configMainCopy);
     expect(typeof workers.configMain).toBe('object');
-    expect(typeof workers.selectHistoricalWorkersCurrent).toBe('function');
-    expect(typeof workers.insertHistoricalWorkersCurrent).toBe('function');
+    expect(typeof workers.selectHistoricalWorkersMain).toBe('function');
+    expect(typeof workers.insertHistoricalWorkersMain).toBe('function');
   });
 
   test('Test query handling [1]', () => {
@@ -38,7 +38,7 @@ describe('Test database workers functionality', () => {
   test('Test workers command handling [1]', () => {
     const workers = new HistoricalWorkers(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };
-    const response = workers.selectHistoricalWorkersCurrent('Pool-Main', parameters);
+    const response = workers.selectHistoricalWorkersMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_workers WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -46,7 +46,7 @@ describe('Test database workers functionality', () => {
   test('Test workers command handling [2]', () => {
     const workers = new HistoricalWorkers(logger, configMainCopy);
     const parameters = { worker: 'worker1', type: 'primary' };
-    const response = workers.selectHistoricalWorkersCurrent('Pool-Main', parameters);
+    const response = workers.selectHistoricalWorkersMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_workers WHERE worker = \'worker1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -54,7 +54,7 @@ describe('Test database workers functionality', () => {
   test('Test workers command handling [3]', () => {
     const workers = new HistoricalWorkers(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = workers.selectHistoricalWorkersCurrent('Pool-Main', parameters);
+    const response = workers.selectHistoricalWorkersMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_workers WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -62,7 +62,7 @@ describe('Test database workers functionality', () => {
   test('Test workers command handling [4]', () => {
     const workers = new HistoricalWorkers(logger, configMainCopy);
     const parameters = { type: 'primary', hmm: 'test' };
-    const response = workers.selectHistoricalWorkersCurrent('Pool-Main', parameters);
+    const response = workers.selectHistoricalWorkersMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_workers WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -79,7 +79,7 @@ describe('Test database workers functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = workers.insertHistoricalWorkersCurrent('Pool-Main', [updates]);
+    const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
@@ -111,7 +111,7 @@ describe('Test database workers functionality', () => {
       hashrate: 1,
       type: 'primary',
     };
-    const response = workers.insertHistoricalWorkersCurrent('Pool-Main', [updates, updates]);
+    const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,

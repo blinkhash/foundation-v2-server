@@ -10,7 +10,7 @@ const HistoricalMiners = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Historical Parameters
   this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate'];
   this.strings = ['miner', 'type'];
   this.parameters = ['timestamp', 'miner', 'efficiency', 'effort', 'hashrate', 'type'];
@@ -39,8 +39,8 @@ const HistoricalMiners = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Miners Using Parameters
-  this.selectHistoricalMinersCurrent = function(pool, parameters) {
+  // Select Historical Miners Using Parameters
+  this.selectHistoricalMinersMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_miners`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
@@ -53,7 +53,7 @@ const HistoricalMiners = function (logger, configMain) {
   };
 
   // Build Miners Values String
-  this.buildHistoricalMinersCurrent = function(updates) {
+  this.buildHistoricalMinersMain = function(updates) {
     let values = '';
     updates.forEach((miner, idx) => {
       values += `(
@@ -69,14 +69,14 @@ const HistoricalMiners = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Current Data
-  this.insertHistoricalMinersCurrent = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalMinersMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
         type)
-      VALUES ${ _this.buildHistoricalMinersCurrent(updates) }
+      VALUES ${ _this.buildHistoricalMinersMain(updates) }
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
   };

@@ -10,7 +10,7 @@ const HistoricalBlocks = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Historical Parameters
   _this.numbers = ['timestamp', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
   _this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
   _this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
@@ -40,8 +40,8 @@ const HistoricalBlocks = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Blocks Using Parameters
-  this.selectHistoricalBlocksCurrent = function(pool, parameters) {
+  // Select Historical Blocks Using Parameters
+  this.selectHistoricalBlocksMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_blocks`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
@@ -54,7 +54,7 @@ const HistoricalBlocks = function (logger, configMain) {
   };
 
   // Build Blocks Values String
-  this.buildHistoricalBlocksCurrent = function(updates) {
+  this.buildHistoricalBlocksMain = function(updates) {
     let values = '';
     updates.forEach((block, idx) => {
       values += `(
@@ -79,7 +79,7 @@ const HistoricalBlocks = function (logger, configMain) {
   };
 
   // Insert Rows Using Blocks Data
-  this.insertHistoricalBlocksCurrent = function(pool, updates) {
+  this.insertHistoricalBlocksMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_blocks (
         timestamp, miner, worker,
@@ -88,7 +88,7 @@ const HistoricalBlocks = function (logger, configMain) {
         identifier, luck, reward,
         round, solo, transaction,
         type)
-      VALUES ${ _this.buildHistoricalBlocksCurrent(updates) }
+      VALUES ${ _this.buildHistoricalBlocksMain(updates) }
       ON CONFLICT DO NOTHING;`;
   };
 };

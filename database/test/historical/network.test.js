@@ -15,8 +15,8 @@ describe('Test database network functionality', () => {
   test('Test initialization of network commands', () => {
     const network = new HistoricalNetwork(logger, configMainCopy);
     expect(typeof network.configMain).toBe('object');
-    expect(typeof network.selectHistoricalNetworkCurrent).toBe('function');
-    expect(typeof network.insertHistoricalNetworkCurrent).toBe('function');
+    expect(typeof network.selectHistoricalNetworkMain).toBe('function');
+    expect(typeof network.insertHistoricalNetworkMain).toBe('function');
   });
 
   test('Test query handling [1]', () => {
@@ -38,7 +38,7 @@ describe('Test database network functionality', () => {
   test('Test network command handling [1]', () => {
     const network = new HistoricalNetwork(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = network.selectHistoricalNetworkCurrent('Pool-Main', parameters);
+    const response = network.selectHistoricalNetworkMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_network WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -46,7 +46,7 @@ describe('Test database network functionality', () => {
   test('Test network command handling [2]', () => {
     const network = new HistoricalNetwork(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary' };
-    const response = network.selectHistoricalNetworkCurrent('Pool-Main', parameters);
+    const response = network.selectHistoricalNetworkMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_network WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -54,7 +54,7 @@ describe('Test database network functionality', () => {
   test('Test network command handling [3]', () => {
     const network = new HistoricalNetwork(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
-    const response = network.selectHistoricalNetworkCurrent('Pool-Main', parameters);
+    const response = network.selectHistoricalNetworkMain('Pool-Main', parameters);
     const expected = 'SELECT * FROM "Pool-Main".historical_network WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
@@ -69,7 +69,7 @@ describe('Test database network functionality', () => {
       height: 1,
       type: 'primary',
     };
-    const response = network.insertHistoricalNetworkCurrent('Pool-Main', [updates]);
+    const response = network.insertHistoricalNetworkMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_network (
         timestamp, recent, difficulty,
@@ -96,7 +96,7 @@ describe('Test database network functionality', () => {
       height: 1,
       type: 'primary',
     };
-    const response = network.insertHistoricalNetworkCurrent('Pool-Main', [updates, updates]);
+    const response = network.insertHistoricalNetworkMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_network (
         timestamp, recent, difficulty,

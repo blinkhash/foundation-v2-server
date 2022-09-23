@@ -1,6 +1,17 @@
 const Schema = require('./schema');
 const Text = require('../../locales/index');
 
+// Current Table Commands
+const CurrentBlocks = require('./current/blocks');
+const CurrentHashrate = require('./current/hashrate');
+const CurrentMetadata = require('./current/metadata');
+const CurrentMiners = require('./current/miners');
+const CurrentNetwork = require('./current/network');
+const CurrentPayments = require('./current/payments');
+const CurrentRounds = require('./current/rounds');
+const CurrentTransactions = require('./current/transactions');
+const CurrentWorkers = require('./current/workers');
+
 // Historical Table Commands
 const HistoricalBlocks = require('./historical/blocks');
 const HistoricalMetadata = require('./historical/metadata');
@@ -10,17 +21,6 @@ const HistoricalPayments = require('./historical/payments');
 const HistoricalRounds = require('./historical/rounds');
 const HistoricalTransactions = require('./historical/transactions');
 const HistoricalWorkers = require('./historical/workers');
-
-// Current Table Commands
-const PoolBlocks = require('./pool/blocks');
-const PoolHashrate = require('./pool/hashrate');
-const PoolMetadata = require('./pool/metadata');
-const PoolMiners = require('./pool/miners');
-const PoolNetwork = require('./pool/network');
-const PoolPayments = require('./pool/payments');
-const PoolRounds = require('./pool/rounds');
-const PoolTransactions = require('./pool/transactions');
-const PoolWorkers = require('./pool/workers');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +34,7 @@ const Commands = function (logger, client, configMain) {
   this.text = Text[configMain.language];
 
   // Database Table Structure
-  this.pool = {};
+  this.current = {};
   this.historical = {};
 
   // Execute Commands
@@ -66,15 +66,15 @@ const Commands = function (logger, client, configMain) {
   this.historical.workers = new HistoricalWorkers(_this.logger, _this.configMain);
 
   // Initialize Current Commands
-  this.pool.blocks = new PoolBlocks(_this.logger, _this.configMain);
-  this.pool.hashrate = new PoolHashrate(_this.logger, _this.configMain);
-  this.pool.metadata = new PoolMetadata(_this.logger, _this.configMain);
-  this.pool.miners = new PoolMiners(_this.logger, _this.configMain);
-  this.pool.network = new PoolNetwork(_this.logger, _this.configMain);
-  this.pool.payments = new PoolPayments(_this.logger, _this.configMain);
-  this.pool.rounds = new PoolRounds(_this.logger, _this.configMain);
-  this.pool.transactions = new PoolTransactions(_this.logger, _this.configMain);
-  this.pool.workers = new PoolWorkers(_this.logger, _this.configMain);
+  this.current.blocks = new CurrentBlocks(_this.logger, _this.configMain);
+  this.current.hashrate = new CurrentHashrate(_this.logger, _this.configMain);
+  this.current.metadata = new CurrentMetadata(_this.logger, _this.configMain);
+  this.current.miners = new CurrentMiners(_this.logger, _this.configMain);
+  this.current.network = new CurrentNetwork(_this.logger, _this.configMain);
+  this.current.payments = new CurrentPayments(_this.logger, _this.configMain);
+  this.current.rounds = new CurrentRounds(_this.logger, _this.configMain);
+  this.current.transactions = new CurrentTransactions(_this.logger, _this.configMain);
+  this.current.workers = new CurrentWorkers(_this.logger, _this.configMain);
 };
 
 module.exports = Commands;

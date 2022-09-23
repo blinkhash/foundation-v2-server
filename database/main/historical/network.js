@@ -10,7 +10,7 @@ const HistoricalNetwork = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Historical Parameters
   this.numbers = ['timestamp', 'difficulty', 'hashrate', 'height'];
   this.strings = ['type'];
   this.parameters = ['timestamp', 'difficulty', 'hashrate', 'height', 'type'];
@@ -39,8 +39,8 @@ const HistoricalNetwork = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Network Using Parameters
-  this.selectHistoricalNetworkCurrent = function(pool, parameters) {
+  // Select Historical Network Using Parameters
+  this.selectHistoricalNetworkMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_network`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
@@ -53,7 +53,7 @@ const HistoricalNetwork = function (logger, configMain) {
   };
 
   // Build Network Values String
-  this.buildHistoricalNetworkCurrent = function(updates) {
+  this.buildHistoricalNetworkMain = function(updates) {
     let values = '';
     updates.forEach((network, idx) => {
       values += `(
@@ -68,13 +68,13 @@ const HistoricalNetwork = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Current Data
-  this.insertHistoricalNetworkCurrent = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalNetworkMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_network (
         timestamp, recent, difficulty,
         hashrate, height, type)
-      VALUES ${ _this.buildHistoricalNetworkCurrent(updates) }
+      VALUES ${ _this.buildHistoricalNetworkMain(updates) }
       ON CONFLICT ON CONSTRAINT historical_network_recent
       DO NOTHING;`;
   };

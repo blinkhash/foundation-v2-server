@@ -15,11 +15,11 @@ const Checks = function (logger, client, config, configMain) {
 
   // Database Variables
   this.executor = _this.client.commands.executor;
-  this.current = _this.client.commands.pool;
+  this.current = _this.client.commands.current;
   this.historical = _this.client.commands.historical;
 
   // Handle Blocks Updates
-  this.handleBlocks = function(blocks) {
+  this.handleCurrentBlocks = function(blocks) {
 
     // Return Blocks Updates
     return blocks.map((block) => {
@@ -44,7 +44,7 @@ const Checks = function (logger, client, config, configMain) {
   };
 
   // Handle Miners Updates
-  this.handleMiners = function(miners, blockType) {
+  this.handleCurrentMiners = function(miners, blockType) {
 
     // Return Miners Updates
     return Object.keys(miners).map((address) => {
@@ -59,7 +59,7 @@ const Checks = function (logger, client, config, configMain) {
   };
 
   // Handle Round Updates
-  this.handleOrphans = function(rounds) {
+  this.handleCurrentOrphans = function(rounds) {
 
     // Flatten Nested Round Array
     const combined = {};
@@ -108,7 +108,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Remove Finished Transactions from Table
     const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.current.transactions.deletePoolTransactionsCurrent(
+    transaction.push(_this.current.transactions.deleteCurrentTransactionsMain(
       _this.pool, transactionsDelete));
 
     // Insert Work into Database
@@ -124,7 +124,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Remove Finished Transactions from Table
     const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.current.transactions.deletePoolTransactionsCurrent(
+    transaction.push(_this.current.transactions.deleteCurrentTransactionsMain(
       _this.pool, transactionsDelete));
 
     // Insert Work into Database
@@ -138,7 +138,7 @@ const Checks = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.miners.insertPoolMinersReset(_this.pool, blockType),
+      _this.current.miners.insertCurrentMinersReset(_this.pool, blockType),
       'COMMIT;'];
 
     // Insert Work into Database
@@ -159,51 +159,51 @@ const Checks = function (logger, client, config, configMain) {
     const generateBlocks = blocks.filter((block) => block.category === 'generate');
 
     // Handle Historical Orphan Block Updates
-    const orphanBlocksUpdates = _this.handleBlocks(orphanBlocks);
+    const orphanBlocksUpdates = _this.handleCurrentBlocks(orphanBlocks);
     if (orphanBlocksUpdates.length >= 1) {
-      transaction.push(_this.historical.blocks.insertHistoricalBlocksCurrent(
+      transaction.push(_this.historical.blocks.insertHistoricalBlocksMain(
         _this.pool, orphanBlocksUpdates));
     }
 
     // Handle Orphan Block Delete Updates
     const orphanBlocksDelete = orphanBlocks.map((block) => `'${ block.round }'`);
     if (orphanBlocksDelete.length >= 1) {
-      transaction.push(_this.current.blocks.deletePoolBlocksCurrent(
+      transaction.push(_this.current.blocks.deleteCurrentBlocksMain(
         _this.pool, orphanBlocksDelete));
     }
 
     // Handle Immature Block Updates
-    const immatureBlocksUpdates = _this.handleBlocks(immatureBlocks);
+    const immatureBlocksUpdates = _this.handleCurrentBlocks(immatureBlocks);
     if (immatureBlocksUpdates.length >= 1) {
-      transaction.push(_this.current.blocks.insertPoolBlocksCurrent(
+      transaction.push(_this.current.blocks.insertCurrentBlocksMain(
         _this.pool, immatureBlocksUpdates));
     }
 
     // Handle Generate Block Updates
-    const generateBlocksUpdates = _this.handleBlocks(generateBlocks);
+    const generateBlocksUpdates = _this.handleCurrentBlocks(generateBlocks);
     if (generateBlocksUpdates.length >= 1) {
-      transaction.push(_this.current.blocks.insertPoolBlocksCurrent(
+      transaction.push(_this.current.blocks.insertCurrentBlocksMain(
         _this.pool, generateBlocksUpdates));
     }
 
     // Handle Miner Payment Updates
-    const minersUpdates = _this.handleMiners(payments, blockType);
+    const minersUpdates = _this.handleCurrentMiners(payments, blockType);
     if (minersUpdates.length >= 1) {
-      transaction.push(_this.current.miners.insertPoolMinersUpdates(
+      transaction.push(_this.current.miners.insertCurrentMinersUpdates(
         _this.pool, minersUpdates));
     }
 
     // Handle Orphan Round Delete Updates
     const orphanRoundsDelete = orphanBlocks.map((block) => `'${ block.round }'`);
     if (orphanRoundsDelete.length >= 1) {
-      transaction.push(_this.current.rounds.deletePoolRoundsCurrent(
+      transaction.push(_this.current.rounds.deleteCurrentRoundsMain(
         _this.pool, orphanRoundsDelete));
     }
 
     // Handle Orphan Round Updates
-    const orphanRoundsUpdates = _this.handleOrphans(orphanRounds);
+    const orphanRoundsUpdates = _this.handleCurrentOrphans(orphanRounds);
     if (orphanRoundsUpdates.length >= 1) {
-      transaction.push(_this.current.rounds.insertPoolRoundsCurrent(
+      transaction.push(_this.current.rounds.insertCurrentRoundsMain(
         _this.pool, orphanRoundsUpdates));
     }
 
@@ -221,7 +221,7 @@ const Checks = function (logger, client, config, configMain) {
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
       const parameters = { solo: block.solo, round: block.round, type: 'primary' };
-      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+      transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
 
@@ -249,7 +249,7 @@ const Checks = function (logger, client, config, configMain) {
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
       const parameters = { solo: block.solo, round: block.round, type: 'auxiliary' };
-      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+      transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
 
@@ -284,7 +284,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Add Checks to Transactions Table
     if (checks.length >= 1) {
-      transaction.push(_this.current.transactions.insertPoolTransactionsCurrent(_this.pool, checks));
+      transaction.push(_this.current.transactions.insertCurrentTransactionsMain(_this.pool, checks));
     }
 
     // Establish Separate Behavior
@@ -361,7 +361,7 @@ const Checks = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.blocks.selectPoolBlocksCurrent(_this.pool, { type: blockType }),
+      _this.current.blocks.selectCurrentBlocksMain(_this.pool, { type: blockType }),
       'COMMIT;'];
 
     // Establish Separate Behavior

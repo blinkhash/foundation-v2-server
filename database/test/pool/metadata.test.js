@@ -1,4 +1,4 @@
-const PoolMetadata = require('../../main/pool/metadata');
+const CurrentMetadata = require('../../main/current/metadata');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main.js');
 const logger = new Logger(configMain);
@@ -13,20 +13,20 @@ describe('Test database metadata functionality', () => {
   });
 
   test('Test initialization of metadata commands', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     expect(typeof metadata.configMain).toBe('object');
-    expect(typeof metadata.selectPoolMetadataCurrent).toBe('function');
-    expect(typeof metadata.insertPoolMetadataHashrate).toBe('function');
+    expect(typeof metadata.selectCurrentMetadataMain).toBe('function');
+    expect(typeof metadata.insertCurrentMetadataHashrate).toBe('function');
   });
 
   test('Test query handling [1]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     expect(metadata.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
     expect(metadata.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
   });
 
   test('Test query handling [2]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     expect(metadata.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
     expect(metadata.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
     expect(metadata.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
@@ -36,61 +36,61 @@ describe('Test database metadata functionality', () => {
   });
 
   test('Test metadata command handling [1]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = metadata.selectPoolMetadataCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_metadata WHERE type = \'primary\';';
+    const response = metadata.selectCurrentMetadataMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_metadata WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [2]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary' };
-    const response = metadata.selectPoolMetadataCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_metadata WHERE timestamp >= 1 AND type = \'primary\';';
+    const response = metadata.selectCurrentMetadataMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_metadata WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [3]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', type: 'primary', hmm: 'test' };
-    const response = metadata.selectPoolMetadataCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_metadata WHERE timestamp >= 1 AND type = \'primary\';';
+    const response = metadata.selectCurrentMetadataMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_metadata WHERE timestamp >= 1 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [4]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       blocks: 1,
       type: 'primary',
     };
-    const response = metadata.insertPoolMetadataBlocks('Pool-Main', [updates]);
+    const response = metadata.insertCurrentMetadataBlocks('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1,
         1,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = "Pool-Main".pool_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Main".current_metadata.blocks + EXCLUDED.blocks;`;
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [5]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       blocks: 1,
       type: 'primary',
     };
-    const response = metadata.insertPoolMetadataBlocks('Pool-Main', [updates, updates]);
+    const response = metadata.insertCurrentMetadataBlocks('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1,
@@ -99,15 +99,15 @@ describe('Test database metadata functionality', () => {
         1,
         1,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = "Pool-Main".pool_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Main".current_metadata.blocks + EXCLUDED.blocks;`;
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [6]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       hashrate: 1,
@@ -115,9 +115,9 @@ describe('Test database metadata functionality', () => {
       type: 'primary',
       workers: 1,
     };
-    const response = metadata.insertPoolMetadataHashrate('Pool-Main', [updates]);
+    const response = metadata.insertCurrentMetadataHashrate('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, hashrate, miners,
         type, workers)
       VALUES (
@@ -126,7 +126,7 @@ describe('Test database metadata functionality', () => {
         1,
         'primary',
         1)
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate,
@@ -136,7 +136,7 @@ describe('Test database metadata functionality', () => {
   });
 
   test('Test metadata command handling [7]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       hashrate: 1,
@@ -144,9 +144,9 @@ describe('Test database metadata functionality', () => {
       type: 'primary',
       workers: 1,
     };
-    const response = metadata.insertPoolMetadataHashrate('Pool-Main', [updates, updates]);
+    const response = metadata.insertCurrentMetadataHashrate('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, hashrate, miners,
         type, workers)
       VALUES (
@@ -160,7 +160,7 @@ describe('Test database metadata functionality', () => {
         1,
         'primary',
         1)
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate,
@@ -170,18 +170,18 @@ describe('Test database metadata functionality', () => {
   });
 
   test('Test metadata command handling [8]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = { timestamp: 1, type: 'primary' };
-    const response = metadata.insertPoolMetadataRoundsReset('Pool-Main', [updates]);
+    const response = metadata.insertCurrentMetadataRoundsReset('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
       VALUES (
         1,
         0, 0, 0, 0, 'primary', 0, 0)
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = 0, effort = 0, invalid = 0,
@@ -190,11 +190,11 @@ describe('Test database metadata functionality', () => {
   });
 
   test('Test metadata command handling [9]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = { timestamp: 1, type: 'primary' };
-    const response = metadata.insertPoolMetadataRoundsReset('Pool-Main', [updates, updates]);
+    const response = metadata.insertCurrentMetadataRoundsReset('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -203,7 +203,7 @@ describe('Test database metadata functionality', () => {
         0, 0, 0, 0, 'primary', 0, 0), (
         1,
         0, 0, 0, 0, 'primary', 0, 0)
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = 0, effort = 0, invalid = 0,
@@ -212,7 +212,7 @@ describe('Test database metadata functionality', () => {
   });
 
   test('Test metadata command handling [10]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       efficiency: 100,
@@ -223,9 +223,9 @@ describe('Test database metadata functionality', () => {
       valid: 1,
       work: 8,
     };
-    const response = metadata.insertPoolMetadataRounds('Pool-Main', [updates]);
+    const response = metadata.insertCurrentMetadataRounds('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -238,20 +238,20 @@ describe('Test database metadata functionality', () => {
         'primary',
         1,
         8)
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
         effort = EXCLUDED.effort,
-        invalid = "Pool-Main".pool_metadata.invalid + EXCLUDED.invalid,
-        stale = "Pool-Main".pool_metadata.stale + EXCLUDED.stale,
-        valid = "Pool-Main".pool_metadata.valid + EXCLUDED.valid,
-        work = "Pool-Main".pool_metadata.work + EXCLUDED.work;`;
+        invalid = "Pool-Main".current_metadata.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".current_metadata.stale + EXCLUDED.stale,
+        valid = "Pool-Main".current_metadata.valid + EXCLUDED.valid,
+        work = "Pool-Main".current_metadata.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
   });
 
   test('Test metadata command handling [11]', () => {
-    const metadata = new PoolMetadata(logger, configMainCopy);
+    const metadata = new CurrentMetadata(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       efficiency: 100,
@@ -262,9 +262,9 @@ describe('Test database metadata functionality', () => {
       valid: 1,
       work: 8,
     };
-    const response = metadata.insertPoolMetadataRounds('Pool-Main', [updates, updates]);
+    const response = metadata.insertCurrentMetadataRounds('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_metadata (
+      INSERT INTO "Pool-Main".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -285,15 +285,15 @@ describe('Test database metadata functionality', () => {
         'primary',
         1,
         8)
-      ON CONFLICT ON CONSTRAINT pool_metadata_unique
+      ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
         effort = EXCLUDED.effort,
-        invalid = "Pool-Main".pool_metadata.invalid + EXCLUDED.invalid,
-        stale = "Pool-Main".pool_metadata.stale + EXCLUDED.stale,
-        valid = "Pool-Main".pool_metadata.valid + EXCLUDED.valid,
-        work = "Pool-Main".pool_metadata.work + EXCLUDED.work;`;
+        invalid = "Pool-Main".current_metadata.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".current_metadata.stale + EXCLUDED.stale,
+        valid = "Pool-Main".current_metadata.valid + EXCLUDED.valid,
+        work = "Pool-Main".current_metadata.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
   });
 });

@@ -337,17 +337,17 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_blocks');`;
+        AND table_name = 'current_blocks');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolBlocks('Pool-Main', (results) => {
+    schema.selectCurrentBlocks('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [20]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_blocks(
+      CREATE TABLE "Pool-Main".current_blocks(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
@@ -364,15 +364,15 @@ describe('Test schema functionality', () => {
         solo BOOLEAN NOT NULL DEFAULT false,
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_blocks_unique UNIQUE (round, type));
-      CREATE INDEX pool_blocks_miner ON "Pool-Main".pool_blocks(miner, type);
-      CREATE INDEX pool_blocks_worker ON "Pool-Main".pool_blocks(worker, type);
-      CREATE INDEX pool_blocks_category ON "Pool-Main".pool_blocks(category, type);
-      CREATE INDEX pool_blocks_identifier ON "Pool-Main".pool_blocks(identifier, type);
-      CREATE INDEX pool_blocks_type ON "Pool-Main".pool_blocks(type);`;
+        CONSTRAINT current_blocks_unique UNIQUE (round, type));
+      CREATE INDEX current_blocks_miner ON "Pool-Main".current_blocks(miner, type);
+      CREATE INDEX current_blocks_worker ON "Pool-Main".current_blocks(worker, type);
+      CREATE INDEX current_blocks_category ON "Pool-Main".current_blocks(category, type);
+      CREATE INDEX current_blocks_identifier ON "Pool-Main".current_blocks(identifier, type);
+      CREATE INDEX current_blocks_type ON "Pool-Main".current_blocks(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolBlocks('Pool-Main', () => {});
+    schema.createCurrentBlocks('Pool-Main', () => {});
   });
 
   test('Test schema functionality [21]', () => {
@@ -381,17 +381,17 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_hashrate');`;
+        AND table_name = 'current_hashrate');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolHashrate('Pool-Main', (results) => {
+    schema.selectCurrentHashrate('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [22]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_hashrate(
+      CREATE TABLE "Pool-Main".current_hashrate(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
@@ -399,12 +399,12 @@ describe('Test schema functionality', () => {
         solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
         work FLOAT NOT NULL DEFAULT 0);
-      CREATE INDEX pool_hashrate_miner ON "Pool-Main".pool_hashrate(timestamp, miner, solo, type);
-      CREATE INDEX pool_hashrate_worker ON "Pool-Main".pool_hashrate(timestamp, worker, solo, type);
-      CREATE INDEX pool_hashrate_type ON "Pool-Main".pool_hashrate(timestamp, solo, type);`;
+      CREATE INDEX current_hashrate_miner ON "Pool-Main".current_hashrate(timestamp, miner, solo, type);
+      CREATE INDEX current_hashrate_worker ON "Pool-Main".current_hashrate(timestamp, worker, solo, type);
+      CREATE INDEX current_hashrate_type ON "Pool-Main".current_hashrate(timestamp, solo, type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolHashrate('Pool-Main', () => {});
+    schema.createCurrentHashrate('Pool-Main', () => {});
   });
 
   test('Test schema functionality [23]', () => {
@@ -413,17 +413,17 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_metadata');`;
+        AND table_name = 'current_metadata');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolMetadata('Pool-Main', (results) => {
+    schema.selectCurrentMetadata('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [24]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_metadata(
+      CREATE TABLE "Pool-Main".current_metadata(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         blocks INT NOT NULL DEFAULT 0,
@@ -437,11 +437,11 @@ describe('Test schema functionality', () => {
         valid INT NOT NULL DEFAULT 0,
         work FLOAT NOT NULL DEFAULT 0,
         workers INT NOT NULL DEFAULT 0,
-        CONSTRAINT pool_metadata_unique UNIQUE (type));
-      CREATE INDEX pool_metadata_type ON "Pool-Main".pool_metadata(type);`;
+        CONSTRAINT current_metadata_unique UNIQUE (type));
+      CREATE INDEX current_metadata_type ON "Pool-Main".current_metadata(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolMetadata('Pool-Main', () => {});
+    schema.createCurrentMetadata('Pool-Main', () => {});
   });
 
   test('Test schema functionality [25]', () => {
@@ -450,17 +450,17 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_miners');`;
+        AND table_name = 'current_miners');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolMiners('Pool-Main', (results) => {
+    schema.selectCurrentMiners('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [26]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_miners(
+      CREATE TABLE "Pool-Main".current_miners(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
@@ -472,13 +472,13 @@ describe('Test schema functionality', () => {
         immature FLOAT NOT NULL DEFAULT 0,
         paid FLOAT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_miners_unique UNIQUE (miner, type));
-      CREATE INDEX pool_miners_balance ON "Pool-Main".pool_miners(balance, type);
-      CREATE INDEX pool_miners_miner ON "Pool-Main".pool_miners(miner, type);
-      CREATE INDEX pool_miners_type ON "Pool-Main".pool_miners(type);`;
+        CONSTRAINT current_miners_unique UNIQUE (miner, type));
+      CREATE INDEX current_miners_balance ON "Pool-Main".current_miners(balance, type);
+      CREATE INDEX current_miners_miner ON "Pool-Main".current_miners(miner, type);
+      CREATE INDEX current_miners_type ON "Pool-Main".current_miners(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolMiners('Pool-Main', () => {});
+    schema.createCurrentMiners('Pool-Main', () => {});
   });
 
   test('Test schema functionality [27]', () => {
@@ -487,28 +487,28 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_network');`;
+        AND table_name = 'current_network');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolNetwork('Pool-Main', (results) => {
+    schema.selectCurrentNetwork('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [28]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_network(
+      CREATE TABLE "Pool-Main".current_network(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         difficulty FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
         height INT NOT NULL DEFAULT -1,
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_network_unique UNIQUE (type));
-      CREATE INDEX pool_network_type ON "Pool-Main".pool_network(type);`;
+        CONSTRAINT current_network_unique UNIQUE (type));
+      CREATE INDEX current_network_type ON "Pool-Main".current_network(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolNetwork('Pool-Main', () => {});
+    schema.createCurrentNetwork('Pool-Main', () => {});
   });
 
   test('Test schema functionality [29]', () => {
@@ -517,26 +517,26 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_payments');`;
+        AND table_name = 'current_payments');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolPayments('Pool-Main', (results) => {
+    schema.selectCurrentPayments('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [30]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_payments(
+      CREATE TABLE "Pool-Main".current_payments(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         round VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_payments_unique UNIQUE (round, type));
-      CREATE INDEX pool_payments_type ON "Pool-Main".pool_payments(type);`;
+        CONSTRAINT current_payments_unique UNIQUE (round, type));
+      CREATE INDEX current_payments_type ON "Pool-Main".current_payments(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolPayments('Pool-Main', () => {});
+    schema.createCurrentPayments('Pool-Main', () => {});
   });
 
   test('Test schema functionality [31]', () => {
@@ -545,17 +545,17 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_rounds');`;
+        AND table_name = 'current_rounds');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolRounds('Pool-Main', (results) => {
+    schema.selectCurrentRounds('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [32]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_rounds(
+      CREATE TABLE "Pool-Main".current_rounds(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
@@ -569,16 +569,16 @@ describe('Test schema functionality', () => {
         type VARCHAR NOT NULL DEFAULT 'primary',
         valid INT NOT NULL DEFAULT 0,
         work FLOAT NOT NULL DEFAULT 0,
-        CONSTRAINT pool_rounds_unique UNIQUE (worker, solo, round, type));
-      CREATE INDEX pool_rounds_miner ON "Pool-Main".pool_rounds(miner, type);
-      CREATE INDEX pool_rounds_worker ON "Pool-Main".pool_rounds(worker, type);
-      CREATE INDEX pool_rounds_identifier ON "Pool-Main".pool_rounds(identifier, type);
-      CREATE INDEX pool_rounds_round ON "Pool-Main".pool_rounds(solo, round, type);
-      CREATE INDEX pool_rounds_historical ON "Pool-Main".pool_rounds(worker, solo, type);
-      CREATE INDEX pool_rounds_combined ON "Pool-Main".pool_rounds(worker, solo, round, type);`;
+        CONSTRAINT current_rounds_unique UNIQUE (worker, solo, round, type));
+      CREATE INDEX current_rounds_miner ON "Pool-Main".current_rounds(miner, type);
+      CREATE INDEX current_rounds_worker ON "Pool-Main".current_rounds(worker, type);
+      CREATE INDEX current_rounds_identifier ON "Pool-Main".current_rounds(identifier, type);
+      CREATE INDEX current_rounds_round ON "Pool-Main".current_rounds(solo, round, type);
+      CREATE INDEX current_rounds_historical ON "Pool-Main".current_rounds(worker, solo, type);
+      CREATE INDEX current_rounds_combined ON "Pool-Main".current_rounds(worker, solo, round, type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolRounds('Pool-Main', () => {});
+    schema.createCurrentRounds('Pool-Main', () => {});
   });
 
   test('Test schema functionality [33]', () => {
@@ -587,26 +587,26 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_transactions');`;
+        AND table_name = 'current_transactions');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolTransactions('Pool-Main', (results) => {
+    schema.selectCurrentTransactions('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [34]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_transactions(
+      CREATE TABLE "Pool-Main".current_transactions(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         round VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_transactions_unique UNIQUE (round, type));
-      CREATE INDEX pool_transactions_type ON "Pool-Main".pool_transactions(type);`;
+        CONSTRAINT current_transactions_unique UNIQUE (round, type));
+      CREATE INDEX current_transactions_type ON "Pool-Main".current_transactions(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolTransactions('Pool-Main', () => {});
+    schema.createCurrentTransactions('Pool-Main', () => {});
   });
 
   test('Test schema functionality [35]', () => {
@@ -615,17 +615,17 @@ describe('Test schema functionality', () => {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
-        AND table_name = 'pool_workers');`;
+        AND table_name = 'current_workers');`;
     const executor = mockExecutor(results, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.selectPoolWorkers('Pool-Main', (results) => {
+    schema.selectCurrentWorkers('Pool-Main', (results) => {
       expect(results).toBe(true);
     });
   });
 
   test('Test schema functionality [36]', () => {
     const expected = `
-      CREATE TABLE "Pool-Main".pool_workers(
+      CREATE TABLE "Pool-Main".current_workers(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
@@ -635,13 +635,13 @@ describe('Test schema functionality', () => {
         hashrate FLOAT NOT NULL DEFAULT 0,
         solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT pool_workers_unique UNIQUE (worker, solo, type));
-      CREATE INDEX pool_workers_miner ON "Pool-Main".pool_workers(miner, type);
-      CREATE INDEX pool_workers_solo ON "Pool-Main".pool_workers(solo, type);
-      CREATE INDEX pool_workers_worker ON "Pool-Main".pool_workers(worker, type);
-      CREATE INDEX pool_workers_type ON "Pool-Main".pool_workers(type);`;
+        CONSTRAINT current_workers_unique UNIQUE (worker, solo, type));
+      CREATE INDEX current_workers_miner ON "Pool-Main".current_workers(miner, type);
+      CREATE INDEX current_workers_solo ON "Pool-Main".current_workers(solo, type);
+      CREATE INDEX current_workers_worker ON "Pool-Main".current_workers(worker, type);
+      CREATE INDEX current_workers_type ON "Pool-Main".current_workers(type);`;
     const executor = mockExecutor(null, expected);
     const schema = new Schema(logger, executor, configMainCopy);
-    schema.createPoolWorkers('Pool-Main', () => {});
+    schema.createCurrentWorkers('Pool-Main', () => {});
   });
 });

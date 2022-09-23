@@ -15,8 +15,50 @@ const Payments = function (logger, client, config, configMain) {
 
   // Database Variables
   this.executor = _this.client.commands.executor;
-  this.current = _this.client.commands.pool;
+  this.current = _this.client.commands.current;
   this.historical = _this.client.commands.historical;
+
+  // Combine Balances and Payments
+  this.handleCurrentCombined = function(balances, payments) {
+
+    // Iterate Through Payments
+    const combined = Object.assign(balances, {});
+    Object.keys(payments).forEach((address) => {
+      if (address in combined) combined[address] += payments[address].generate;
+      else combined[address] = payments[address].generate;
+    });
+
+    // Return Combined Payments
+    return combined;
+  };
+
+  // Handle Miners Updates
+  this.handleCurrentMiners = function(amounts, balances, blockType) {
+
+    // Iterate Through Amounts
+    const combined = {};
+    Object.keys(amounts).forEach((address) => {
+      if (address in combined) combined[address].paid += amounts[address];
+      else combined[address] = { balance: 0, paid: amounts[address] };
+    });
+
+    // Iterate Through Balances
+    Object.keys(balances).forEach((address) => {
+      if (address in combined) combined[address].balance += balances[address];
+      else combined[address] = { balance: balances[address], paid: 0 };
+    });
+
+    // Return Miners Updates
+    return Object.keys(combined).map((miner) => {
+      return {
+        timestamp: Date.now(),
+        miner: miner,
+        balance: combined[miner].balance,
+        paid: combined[miner].paid,
+        type: blockType,
+      };
+    });
+  };
 
   // Handle Historical Blocks Updates
   this.handleHistoricalBlocks = function(blocks) {
@@ -103,48 +145,6 @@ const Payments = function (logger, client, config, configMain) {
     };
   };
 
-  // Combine Balances and Payments
-  this.handleCombined = function(balances, payments) {
-
-    // Iterate Through Payments
-    const combined = Object.assign(balances, {});
-    Object.keys(payments).forEach((address) => {
-      if (address in combined) combined[address] += payments[address].generate;
-      else combined[address] = payments[address].generate;
-    });
-
-    // Return Combined Payments
-    return combined;
-  };
-
-  // Handle Miners Updates
-  this.handleMiners = function(amounts, balances, blockType) {
-
-    // Iterate Through Amounts
-    const combined = {};
-    Object.keys(amounts).forEach((address) => {
-      if (address in combined) combined[address].paid += amounts[address];
-      else combined[address] = { balance: 0, paid: amounts[address] };
-    });
-
-    // Iterate Through Balances
-    Object.keys(balances).forEach((address) => {
-      if (address in combined) combined[address].balance += balances[address];
-      else combined[address] = { balance: balances[address], paid: 0 };
-    });
-
-    // Return Miners Updates
-    return Object.keys(combined).map((miner) => {
-      return {
-        timestamp: Date.now(),
-        miner: miner,
-        balance: combined[miner].balance,
-        paid: combined[miner].paid,
-        type: blockType,
-      };
-    });
-  };
-
   // Handle Round Failure Updates
   this.handleFailures = function(blocks, callback) {
 
@@ -153,7 +153,7 @@ const Payments = function (logger, client, config, configMain) {
 
     // Remove Finished Payments from Table
     const paymentsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.current.payments.deletePoolPaymentsCurrent(
+    transaction.push(_this.current.payments.deleteCurrentPaymentsMain(
       _this.pool, paymentsDelete));
 
     // Insert Work into Database
@@ -169,7 +169,7 @@ const Payments = function (logger, client, config, configMain) {
 
     // Remove Finished Transactions from Table
     const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.current.transactions.deletePoolTransactionsCurrent(
+    transaction.push(_this.current.transactions.deleteCurrentTransactionsMain(
       _this.pool, transactionsDelete));
 
     // Insert Work into Database
@@ -183,7 +183,7 @@ const Payments = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.miners.insertPoolMinersReset(_this.pool, blockType),
+      _this.current.miners.insertCurrentMinersReset(_this.pool, blockType),
       'COMMIT;'];
 
     // Insert Work into Database
@@ -199,49 +199,49 @@ const Payments = function (logger, client, config, configMain) {
     // Handle Historical Generate Block Updates
     const generateBlocksUpdates = _this.handleHistoricalBlocks(blocks);
     if (generateBlocksUpdates.length >= 1) {
-      transaction.push(_this.historical.blocks.insertHistoricalBlocksCurrent(
+      transaction.push(_this.historical.blocks.insertHistoricalBlocksMain(
         _this.pool, generateBlocksUpdates));
     }
 
     // Handle Historical Payments Updates
     const paymentsUpdates = _this.handleHistoricalPayments(amounts, record, blockType);
     if (paymentsUpdates.length >= 1) {
-      transaction.push(_this.historical.payments.insertHistoricalPaymentsCurrent(
+      transaction.push(_this.historical.payments.insertHistoricalPaymentsMain(
         _this.pool, paymentsUpdates));
     }
 
     // Handle Historical Generate Round Updates
     const generateRoundsUpdates = _this.handleHistoricalRounds(rounds);
     if (generateRoundsUpdates.length >= 1) {
-      transaction.push(_this.historical.rounds.insertHistoricalRoundsCurrent(
+      transaction.push(_this.historical.rounds.insertHistoricalRoundsMain(
         _this.pool, generateRoundsUpdates));
     }
 
     // Handle Historical Transactions Updates
     const transactionsUpdates = _this.handleHistoricalTransactions(amounts, record, blockType);
     if (record !== null) {
-      transaction.push(_this.historical.transactions.insertHistoricalTransactionsCurrent(
+      transaction.push(_this.historical.transactions.insertHistoricalTransactionsMain(
         _this.pool, [transactionsUpdates]));
     }
 
     // Handle Generate Block Delete Updates
     const generateBlocksDelete = blocks.map((block) => `'${ block.round }'`);
     if (generateBlocksDelete.length >= 1) {
-      transaction.push(_this.current.blocks.deletePoolBlocksCurrent(
+      transaction.push(_this.current.blocks.deleteCurrentBlocksMain(
         _this.pool, generateBlocksDelete));
     }
 
     // Handle Miners Updates
-    const minersUpdates = _this.handleMiners(amounts, balances, blockType);
+    const minersUpdates = _this.handleCurrentMiners(amounts, balances, blockType);
     if (minersUpdates.length >= 1) {
-      transaction.push(_this.current.miners.insertPoolMinersPayments(
+      transaction.push(_this.current.miners.insertCurrentMinersPayments(
         _this.pool, minersUpdates));
     }
 
     // Handle Generate Round Delete Updates
     const generateRoundsDelete = blocks.map((block) => `'${ block.round }'`);
     if (generateRoundsDelete.length >= 1) {
-      transaction.push(_this.current.rounds.deletePoolRoundsCurrent(
+      transaction.push(_this.current.rounds.deleteCurrentRoundsMain(
         _this.pool, generateRoundsDelete));
     }
 
@@ -259,7 +259,7 @@ const Payments = function (logger, client, config, configMain) {
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
       const parameters = { solo: block.solo, round: block.round, type: 'primary' };
-      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+      transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
 
@@ -272,7 +272,7 @@ const Payments = function (logger, client, config, configMain) {
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
-          const payments = _this.handleCombined(balances, results);
+          const payments = _this.handleCurrentCombined(balances, results);
 
           // Validate and Send Out Primary Payments
           _this.stratum.stratum.handlePrimaryBalances(payments, (error) => {
@@ -296,7 +296,7 @@ const Payments = function (logger, client, config, configMain) {
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
       const parameters = { solo: block.solo, round: block.round, type: 'auxiliary' };
-      transaction.push(_this.current.rounds.selectPoolRoundsCurrent(
+      transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
 
@@ -309,7 +309,7 @@ const Payments = function (logger, client, config, configMain) {
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
         else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
-          const payments = _this.handleCombined(balances, results);
+          const payments = _this.handleCurrentCombined(balances, results);
 
           // Validate and Send Out Auxiliary Payments
           _this.stratum.stratum.handleAuxiliaryBalances(payments, (error) => {
@@ -349,7 +349,7 @@ const Payments = function (logger, client, config, configMain) {
 
     // Add Checks to Payments Table
     if (checks.length >= 1) {
-      transaction.push(_this.current.payments.insertPoolPaymentsCurrent(_this.pool, checks));
+      transaction.push(_this.current.payments.insertCurrentPaymentsMain(_this.pool, checks));
     }
 
     // Establish Separate Behavior
@@ -426,8 +426,8 @@ const Payments = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
-      _this.current.blocks.selectPoolBlocksCurrent(_this.pool, { category: 'generate', type: blockType }),
-      _this.current.miners.selectPoolMinersCurrent(_this.pool, { balance: 'gt0', type: blockType }),
+      _this.current.blocks.selectCurrentBlocksMain(_this.pool, { category: 'generate', type: blockType }),
+      _this.current.miners.selectCurrentMinersMain(_this.pool, { balance: 'gt0', type: blockType }),
       'COMMIT;'];
 
     // Establish Separate Behavior

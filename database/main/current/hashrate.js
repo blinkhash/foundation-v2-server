@@ -3,14 +3,14 @@ const Text = require('../../../locales/index');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const PoolHashrate = function (logger, configMain) {
+const CurrentHashrate = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Current Parameters
   _this.numbers = ['timestamp', 'work'];
   _this.strings = ['miner', 'worker', 'type'];
   _this.parameters = ['timestamp', 'miner', 'worker', 'solo', 'type', 'work'];
@@ -39,9 +39,9 @@ const PoolHashrate = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Hashrate Using Parameters
-  this.selectPoolHashrateCurrent = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".pool_hashrate`;
+  // Select Current Hashrate Using Parameters
+  this.selectCurrentHashrateMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_hashrate`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -53,54 +53,54 @@ const PoolHashrate = function (logger, configMain) {
   };
 
   // Select Count of Distinct Miners
-  this.countPoolHashrateMiner = function(pool, timestamp, solo, type) {
+  this.countCurrentHashrateMiner = function(pool, timestamp, solo, type) {
     return `
       SELECT CAST(COUNT(DISTINCT miner) AS INT)
-      FROM "${ pool }".pool_hashrate
+      FROM "${ pool }".current_hashrate
       WHERE timestamp >= ${ timestamp }
       AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Select Sum of Rows Using Miners
-  this.sumPoolHashrateMiner = function(pool, timestamp, solo, type) {
+  this.sumCurrentHashrateMiner = function(pool, timestamp, solo, type) {
     return `
       SELECT miner, SUM(work) as current_work
-      FROM "${ pool }".pool_hashrate
+      FROM "${ pool }".current_hashrate
       WHERE timestamp >= ${ timestamp }
       AND solo = ${ solo } AND type = '${ type }'
       GROUP BY miner;`;
   };
 
   // Select Count of Distinct Workers
-  this.countPoolHashrateWorker = function(pool, timestamp, solo, type) {
+  this.countCurrentHashrateWorker = function(pool, timestamp, solo, type) {
     return `
       SELECT CAST(COUNT(DISTINCT worker) AS INT)
-      FROM "${ pool }".pool_hashrate
+      FROM "${ pool }".current_hashrate
       WHERE timestamp >= ${ timestamp }
       AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Select Sum of Rows Using Workers
-  this.sumPoolHashrateWorker = function(pool, timestamp, solo, type) {
+  this.sumCurrentHashrateWorker = function(pool, timestamp, solo, type) {
     return `
       SELECT worker, SUM(work) as current_work
-      FROM "${ pool }".pool_hashrate
+      FROM "${ pool }".current_hashrate
       WHERE timestamp >= ${ timestamp }
       AND solo = ${ solo } AND type = '${ type }'
       GROUP BY worker;`;
   };
 
   // Select Sum of Rows Using Types
-  this.sumPoolHashrateType = function(pool, timestamp, solo, type) {
+  this.sumCurrentHashrateType = function(pool, timestamp, solo, type) {
     return `
       SELECT SUM(work) as current_work
-      FROM "${ pool }".pool_hashrate
+      FROM "${ pool }".current_hashrate
       WHERE timestamp >= ${ timestamp }
       AND solo = ${ solo } AND type = '${ type }';`;
   };
 
   // Build Hashrate Values String
-  this.buildPoolHashrateCurrent = function(updates) {
+  this.buildCurrentHashrateMain = function(updates) {
     let values = '';
     updates.forEach((hashrate, idx) => {
       values += `(
@@ -116,20 +116,20 @@ const PoolHashrate = function (logger, configMain) {
   };
 
   // Insert Rows Using Current Round
-  this.insertPoolHashrateCurrent = function(pool, updates) {
+  this.insertCurrentHashrateMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_hashrate (
+      INSERT INTO "${ pool }".current_hashrate (
         timestamp, miner, worker,
         solo, type, work)
-      VALUES ${ _this.buildPoolHashrateCurrent(updates) };`;
+      VALUES ${ _this.buildCurrentHashrateMain(updates) };`;
   };
 
   // Delete Rows From Current Round
-  this.deletePoolHashrateInactive = function(pool, timestamp) {
+  this.deleteCurrentHashrateInactive = function(pool, timestamp) {
     return `
-      DELETE FROM "${ pool }".pool_hashrate
+      DELETE FROM "${ pool }".current_hashrate
       WHERE timestamp < ${ timestamp };`;
   };
 };
 
-module.exports = PoolHashrate;
+module.exports = CurrentHashrate;

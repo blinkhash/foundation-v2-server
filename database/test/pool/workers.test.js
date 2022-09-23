@@ -1,4 +1,4 @@
-const PoolWorkers = require('../../main/pool/workers');
+const CurrentWorkers = require('../../main/current/workers');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main.js');
 const logger = new Logger(configMain);
@@ -13,20 +13,20 @@ describe('Test database workers functionality', () => {
   });
 
   test('Test initialization of workers commands', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     expect(typeof workers.configMain).toBe('object');
-    expect(typeof workers.selectPoolWorkersCurrent).toBe('function');
-    expect(typeof workers.insertPoolWorkersHashrate).toBe('function');
+    expect(typeof workers.selectCurrentWorkersMain).toBe('function');
+    expect(typeof workers.insertCurrentWorkersHashrate).toBe('function');
   });
 
   test('Test query handling [1]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     expect(workers.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
     expect(workers.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
   });
 
   test('Test query handling [2]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     expect(workers.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
     expect(workers.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
     expect(workers.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
@@ -36,39 +36,39 @@ describe('Test database workers functionality', () => {
   });
 
   test('Test workers command handling [1]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };
-    const response = workers.selectPoolWorkersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_workers WHERE miner = \'miner1\' AND type = \'primary\';';
+    const response = workers.selectCurrentWorkersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_workers WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test workers command handling [2]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const parameters = { worker: 'worker1', type: 'primary' };
-    const response = workers.selectPoolWorkersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_workers WHERE worker = \'worker1\' AND type = \'primary\';';
+    const response = workers.selectCurrentWorkersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_workers WHERE worker = \'worker1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test workers command handling [3]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = workers.selectPoolWorkersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_workers WHERE type = \'primary\';';
+    const response = workers.selectCurrentWorkersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_workers WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test workers command handling [4]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const parameters = { type: 'primary', hmm: 'test' };
-    const response = workers.selectPoolWorkersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_workers WHERE type = \'primary\';';
+    const response = workers.selectCurrentWorkersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_workers WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test workers command handling [4]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
       miner: 'miner1',
@@ -77,9 +77,9 @@ describe('Test database workers functionality', () => {
       solo: false,
       type: 'primary',
     };
-    const response = workers.insertPoolWorkersHashrate('Pool-Main', [updates]);
+    const response = workers.insertCurrentWorkersHashrate('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_workers (
+      INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
         hashrate, solo, type)
       VALUES (
@@ -89,7 +89,7 @@ describe('Test database workers functionality', () => {
         1,
         false,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_workers_unique
+      ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
@@ -97,7 +97,7 @@ describe('Test database workers functionality', () => {
   });
 
   test('Test workers command handling [5]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
       miner: 'miner1',
@@ -106,9 +106,9 @@ describe('Test database workers functionality', () => {
       solo: false,
       type: 'primary',
     };
-    const response = workers.insertPoolWorkersHashrate('Pool-Main', [updates, updates]);
+    const response = workers.insertCurrentWorkersHashrate('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_workers (
+      INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
         hashrate, solo, type)
       VALUES (
@@ -124,7 +124,7 @@ describe('Test database workers functionality', () => {
         1,
         false,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_workers_unique
+      ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
@@ -132,7 +132,7 @@ describe('Test database workers functionality', () => {
   });
 
   test('Test workers command handling [6]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
       miner: 'miner1',
@@ -142,9 +142,9 @@ describe('Test database workers functionality', () => {
       solo: false,
       type: 'primary',
     };
-    const response = workers.insertPoolWorkersRounds('Pool-Main', [updates]);
+    const response = workers.insertCurrentWorkersRounds('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_workers (
+      INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
         efficiency, effort, solo,
         type)
@@ -156,7 +156,7 @@ describe('Test database workers functionality', () => {
         100,
         false,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_workers_unique
+      ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
@@ -166,7 +166,7 @@ describe('Test database workers functionality', () => {
   });
 
   test('Test workers command handling [7]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
+    const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
       miner: 'miner1',
@@ -176,9 +176,9 @@ describe('Test database workers functionality', () => {
       solo: false,
       type: 'primary',
     };
-    const response = workers.insertPoolWorkersRounds('Pool-Main', [updates, updates]);
+    const response = workers.insertCurrentWorkersRounds('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_workers (
+      INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
         efficiency, effort, solo,
         type)
@@ -197,7 +197,7 @@ describe('Test database workers functionality', () => {
         100,
         false,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_workers_unique
+      ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
@@ -207,10 +207,10 @@ describe('Test database workers functionality', () => {
   });
 
   test('Test workers command handling [8]', () => {
-    const workers = new PoolWorkers(logger, configMainCopy);
-    const response = workers.deletePoolWorkersInactive('Pool-Main', 1);
+    const workers = new CurrentWorkers(logger, configMainCopy);
+    const response = workers.deleteCurrentWorkersInactive('Pool-Main', 1);
     const expected = `
-      DELETE FROM "Pool-Main".pool_workers
+      DELETE FROM "Pool-Main".current_workers
       WHERE timestamp < 1;`;
     expect(response).toBe(expected);
   });

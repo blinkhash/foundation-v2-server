@@ -3,14 +3,14 @@ const Text = require('../../../locales/index');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const PoolRounds = function (logger, configMain) {
+const CurrentRounds = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Current Parameters
   this.numbers = ['timestamp', 'invalid', 'stale', 'times', 'valid', 'work'];
   this.strings = ['miner', 'worker', 'identifier', 'round', 'type'];
   this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
@@ -40,9 +40,9 @@ const PoolRounds = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Rounds Using Parameters
-  this.selectPoolRoundsCurrent = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".pool_rounds`;
+  // Select Current Rounds Using Parameters
+  this.selectCurrentRoundsMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_rounds`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -54,7 +54,7 @@ const PoolRounds = function (logger, configMain) {
   };
 
   // Build Rounds Values String
-  this.buildPoolRoundsCurrent = function(updates) {
+  this.buildCurrentRoundsMain = function(updates) {
     let values = '';
     updates.forEach((round, idx) => {
       values += `(
@@ -76,48 +76,48 @@ const PoolRounds = function (logger, configMain) {
   };
 
   // Insert Rows Using Round Data
-  this.insertPoolRoundsCurrent = function(pool, updates) {
+  this.insertCurrentRoundsMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".pool_rounds (
+      INSERT INTO "${ pool }".current_rounds (
         timestamp, miner, worker,
         identifier, invalid, round,
         solo, stale, times, type,
         valid, work)
-      VALUES ${ _this.buildPoolRoundsCurrent(updates) }
-      ON CONFLICT ON CONSTRAINT pool_rounds_unique
+      VALUES ${ _this.buildCurrentRoundsMain(updates) }
+      ON CONFLICT ON CONSTRAINT current_rounds_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        invalid = "${ pool }".pool_rounds.invalid + EXCLUDED.invalid,
-        stale = "${ pool }".pool_rounds.stale + EXCLUDED.stale,
-        times = GREATEST("${ pool }".pool_rounds.times, EXCLUDED.times),
-        valid = "${ pool }".pool_rounds.valid + EXCLUDED.valid,
-        work = "${ pool }".pool_rounds.work + EXCLUDED.work;`;
+        invalid = "${ pool }".current_rounds.invalid + EXCLUDED.invalid,
+        stale = "${ pool }".current_rounds.stale + EXCLUDED.stale,
+        times = GREATEST("${ pool }".current_rounds.times, EXCLUDED.times),
+        valid = "${ pool }".current_rounds.valid + EXCLUDED.valid,
+        work = "${ pool }".current_rounds.work + EXCLUDED.work;`;
   };
 
   // Update Rows Using Round
-  this.updatePoolRoundsCurrentSolo = function(pool, miner, round, type) {
+  this.updateCurrentRoundsMainSolo = function(pool, miner, round, type) {
     return `
-      UPDATE "${ pool }".pool_rounds
+      UPDATE "${ pool }".current_rounds
       SET round = '${ round }'
       WHERE round = 'current' AND miner = '${ miner }'
       AND solo = true AND type = '${ type }';`;
   };
 
   // Update Rows Using Round
-  this.updatePoolRoundsCurrentShared = function(pool, round, type) {
+  this.updateCurrentRoundsMainShared = function(pool, round, type) {
     return `
-      UPDATE "${ pool }".pool_rounds
+      UPDATE "${ pool }".current_rounds
       SET round = '${ round }'
       WHERE round = 'current' AND solo = false
       AND type = '${ type }';`;
   };
 
   // Delete Rows From Current Round
-  this.deletePoolRoundsCurrent = function(pool, rounds) {
+  this.deleteCurrentRoundsMain = function(pool, rounds) {
     return `
-      DELETE FROM "${ pool }".pool_rounds
+      DELETE FROM "${ pool }".current_rounds
       WHERE round IN (${ rounds.join(', ') });`;
   };
 };
 
-module.exports = PoolRounds;
+module.exports = CurrentRounds;

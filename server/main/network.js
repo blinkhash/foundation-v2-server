@@ -19,10 +19,10 @@ const Network = function (logger, client, config, configMain) {
 
   // Database Variables
   this.executor = _this.client.commands.executor;
-  this.current = _this.client.commands.pool;
+  this.current = _this.client.commands.current;
 
   // Handle Current Network Updates
-  this.handleNetwork = function(network, networkType) {
+  this.handleCurrentNetwork = function(network, networkType) {
 
     // Return Network Updates
     return {
@@ -38,10 +38,10 @@ const Network = function (logger, client, config, configMain) {
   this.handlePrimary = function(network, callback) {
 
     // Build Combined Transaction
-    const networkUpdates = _this.handleNetwork(network, 'primary');
+    const networkUpdates = _this.handleCurrentNetwork(network, 'primary');
     const transaction = [
       'BEGIN;',
-      _this.current.network.insertPoolNetworkCurrent(_this.pool, [networkUpdates]),
+      _this.current.network.insertCurrentNetworkMain(_this.pool, [networkUpdates]),
       'COMMIT'];
 
     // Insert Work into Database
@@ -52,10 +52,10 @@ const Network = function (logger, client, config, configMain) {
   this.handleAuxiliary = function(network, callback) {
 
     // Build Combined Transaction
-    const networkUpdates = _this.handleNetwork(network, 'auxiliary');
+    const networkUpdates = _this.handleCurrentNetwork(network, 'auxiliary');
     const transaction = [
       'BEGIN;',
-      _this.current.network.insertPoolNetworkCurrent(_this.pool, [networkUpdates]),
+      _this.current.network.insertCurrentNetworkMain(_this.pool, [networkUpdates]),
       'COMMIT'];
 
     // Insert Work into Database

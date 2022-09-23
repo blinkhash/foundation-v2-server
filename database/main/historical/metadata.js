@@ -10,7 +10,7 @@ const HistoricalMetadata = function (logger, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Pool Parameters
+  // Handle Historical Parameters
   _this.numbers = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
     'stale', 'valid', 'work', 'workers'];
   _this.strings = ['type'];
@@ -41,8 +41,8 @@ const HistoricalMetadata = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
-  // Select Pool Metadata Using Parameters
-  this.selectHistoricalMetadataCurrent = function(pool, parameters) {
+  // Select Historical Metadata Using Parameters
+  this.selectHistoricalMetadataMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_metadata`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
@@ -55,7 +55,7 @@ const HistoricalMetadata = function (logger, configMain) {
   };
 
   // Build Metadata Values String
-  this.buildHistoricalMetadataCurrent = function(updates) {
+  this.buildHistoricalMetadataMain = function(updates) {
     let values = '';
     updates.forEach((metadata, idx) => {
       values += `(
@@ -77,15 +77,15 @@ const HistoricalMetadata = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Current Data
-  this.insertHistoricalMetadataCurrent = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalMetadataMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_metadata (
         timestamp, recent, blocks,
         efficiency, effort, hashrate,
         invalid, miners, stale,
         type, valid, work, workers)
-      VALUES ${ _this.buildHistoricalMetadataCurrent(updates) }
+      VALUES ${ _this.buildHistoricalMetadataMain(updates) }
       ON CONFLICT ON CONSTRAINT historical_metadata_recent
       DO NOTHING;`;
   };

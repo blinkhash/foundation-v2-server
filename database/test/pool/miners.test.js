@@ -1,4 +1,4 @@
-const PoolMiners = require('../../main/pool/miners');
+const CurrentMiners = require('../../main/current/miners');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main.js');
 const logger = new Logger(configMain);
@@ -13,20 +13,20 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test initialization of miners commands', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     expect(typeof miners.configMain).toBe('object');
-    expect(typeof miners.selectPoolMinersCurrent).toBe('function');
-    expect(typeof miners.insertPoolMinersHashrate).toBe('function');
+    expect(typeof miners.selectCurrentMinersMain).toBe('function');
+    expect(typeof miners.insertCurrentMinersHashrate).toBe('function');
   });
 
   test('Test query handling [1]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     expect(miners.handleStrings({ test: 'test' }, 'test')).toBe(' = \'test\'');
     expect(miners.handleStrings({ miner: 'miner1' }, 'miner')).toBe(' = \'miner1\'');
   });
 
   test('Test query handling [2]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     expect(miners.handleNumbers({ test: '100' }, 'test')).toBe(' = 100');
     expect(miners.handleNumbers({ timestamp: 'lt100' }, 'timestamp')).toBe(' < 100');
     expect(miners.handleNumbers({ timestamp: 'le100' }, 'timestamp')).toBe(' <= 100');
@@ -36,48 +36,48 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test miners command handling [1]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };
-    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE miner = \'miner1\' AND type = \'primary\';';
+    const response = miners.selectCurrentMinersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_miners WHERE miner = \'miner1\' AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [2]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const parameters = { balance: 'gt0', type: 'primary' };
-    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE balance > 0 AND type = \'primary\';';
+    const response = miners.selectCurrentMinersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_miners WHERE balance > 0 AND type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [3]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const parameters = { type: 'primary' };
-    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE type = \'primary\';';
+    const response = miners.selectCurrentMinersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_miners WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [4]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const parameters = { type: 'primary', hmm: 'test' };
-    const response = miners.selectPoolMinersCurrent('Pool-Main', parameters);
-    const expected = 'SELECT * FROM "Pool-Main".pool_miners WHERE type = \'primary\';';
+    const response = miners.selectCurrentMinersMain('Pool-Main', parameters);
+    const expected = 'SELECT * FROM "Pool-Main".current_miners WHERE type = \'primary\';';
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [5]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
       hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersHashrate('Pool-Main', [updates]);
+    const response = miners.insertCurrentMinersHashrate('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, hashrate,
         type)
       VALUES (
@@ -85,7 +85,7 @@ describe('Test database miners functionality', () => {
         'miner1',
         1,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
@@ -93,16 +93,16 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test miners command handling [6]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
       hashrate: 1,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersHashrate('Pool-Main', [updates, updates]);
+    const response = miners.insertCurrentMinersHashrate('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, hashrate,
         type)
       VALUES (
@@ -114,7 +114,7 @@ describe('Test database miners functionality', () => {
         'miner1',
         1,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
@@ -122,7 +122,7 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test miners command handling [7]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
@@ -130,9 +130,9 @@ describe('Test database miners functionality', () => {
       effort: 100,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersRounds('Pool-Main', [updates]);
+    const response = miners.insertCurrentMinersRounds('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, efficiency,
         effort, type)
       VALUES (
@@ -141,7 +141,7 @@ describe('Test database miners functionality', () => {
         100,
         100,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
@@ -150,7 +150,7 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test miners command handling [8]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
@@ -158,9 +158,9 @@ describe('Test database miners functionality', () => {
       effort: 100,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersRounds('Pool-Main', [updates, updates]);
+    const response = miners.insertCurrentMinersRounds('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, efficiency,
         effort, type)
       VALUES (
@@ -174,7 +174,7 @@ describe('Test database miners functionality', () => {
         100,
         100,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
@@ -183,7 +183,7 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test miners command handling [9]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
@@ -191,9 +191,9 @@ describe('Test database miners functionality', () => {
       paid: 0,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersPayments('Pool-Main', [updates]);
+    const response = miners.insertCurrentMinersPayments('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, balance,
         paid, type)
       VALUES (
@@ -202,16 +202,16 @@ describe('Test database miners functionality', () => {
         0,
         0,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         balance = EXCLUDED.balance,
-        paid = "Pool-Main".pool_miners.paid + EXCLUDED.paid;`;
+        paid = "Pool-Main".current_miners.paid + EXCLUDED.paid;`;
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [10]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
@@ -219,9 +219,9 @@ describe('Test database miners functionality', () => {
       paid: 0,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersPayments('Pool-Main', [updates, updates]);
+    const response = miners.insertCurrentMinersPayments('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, balance,
         paid, type)
       VALUES (
@@ -235,16 +235,16 @@ describe('Test database miners functionality', () => {
         0,
         0,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         balance = EXCLUDED.balance,
-        paid = "Pool-Main".pool_miners.paid + EXCLUDED.paid;`;
+        paid = "Pool-Main".current_miners.paid + EXCLUDED.paid;`;
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [11]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
@@ -252,9 +252,9 @@ describe('Test database miners functionality', () => {
       immature: 0,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersUpdates('Pool-Main', [updates]);
+    const response = miners.insertCurrentMinersUpdates('Pool-Main', [updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, generate,
         immature, type)
       VALUES (
@@ -263,7 +263,7 @@ describe('Test database miners functionality', () => {
         0,
         0,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         generate = EXCLUDED.generate,
@@ -272,7 +272,7 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test miners command handling [12]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
+    const miners = new CurrentMiners(logger, configMainCopy);
     const updates = {
       miner: 'miner1',
       timestamp: 1,
@@ -280,9 +280,9 @@ describe('Test database miners functionality', () => {
       immature: 0,
       type: 'primary',
     };
-    const response = miners.insertPoolMinersUpdates('Pool-Main', [updates, updates]);
+    const response = miners.insertCurrentMinersUpdates('Pool-Main', [updates, updates]);
     const expected = `
-      INSERT INTO "Pool-Main".pool_miners (
+      INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, generate,
         immature, type)
       VALUES (
@@ -296,7 +296,7 @@ describe('Test database miners functionality', () => {
         0,
         0,
         'primary')
-      ON CONFLICT ON CONSTRAINT pool_miners_unique
+      ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         generate = EXCLUDED.generate,
@@ -305,20 +305,20 @@ describe('Test database miners functionality', () => {
   });
 
   test('Test miners command handling [13]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
-    const response = miners.insertPoolMinersReset('Pool-Main', 'primary');
+    const miners = new CurrentMiners(logger, configMainCopy);
+    const response = miners.insertCurrentMinersReset('Pool-Main', 'primary');
     const expected = `
-      UPDATE "Pool-Main".pool_miners
+      UPDATE "Pool-Main".current_miners
       SET immature = 0, generate = 0
       WHERE type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test miners command handling [14]', () => {
-    const miners = new PoolMiners(logger, configMainCopy);
-    const response = miners.deletePoolMinersInactive('Pool-Main', 1);
+    const miners = new CurrentMiners(logger, configMainCopy);
+    const response = miners.deleteCurrentMinersInactive('Pool-Main', 1);
     const expected = `
-      DELETE FROM "Pool-Main".pool_miners
+      DELETE FROM "Pool-Main".current_miners
       WHERE timestamp < 1 AND balance = 0
       AND generate = 0 AND immature = 0 AND paid = 0;`;
     expect(response).toBe(expected);
