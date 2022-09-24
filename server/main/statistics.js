@@ -378,8 +378,8 @@ const Statistics = function (logger, client, config, configMain, template) {
   // Start Statistics Interval Management
   /* istanbul ignore next */
   this.handleInterval = function(minerType) {
-    const minInterval = _this.config.settings.interval.payments * 0.75;
-    const maxInterval = _this.config.settings.interval.payments * 1.25;
+    const minInterval = _this.config.settings.interval.statistics * 0.75;
+    const maxInterval = _this.config.settings.interval.statistics * 1.25;
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval(minerType);
