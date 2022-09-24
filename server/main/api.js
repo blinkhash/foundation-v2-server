@@ -1,5 +1,6 @@
+const Endpoints = require('./endpoints');
 const Text = require('../../locales/index');
-const validation = require('./validation');
+const utils = require('./utils');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -14,9 +15,7 @@ const Api = function (logger, client, configs, configMain) {
   this.text = Text[configMain.language];
 
   // API Variables
-  this.executor = _this.client.commands.executor;
-  this.current = _this.client.commands.current;
-  this.historical = _this.client.commands.historical;
+  this.endpoints = new Endpoints(logger, client, configMain);
   this.headers = {
     'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Access-Control-Allow-Methods',
     'Access-Control-Allow-Origin': '*',
@@ -40,15 +39,80 @@ const Api = function (logger, client, configs, configMain) {
   this.handleApiV2 = function(req, callback) {
 
     // Handle Parameters
-    const pool = validation.validateParams((req.params || {}).pool || '');
-    const category = validation.validateParams((req.params || {}).category || '');
-    const endpoint = validation.validateParams((req.params || {}).endpoint || '');
-    const query = req.query || {};
+    const queries = req.query || {};
+    const output = (code, message) => callback(code, message);
+    const pool = utils.validateParameters((req.params || {}).pool || '');
+    const category = utils.validateParameters((req.params || {}).category || '');
+    const endpoint = utils.validateParameters((req.params || {}).endpoint || '');
 
     // Check if Requested Pool Exists
     if (!(pool in _this.configs)) {
       callback(404, _this.text.websiteErrorText3());
       return;
+    }
+
+    // Select Endpoint from Parameters
+    switch (true) {
+
+    // Current Endpoints
+    case (category === 'current' && endpoint === 'blocks'):
+      _this.endpoints.handleCurrentBlocks(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'hashrate'):
+      _this.endpoints.handleCurrentHashrate(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'metadata'):
+      _this.endpoints.handleCurrentMetadata(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'miners'):
+      _this.endpoints.handleCurrentMiners(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'network'):
+      _this.endpoints.handleCurrentNetwork(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'payments'):
+      _this.endpoints.handleCurrentPayments(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'rounds'):
+      _this.endpoints.handleCurrentRounds(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'transactions'):
+      _this.endpoints.handleCurrentTransactions(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'workers'):
+      _this.endpoints.handleCurrentWorkers(pool, queries, output);
+      break;
+
+    // Historical Endpoints
+    case (category === 'historical' && endpoint === 'blocks'):
+      _this.endpoints.handleHistoricalBlocks(pool, queries, output);
+      break;
+    case (category === 'historical' && endpoint === 'metadata'):
+      _this.endpoints.handleHistoricalMetadata(pool, queries, output);
+      break;
+    case (category === 'historical' && endpoint === 'miners'):
+      _this.endpoints.handleHistoricalMiners(pool, queries, output);
+      break;
+    case (category === 'historical' && endpoint === 'network'):
+      _this.endpoints.handleHistoricalNetwork(pool, queries, output);
+      break;
+    case (category === 'historical' && endpoint === 'payments'):
+      _this.endpoints.handleHistoricalPayments(pool, queries, output);
+      break;
+    case (category === 'historical' && endpoint === 'rounds'):
+      _this.endpoints.handleHistoricalRounds(pool, queries, output);
+      break;
+    case (category === 'historical' && endpoint === 'transactions'):
+      _this.endpoints.handleHistoricalTransactions(pool, queries, output);
+      break;
+    case (category === 'historical' && endpoint === 'workers'):
+      _this.endpoints.handleHistoricalWorkers(pool, queries, output);
+      break;
+
+    // Unknown Endpoints
+    default:
+      callback(405, _this.text.websiteErrorText4());
+      break;
     }
   };
 };

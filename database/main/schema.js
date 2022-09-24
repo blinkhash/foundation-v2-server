@@ -26,249 +26,6 @@ const Schema = function (logger, executor, configMain) {
     _this.executor([command], () => callback());
   };
 
-  // Check if Historical Blocks Table Exists in Database
-  this.selectHistoricalBlocks = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_blocks');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Blocks Table to Database
-  this.createHistoricalBlocks = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_blocks(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        miner VARCHAR NOT NULL DEFAULT 'unknown',
-        worker VARCHAR NOT NULL DEFAULT 'unknown',
-        category VARCHAR NOT NULL DEFAULT 'pending',
-        confirmations INT NOT NULL DEFAULT -1,
-        difficulty FLOAT NOT NULL DEFAULT -1,
-        hash VARCHAR NOT NULL DEFAULT 'unknown',
-        height INT NOT NULL DEFAULT -1,
-        identifier VARCHAR NOT NULL DEFAULT 'master',
-        luck FLOAT NOT NULL DEFAULT 0,
-        reward FLOAT NOT NULL DEFAULT 0,
-        round VARCHAR NOT NULL DEFAULT 'unknown',
-        solo BOOLEAN NOT NULL DEFAULT false,
-        transaction VARCHAR NOT NULL DEFAULT 'unknown',
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT historical_blocks_unique UNIQUE (round, type));
-      CREATE INDEX historical_blocks_miner ON "${ pool }".historical_blocks(miner, type);
-      CREATE INDEX historical_blocks_worker ON "${ pool }".historical_blocks(worker, type);
-      CREATE INDEX historical_blocks_category ON "${ pool }".historical_blocks(category, type);
-      CREATE INDEX historical_blocks_identifier ON "${ pool }".historical_blocks(identifier, type);
-      CREATE INDEX historical_blocks_type ON "${ pool }".historical_blocks(type);`;
-    _this.executor([command], () => callback());
-  };
-
-  // Check if Historical Metadata Table Exists in Database
-  this.selectHistoricalMetadata = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_metadata');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Metadata Table to Database
-  this.createHistoricalMetadata = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_metadata(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        recent BIGINT NOT NULL DEFAULT -1,
-        blocks INT NOT NULL DEFAULT 0,
-        efficiency FLOAT NOT NULL DEFAULT 0,
-        effort FLOAT NOT NULL DEFAULT 0,
-        hashrate FLOAT NOT NULL DEFAULT 0,
-        invalid INT NOT NULL DEFAULT 0,
-        miners INT NOT NULL DEFAULT 0,
-        stale INT NOT NULL DEFAULT 0,
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        valid INT NOT NULL DEFAULT 0,
-        work FLOAT NOT NULL DEFAULT 0,
-        workers INT NOT NULL DEFAULT 0,
-        CONSTRAINT historical_metadata_recent UNIQUE (recent, type));
-      CREATE INDEX historical_metadata_type ON "${ pool }".historical_metadata(type);`;
-    _this.executor([command], () => callback());
-  };
-
-  // Check if Historical Miners Table Exists in Database
-  this.selectHistoricalMiners = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_miners');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Miners Table to Database
-  this.createHistoricalMiners = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_miners(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        recent BIGINT NOT NULL DEFAULT -1,
-        miner VARCHAR NOT NULL DEFAULT 'unknown',
-        efficiency FLOAT NOT NULL DEFAULT 0,
-        effort FLOAT NOT NULL DEFAULT 0,
-        hashrate FLOAT NOT NULL DEFAULT 0,
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT historical_miners_recent UNIQUE (recent, miner, type));
-      CREATE INDEX historical_miners_miner ON "${ pool }".historical_miners(miner, type);
-      CREATE INDEX historical_miners_type ON "${ pool }".historical_miners(type);`;
-    _this.executor([command], () => callback());
-  };
-
-  // Check if Historical Network Table Exists in Database
-  this.selectHistoricalNetwork = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_network');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Network Table to Database
-  this.createHistoricalNetwork = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_network(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        recent BIGINT NOT NULL DEFAULT -1,
-        difficulty FLOAT NOT NULL DEFAULT 0,
-        hashrate FLOAT NOT NULL DEFAULT 0,
-        height INT NOT NULL DEFAULT -1,
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT historical_network_recent UNIQUE (recent, type));
-      CREATE INDEX historical_network_type ON "${ pool }".historical_network(type);`;
-    _this.executor([command], () => callback());
-  };
-
-  // Check if Historical Payments Table Exists in Database
-  this.selectHistoricalPayments = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_payments');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Payments Table to Database
-  this.createHistoricalPayments = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_payments(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        miner VARCHAR NOT NULL DEFAULT 'unknown',
-        amount FLOAT NOT NULL DEFAULT 0,
-        transaction VARCHAR NOT NULL DEFAULT 'unknown',
-        type VARCHAR NOT NULL DEFAULT 'primary');
-      CREATE INDEX historical_payments_miner ON "${ pool }".historical_payments(miner, type);
-      CREATE INDEX historical_payments_transaction ON "${ pool }".historical_payments(transaction, type);
-      CREATE INDEX historical_payments_type ON "${ pool }".historical_payments(type);`;
-    _this.executor([command], () => callback());
-  };
-
-  // Check if Historical Rounds Table Exists in Database
-  this.selectHistoricalRounds = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_rounds');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Rounds Table to Database
-  this.createHistoricalRounds = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_rounds(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        miner VARCHAR NOT NULL DEFAULT 'unknown',
-        worker VARCHAR NOT NULL DEFAULT 'unknown',
-        identifier VARCHAR NOT NULL DEFAULT 'master',
-        invalid INT NOT NULL DEFAULT 0,
-        round VARCHAR NOT NULL DEFAULT 'unknown',
-        solo BOOLEAN NOT NULL DEFAULT false,
-        stale INT NOT NULL DEFAULT 0,
-        times FLOAT NOT NULL DEFAULT 0,
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        valid INT NOT NULL DEFAULT 0,
-        work FLOAT NOT NULL DEFAULT 0,
-        CONSTRAINT historical_rounds_unique UNIQUE (worker, solo, round, type));
-      CREATE INDEX historical_rounds_miner ON "${ pool }".historical_rounds(miner, type);
-      CREATE INDEX historical_rounds_worker ON "${ pool }".historical_rounds(worker, type);
-      CREATE INDEX historical_rounds_identifier ON "${ pool }".historical_rounds(identifier, type);
-      CREATE INDEX historical_rounds_round ON "${ pool }".historical_rounds(solo, round, type);
-      CREATE INDEX historical_rounds_historical ON "${ pool }".historical_rounds(worker, solo, type);
-      CREATE INDEX historical_rounds_combined ON "${ pool }".historical_rounds(worker, solo, round, type);`;
-    _this.executor([command], () => callback());
-  };
-
-  // Check if Historical Transactions Table Exists in Database
-  this.selectHistoricalTransactions = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_transactions');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Transactions Table to Database
-  this.createHistoricalTransactions = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_transactions(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        amount FLOAT NOT NULL DEFAULT 0,
-        transaction VARCHAR NOT NULL DEFAULT 'unknown',
-        type VARCHAR NOT NULL DEFAULT 'primary');
-      CREATE INDEX historical_transactions_transaction ON "${ pool }".historical_transactions(transaction, type);
-      CREATE INDEX historical_transactions_type ON "${ pool }".historical_transactions(type);`;
-    _this.executor([command], () => callback());
-  };
-
-  // Check if Historical Workers Table Exists in Database
-  this.selectHistoricalWorkers = function(pool, callback) {
-    const command = `
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables
-        WHERE table_schema = '${ pool }'
-        AND table_name = 'historical_workers');`;
-    _this.executor([command], (results) => callback(results.rows[0].exists));
-  };
-
-  // Deploy Historical Workers Table to Database
-  this.createHistoricalWorkers = function(pool, callback) {
-    const command = `
-      CREATE TABLE "${ pool }".historical_workers(
-        id BIGSERIAL PRIMARY KEY,
-        timestamp BIGINT NOT NULL DEFAULT -1,
-        recent BIGINT NOT NULL DEFAULT -1,
-        miner VARCHAR NOT NULL DEFAULT 'unknown',
-        worker VARCHAR NOT NULL DEFAULT 'unknown',
-        efficiency FLOAT NOT NULL DEFAULT 0,
-        effort FLOAT NOT NULL DEFAULT 0,
-        hashrate FLOAT NOT NULL DEFAULT 0,
-        type VARCHAR NOT NULL DEFAULT 'primary',
-        CONSTRAINT historical_workers_recent UNIQUE (recent, worker, type));
-      CREATE INDEX historical_workers_miner ON "${ pool }".historical_workers(miner, type);
-      CREATE INDEX historical_workers_worker ON "${ pool }".historical_workers(worker, type);
-      CREATE INDEX historical_workers_type ON "${ pool }".historical_workers(type);`;
-    _this.executor([command], () => callback());
-  };
-
   // Check if Current Blocks Table Exists in Database
   this.selectCurrentBlocks = function(pool, callback) {
     const command = `
@@ -538,6 +295,249 @@ const Schema = function (logger, executor, configMain) {
     _this.executor([command], () => callback());
   };
 
+  // Check if Historical Blocks Table Exists in Database
+  this.selectHistoricalBlocks = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_blocks');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Blocks Table to Database
+  this.createHistoricalBlocks = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_blocks(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        miner VARCHAR NOT NULL DEFAULT 'unknown',
+        worker VARCHAR NOT NULL DEFAULT 'unknown',
+        category VARCHAR NOT NULL DEFAULT 'pending',
+        confirmations INT NOT NULL DEFAULT -1,
+        difficulty FLOAT NOT NULL DEFAULT -1,
+        hash VARCHAR NOT NULL DEFAULT 'unknown',
+        height INT NOT NULL DEFAULT -1,
+        identifier VARCHAR NOT NULL DEFAULT 'master',
+        luck FLOAT NOT NULL DEFAULT 0,
+        reward FLOAT NOT NULL DEFAULT 0,
+        round VARCHAR NOT NULL DEFAULT 'unknown',
+        solo BOOLEAN NOT NULL DEFAULT false,
+        transaction VARCHAR NOT NULL DEFAULT 'unknown',
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT historical_blocks_unique UNIQUE (round, type));
+      CREATE INDEX historical_blocks_miner ON "${ pool }".historical_blocks(miner, type);
+      CREATE INDEX historical_blocks_worker ON "${ pool }".historical_blocks(worker, type);
+      CREATE INDEX historical_blocks_category ON "${ pool }".historical_blocks(category, type);
+      CREATE INDEX historical_blocks_identifier ON "${ pool }".historical_blocks(identifier, type);
+      CREATE INDEX historical_blocks_type ON "${ pool }".historical_blocks(type);`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Historical Metadata Table Exists in Database
+  this.selectHistoricalMetadata = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_metadata');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Metadata Table to Database
+  this.createHistoricalMetadata = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_metadata(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        recent BIGINT NOT NULL DEFAULT -1,
+        blocks INT NOT NULL DEFAULT 0,
+        efficiency FLOAT NOT NULL DEFAULT 0,
+        effort FLOAT NOT NULL DEFAULT 0,
+        hashrate FLOAT NOT NULL DEFAULT 0,
+        invalid INT NOT NULL DEFAULT 0,
+        miners INT NOT NULL DEFAULT 0,
+        stale INT NOT NULL DEFAULT 0,
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        valid INT NOT NULL DEFAULT 0,
+        work FLOAT NOT NULL DEFAULT 0,
+        workers INT NOT NULL DEFAULT 0,
+        CONSTRAINT historical_metadata_recent UNIQUE (recent, type));
+      CREATE INDEX historical_metadata_type ON "${ pool }".historical_metadata(type);`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Historical Miners Table Exists in Database
+  this.selectHistoricalMiners = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_miners');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Miners Table to Database
+  this.createHistoricalMiners = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_miners(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        recent BIGINT NOT NULL DEFAULT -1,
+        miner VARCHAR NOT NULL DEFAULT 'unknown',
+        efficiency FLOAT NOT NULL DEFAULT 0,
+        effort FLOAT NOT NULL DEFAULT 0,
+        hashrate FLOAT NOT NULL DEFAULT 0,
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT historical_miners_recent UNIQUE (recent, miner, type));
+      CREATE INDEX historical_miners_miner ON "${ pool }".historical_miners(miner, type);
+      CREATE INDEX historical_miners_type ON "${ pool }".historical_miners(type);`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Historical Network Table Exists in Database
+  this.selectHistoricalNetwork = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_network');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Network Table to Database
+  this.createHistoricalNetwork = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_network(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        recent BIGINT NOT NULL DEFAULT -1,
+        difficulty FLOAT NOT NULL DEFAULT 0,
+        hashrate FLOAT NOT NULL DEFAULT 0,
+        height INT NOT NULL DEFAULT -1,
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT historical_network_recent UNIQUE (recent, type));
+      CREATE INDEX historical_network_type ON "${ pool }".historical_network(type);`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Historical Payments Table Exists in Database
+  this.selectHistoricalPayments = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_payments');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Payments Table to Database
+  this.createHistoricalPayments = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_payments(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        miner VARCHAR NOT NULL DEFAULT 'unknown',
+        amount FLOAT NOT NULL DEFAULT 0,
+        transaction VARCHAR NOT NULL DEFAULT 'unknown',
+        type VARCHAR NOT NULL DEFAULT 'primary');
+      CREATE INDEX historical_payments_miner ON "${ pool }".historical_payments(miner, type);
+      CREATE INDEX historical_payments_transaction ON "${ pool }".historical_payments(transaction, type);
+      CREATE INDEX historical_payments_type ON "${ pool }".historical_payments(type);`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Historical Rounds Table Exists in Database
+  this.selectHistoricalRounds = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_rounds');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Rounds Table to Database
+  this.createHistoricalRounds = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_rounds(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        miner VARCHAR NOT NULL DEFAULT 'unknown',
+        worker VARCHAR NOT NULL DEFAULT 'unknown',
+        identifier VARCHAR NOT NULL DEFAULT 'master',
+        invalid INT NOT NULL DEFAULT 0,
+        round VARCHAR NOT NULL DEFAULT 'unknown',
+        solo BOOLEAN NOT NULL DEFAULT false,
+        stale INT NOT NULL DEFAULT 0,
+        times FLOAT NOT NULL DEFAULT 0,
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        valid INT NOT NULL DEFAULT 0,
+        work FLOAT NOT NULL DEFAULT 0,
+        CONSTRAINT historical_rounds_unique UNIQUE (worker, solo, round, type));
+      CREATE INDEX historical_rounds_miner ON "${ pool }".historical_rounds(miner, type);
+      CREATE INDEX historical_rounds_worker ON "${ pool }".historical_rounds(worker, type);
+      CREATE INDEX historical_rounds_identifier ON "${ pool }".historical_rounds(identifier, type);
+      CREATE INDEX historical_rounds_round ON "${ pool }".historical_rounds(solo, round, type);
+      CREATE INDEX historical_rounds_historical ON "${ pool }".historical_rounds(worker, solo, type);
+      CREATE INDEX historical_rounds_combined ON "${ pool }".historical_rounds(worker, solo, round, type);`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Historical Transactions Table Exists in Database
+  this.selectHistoricalTransactions = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_transactions');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Transactions Table to Database
+  this.createHistoricalTransactions = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_transactions(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        amount FLOAT NOT NULL DEFAULT 0,
+        transaction VARCHAR NOT NULL DEFAULT 'unknown',
+        type VARCHAR NOT NULL DEFAULT 'primary');
+      CREATE INDEX historical_transactions_transaction ON "${ pool }".historical_transactions(transaction, type);
+      CREATE INDEX historical_transactions_type ON "${ pool }".historical_transactions(type);`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Historical Workers Table Exists in Database
+  this.selectHistoricalWorkers = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'historical_workers');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Historical Workers Table to Database
+  this.createHistoricalWorkers = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".historical_workers(
+        id BIGSERIAL PRIMARY KEY,
+        timestamp BIGINT NOT NULL DEFAULT -1,
+        recent BIGINT NOT NULL DEFAULT -1,
+        miner VARCHAR NOT NULL DEFAULT 'unknown',
+        worker VARCHAR NOT NULL DEFAULT 'unknown',
+        efficiency FLOAT NOT NULL DEFAULT 0,
+        effort FLOAT NOT NULL DEFAULT 0,
+        hashrate FLOAT NOT NULL DEFAULT 0,
+        type VARCHAR NOT NULL DEFAULT 'primary',
+        CONSTRAINT historical_workers_recent UNIQUE (recent, worker, type));
+      CREATE INDEX historical_workers_miner ON "${ pool }".historical_workers(miner, type);
+      CREATE INDEX historical_workers_worker ON "${ pool }".historical_workers(worker, type);
+      CREATE INDEX historical_workers_type ON "${ pool }".historical_workers(type);`;
+    _this.executor([command], () => callback());
+  };
+
   // Build Schema Promises for Deployment
   /* istanbul ignore next */
   this.handlePromises = function(pool, checker, deployer) {
@@ -554,14 +554,6 @@ const Schema = function (logger, executor, configMain) {
   this.handleDeployment = function(pool) {
     return new Promise((resolve) => {
       _this.handlePromises(pool, _this.selectSchema, _this.createSchema)
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalBlocks, _this.createHistoricalBlocks))
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalMetadata, _this.createHistoricalMetadata))
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalMiners, _this.createHistoricalMiners))
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalNetwork, _this.createHistoricalNetwork))
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalPayments, _this.createHistoricalPayments))
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalRounds, _this.createHistoricalRounds))
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalTransactions, _this.createHistoricalTransactions))
-        .then(() => _this.handlePromises(pool, _this.selectHistoricalWorkers, _this.createHistoricalWorkers))
         .then(() => _this.handlePromises(pool, _this.selectCurrentBlocks, _this.createCurrentBlocks))
         .then(() => _this.handlePromises(pool, _this.selectCurrentHashrate, _this.createCurrentHashrate))
         .then(() => _this.handlePromises(pool, _this.selectCurrentMetadata, _this.createCurrentMetadata))
@@ -571,6 +563,14 @@ const Schema = function (logger, executor, configMain) {
         .then(() => _this.handlePromises(pool, _this.selectCurrentRounds, _this.createCurrentRounds))
         .then(() => _this.handlePromises(pool, _this.selectCurrentTransactions, _this.createCurrentTransactions))
         .then(() => _this.handlePromises(pool, _this.selectCurrentWorkers, _this.createCurrentWorkers))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalBlocks, _this.createHistoricalBlocks))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalMetadata, _this.createHistoricalMetadata))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalMiners, _this.createHistoricalMiners))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalNetwork, _this.createHistoricalNetwork))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalPayments, _this.createHistoricalPayments))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalRounds, _this.createHistoricalRounds))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalTransactions, _this.createHistoricalTransactions))
+        .then(() => _this.handlePromises(pool, _this.selectHistoricalWorkers, _this.createHistoricalWorkers))
         .then(() => resolve());
     });
   };

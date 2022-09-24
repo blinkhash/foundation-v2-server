@@ -24,6 +24,20 @@ exports.countProcessForks = function(configMain) {
   return configMain.clustering.forks;
 };
 
+// Handle Query Validator
+exports.handleValidation = function(parameter, type) {
+  switch (type) {
+  case 'boolean':
+    return exports.validateBooleans(parameter);
+  case 'number':
+    return exports.validateNumbers(parameter);
+  case 'string':
+    return exports.validateStrings(parameter);
+  default:
+    return false;
+  }
+};
+
 // Indicate Severity By Colors
 exports.loggerColors = function(severity, text) {
   switch (severity) {
@@ -60,4 +74,32 @@ exports.roundTo = function(n, digits) {
   n = parseFloat((n * multiplicator).toFixed(11));
   const test = Math.round(n) / multiplicator;
   return +(test.toFixed(digits));
+};
+
+// Validate Booleans
+exports.validateBooleans = function(parameter) {
+  return parameter === 'true' || parameter === 'false';
+};
+
+// Validate Numbers
+exports.validateNumbers = function(parameter) {
+  const accepted = ['lt', 'le', 'gt', 'ge', 'ne'];
+  const condition = parameter.slice(0, 2);
+  const remainder = parameter.slice(2);
+  if (accepted.includes(condition) && Number(remainder)) return true;
+  else if (Number(parameter)) return true;
+  else return false;
+};
+
+// Validate Parameters
+exports.validateParameters = function(parameter) {
+  if (parameter.length >= 1) {
+    parameter = parameter.toString().replace(/[^a-zA-Z0-9.-]+/g, '');
+  }
+  return parameter;
+};
+
+// Validate Strings
+exports.validateStrings = function(parameter) {
+  return /^[a-zA-Z0-9.-]+$/g.test(parameter);
 };

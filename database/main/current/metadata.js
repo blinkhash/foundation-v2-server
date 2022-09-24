@@ -25,11 +25,11 @@ const CurrentMetadata = function (logger, configMain) {
   // Handle Numerical Parameters
   this.handleNumbers = function(parameters, parameter) {
     const query = parameters[parameter];
-    if (query.includes('lt')) return ` < ${ query.replace('lt', '') }`;
-    if (query.includes('le')) return ` <= ${ query.replace('le', '') }`;
-    if (query.includes('gt')) return ` > ${ query.replace('gt', '') }`;
-    if (query.includes('ge')) return ` >= ${ query.replace('ge', '') }`;
-    if (query.includes('ne')) return ` != ${ query.replace('ne', '') }`;
+    if (query.slice(0, 2) === 'lt') return ` < ${ query.replace('lt', '') }`;
+    if (query.slice(0, 2) === 'le') return ` <= ${ query.replace('le', '') }`;
+    if (query.slice(0, 2) === 'gt') return ` > ${ query.replace('gt', '') }`;
+    if (query.slice(0, 2) === 'ge') return ` >= ${ query.replace('ge', '') }`;
+    if (query.slice(0, 2) === 'ne') return ` != ${ query.replace('ne', '') }`;
     else return ` = ${ query }`;
   };
 
