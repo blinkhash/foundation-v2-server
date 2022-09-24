@@ -569,7 +569,7 @@ const Endpoints = function (logger, client, configMain) {
     // Validated Query Types
     const parameters = { limit: 'number', offset: 'number', timestamp: 'number',
       miner: 'string', worker: 'string', efficiency: 'number', effort: 'number',
-      hashrate: 'number', type: 'string' };
+      hashrate: 'number', solo: 'boolean', type: 'string' };
 
     // Accepted Values for Parameters
     const validType = ['primary', 'auxiliary'];

@@ -321,6 +321,7 @@ describe('Test schema functionality', () => {
         efficiency FLOAT NOT NULL DEFAULT 0,
         effort FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
+        solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT historical_workers_recent UNIQUE (recent, worker, type));
       CREATE INDEX historical_workers_miner ON "Pool-Main".historical_workers(miner, type);

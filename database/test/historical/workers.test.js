@@ -77,6 +77,7 @@ describe('Test database workers functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 1,
+      solo: false,
       type: 'primary',
     };
     const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates]);
@@ -84,7 +85,7 @@ describe('Test database workers functionality', () => {
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, type)
+        hashrate, solo, type)
       VALUES (
         1,
         1,
@@ -93,6 +94,7 @@ describe('Test database workers functionality', () => {
         100,
         100,
         1,
+        false,
         'primary')
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -109,6 +111,7 @@ describe('Test database workers functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 1,
+      solo: false,
       type: 'primary',
     };
     const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates, updates]);
@@ -116,7 +119,7 @@ describe('Test database workers functionality', () => {
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, type)
+        hashrate, solo, type)
       VALUES (
         1,
         1,
@@ -125,6 +128,7 @@ describe('Test database workers functionality', () => {
         100,
         100,
         1,
+        false,
         'primary'), (
         1,
         1,
@@ -133,6 +137,7 @@ describe('Test database workers functionality', () => {
         100,
         100,
         1,
+        false,
         'primary')
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;

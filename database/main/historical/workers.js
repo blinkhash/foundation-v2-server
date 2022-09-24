@@ -64,6 +64,7 @@ const HistoricalWorkers = function (logger, configMain) {
         ${ worker.efficiency },
         ${ worker.effort },
         ${ worker.hashrate },
+        ${ worker.solo },
         '${ worker.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
@@ -76,7 +77,7 @@ const HistoricalWorkers = function (logger, configMain) {
       INSERT INTO "${ pool }".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, type)
+        hashrate, solo, type)
       VALUES ${ _this.buildHistoricalWorkersMain(updates) }
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;

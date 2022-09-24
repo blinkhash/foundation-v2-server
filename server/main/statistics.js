@@ -164,6 +164,7 @@ const Statistics = function (logger, client, config, configMain, template) {
         efficiency: worker.efficiency,
         effort: worker.effort,
         hashrate: worker.hashrate,
+        solo: worker.solo,
         type: worker.type,
       };
     });
