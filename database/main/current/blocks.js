@@ -11,9 +11,9 @@ const CurrentBlocks = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  _this.numbers = ['timestamp', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
-  _this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
-  _this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
+  this.numbers = ['timestamp', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
+  this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
     'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction', 'type'];
 
   // Handle String Parameters
@@ -40,6 +40,17 @@ const CurrentBlocks = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
+  // Handle Special Parameters
+  this.handleSpecial = function(parameters, output) {
+    if (parameters.order || parameters.direction) {
+      output += ` ORDER BY ${ parameters.order || 'id' }`;
+      output += ` ${ parameters.direction === 'ascending' ? 'ASC' : 'DESC' }`;
+    }
+    if (parameters.limit) output += ` LIMIT ${ parameters.limit }`;
+    if (parameters.offset) output += ` OFFSET ${ parameters.offset }`;
+    return output;
+  };
+
   // Select Current Blocks Using Parameters
   this.selectCurrentBlocksMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".current_blocks`;
@@ -50,6 +61,7 @@ const CurrentBlocks = function (logger, configMain) {
       output += `${ parameter }`;
       output += _this.handleQueries(parameters, parameter);
     });
+    output = _this.handleSpecial(parameters, output);
     return output + ';';
   };
 

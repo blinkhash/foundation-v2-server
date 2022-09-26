@@ -33,6 +33,8 @@ exports.handleValidation = function(parameter, type) {
     return exports.validateNumbers(parameter);
   case 'string':
     return exports.validateStrings(parameter);
+  case 'special':
+    return true;
   default:
     return false;
   }

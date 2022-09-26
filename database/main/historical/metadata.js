@@ -11,10 +11,10 @@ const HistoricalMetadata = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Historical Parameters
-  _this.numbers = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
+  this.numbers = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
     'stale', 'valid', 'work', 'workers'];
-  _this.strings = ['type'];
-  _this.parameters = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
+  this.strings = ['type'];
+  this.parameters = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
     'stale', 'type', 'valid', 'work', 'workers'];
 
   // Handle String Parameters
@@ -41,6 +41,17 @@ const HistoricalMetadata = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
+  // Handle Special Parameters
+  this.handleSpecial = function(parameters, output) {
+    if (parameters.order || parameters.direction) {
+      output += ` ORDER BY ${ parameters.order || 'id' }`;
+      output += ` ${ parameters.direction === 'ascending' ? 'ASC' : 'DESC' }`;
+    }
+    if (parameters.limit) output += ` LIMIT ${ parameters.limit }`;
+    if (parameters.offset) output += ` OFFSET ${ parameters.offset }`;
+    return output;
+  };
+
   // Select Historical Metadata Using Parameters
   this.selectHistoricalMetadataMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".historical_metadata`;
@@ -51,6 +62,7 @@ const HistoricalMetadata = function (logger, configMain) {
       output += `${ parameter }`;
       output += _this.handleQueries(parameters, parameter);
     });
+    output = _this.handleSpecial(parameters, output);
     return output + ';';
   };
 

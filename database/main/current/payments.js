@@ -39,6 +39,17 @@ const CurrentPayments = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
+  // Handle Special Parameters
+  this.handleSpecial = function(parameters, output) {
+    if (parameters.order || parameters.direction) {
+      output += ` ORDER BY ${ parameters.order || 'id' }`;
+      output += ` ${ parameters.direction === 'ascending' ? 'ASC' : 'DESC' }`;
+    }
+    if (parameters.limit) output += ` LIMIT ${ parameters.limit }`;
+    if (parameters.offset) output += ` OFFSET ${ parameters.offset }`;
+    return output;
+  };
+
   // Select Current Payments Using Parameters
   this.selectCurrentPaymentsMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".current_payments`;
@@ -49,6 +60,7 @@ const CurrentPayments = function (logger, configMain) {
       output += `${ parameter }`;
       output += _this.handleQueries(parameters, parameter);
     });
+    output = _this.handleSpecial(parameters, output);
     return output + ';';
   };
 

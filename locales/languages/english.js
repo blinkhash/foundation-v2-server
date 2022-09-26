@@ -52,4 +52,4 @@ exports.websiteErrorText3 = () => 'The requested pool was not found. Verify your
 exports.websiteErrorText4 = () => 'The requested method is not currently supported. Verify your input and try again';
 exports.websiteStartingText1 = () => 'Enabling TLS/SSL encryption on API endpoints';
 exports.websiteStartingText2 = (host, port) => `Validated the API configuration, initializing server on ${ host }:${ port } ...`;
-exports.websiteValidationText1 = (parameter, accepted) => `Invalid query parameter specified (${ parameter }: [${ accepted }]). Verify your input and try again`;
+exports.websiteValidationText1 = (parameter, accepted) => `Invalid query parameter specified (${ parameter }: ${ accepted }). Verify your input and try again`;

@@ -46,7 +46,7 @@ const Api = function (logger, client, configs, configMain) {
     const endpoint = utils.validateParameters((req.params || {}).endpoint || '');
 
     // Check if Requested Pool Exists
-    if (!(pool in _this.configs)) {
+    if (!(pool in _this.configs) && pool !== 'pools') {
       callback(404, _this.text.websiteErrorText3());
       return;
     }
@@ -72,6 +72,9 @@ const Api = function (logger, client, configs, configMain) {
       break;
     case (category === 'current' && endpoint === 'payments'):
       _this.endpoints.handleCurrentPayments(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'ports'):
+      callback(200, { ports: _this.configs[pool].ports });
       break;
     case (category === 'current' && endpoint === 'rounds'):
       _this.endpoints.handleCurrentRounds(pool, queries, output);
@@ -107,6 +110,14 @@ const Api = function (logger, client, configs, configMain) {
       break;
     case (category === 'historical' && endpoint === 'workers'):
       _this.endpoints.handleHistoricalWorkers(pool, queries, output);
+      break;
+
+    // Miscellaneous Endpoints
+    case (Object.keys(_this.configs).includes(pool) && category === '' && endpoint === ''):
+      _this.endpoints.handleCurrentMetadata(pool, queries, output);
+      break;
+    case (pool === 'pools' && category === '' && endpoint === ''):
+      callback(200, Object.keys(_this.configs));
       break;
 
     // Unknown Endpoints

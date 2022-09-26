@@ -11,9 +11,9 @@ const CurrentHashrate = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  _this.numbers = ['timestamp', 'work'];
-  _this.strings = ['miner', 'worker', 'type'];
-  _this.parameters = ['timestamp', 'miner', 'worker', 'solo', 'type', 'work'];
+  this.numbers = ['timestamp', 'work'];
+  this.strings = ['miner', 'worker', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'solo', 'type', 'work'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -39,6 +39,17 @@ const CurrentHashrate = function (logger, configMain) {
     else return ` = ${ parameters[parameter] }`;
   };
 
+  // Handle Special Parameters
+  this.handleSpecial = function(parameters, output) {
+    if (parameters.order || parameters.direction) {
+      output += ` ORDER BY ${ parameters.order || 'id' }`;
+      output += ` ${ parameters.direction === 'ascending' ? 'ASC' : 'DESC' }`;
+    }
+    if (parameters.limit) output += ` LIMIT ${ parameters.limit }`;
+    if (parameters.offset) output += ` OFFSET ${ parameters.offset }`;
+    return output;
+  };
+
   // Select Current Hashrate Using Parameters
   this.selectCurrentHashrateMain = function(pool, parameters) {
     let output = `SELECT * FROM "${ pool }".current_hashrate`;
@@ -49,6 +60,7 @@ const CurrentHashrate = function (logger, configMain) {
       output += `${ parameter }`;
       output += _this.handleQueries(parameters, parameter);
     });
+    output = _this.handleSpecial(parameters, output);
     return output + ';';
   };
 
