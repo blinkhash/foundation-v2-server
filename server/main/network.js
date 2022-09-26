@@ -63,19 +63,19 @@ const Network = function (logger, client, config, configMain) {
   };
 
   // Handle Network Data Submissions
-  this.handleSubmissions = function(networkData) {
+  this.handleSubmissions = function(networkData, callback) {
 
     // Establish Separate Behavior
     switch (networkData.networkType) {
 
     // Primary Behavior
     case 'primary':
-      _this.handlePrimary(networkData, () => {});
+      _this.handlePrimary(networkData, () => callback());
       break;
 
     // Auxiliary Behavior
     case 'auxiliary':
-      _this.handleAuxiliary(networkData, () => {});
+      _this.handleAuxiliary(networkData, () => callback());
       break;
 
     // Default Behavior

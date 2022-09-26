@@ -269,7 +269,7 @@ const Checks = function (logger, client, config, configMain) {
   };
 
   // Handle Payment Updates
-  this.handleRounds = function(lookups, blockType) {
+  this.handleRounds = function(lookups, blockType, callback) {
 
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
@@ -305,6 +305,7 @@ const Checks = function (logger, client, config, configMain) {
                 _this.text.databaseCommandsText2(JSON.stringify(error)) :
                 _this.text.databaseUpdatesText2(blockType, blocks.length)];
               _this.logger.log('Checks', _this.config.name, updates);
+              callback();
             });
           });
 
@@ -313,6 +314,7 @@ const Checks = function (logger, client, config, configMain) {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText3(blockType)];
             _this.logger.log('Checks', _this.config.name, updates);
+            callback();
           });
         }
       });
@@ -332,6 +334,7 @@ const Checks = function (logger, client, config, configMain) {
                 _this.text.databaseCommandsText2(JSON.stringify(error)) :
                 _this.text.databaseUpdatesText2(blockType, blocks.length)];
               _this.logger.log('Checks', _this.config.name, updates);
+              callback();
             });
           });
 
@@ -340,6 +343,7 @@ const Checks = function (logger, client, config, configMain) {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText3(blockType)];
             _this.logger.log('Checks', _this.config.name, updates);
+            callback();
           });
         }
       });
@@ -352,7 +356,7 @@ const Checks = function (logger, client, config, configMain) {
   };
 
   // Handle Checks Updates
-  this.handleChecks = function(blockType) {
+  this.handleChecks = function(blockType, callback) {
 
     // Handle Initial Logging
     const starting = [_this.text.databaseStartingText2(blockType)];
@@ -366,7 +370,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Establish Separate Behavior
     _this.executor(transaction, (lookups) => {
-      _this.handleRounds(lookups, blockType);
+      _this.handleRounds(lookups, blockType, callback);
     });
   };
 
@@ -378,9 +382,9 @@ const Checks = function (logger, client, config, configMain) {
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval();
-      _this.handleChecks('primary');
+      _this.handleChecks('primary', () => {});
       if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
-        _this.handleChecks('auxiliary');
+        _this.handleChecks('auxiliary', () => {});
       }
     }, random);
   };

@@ -325,7 +325,7 @@ const Payments = function (logger, client, config, configMain) {
   };
 
   // Handle Payment Updates
-  this.handleRounds = function(lookups, blockType) {
+  this.handleRounds = function(lookups, blockType, callback) {
 
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
@@ -370,6 +370,7 @@ const Payments = function (logger, client, config, configMain) {
                 _this.text.databaseCommandsText2(JSON.stringify(error)) :
                 _this.text.databaseUpdatesText4(blockType, blocks.length)];
               _this.logger.log('Payments', _this.config.name, updates);
+              callback();
             });
           });
 
@@ -378,6 +379,7 @@ const Payments = function (logger, client, config, configMain) {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText5(blockType)];
             _this.logger.log('Payments', _this.config.name, updates);
+            callback();
           });
         }
       });
@@ -397,6 +399,7 @@ const Payments = function (logger, client, config, configMain) {
                 _this.text.databaseCommandsText2(JSON.stringify(error)) :
                 _this.text.databaseUpdatesText4(blockType, blocks.length)];
               _this.logger.log('Payments', _this.config.name, updates);
+              callback();
             });
           });
 
@@ -405,6 +408,7 @@ const Payments = function (logger, client, config, configMain) {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText5(blockType)];
             _this.logger.log('Payments', _this.config.name, updates);
+            callback();
           });
         }
       });
@@ -417,7 +421,7 @@ const Payments = function (logger, client, config, configMain) {
   };
 
   // Handle Payments Updates
-  this.handlePayments = function(blockType) {
+  this.handlePayments = function(blockType, callback) {
 
     // Handle Initial Logging
     const starting = [_this.text.databaseStartingText3(blockType)];
@@ -432,7 +436,7 @@ const Payments = function (logger, client, config, configMain) {
 
     // Establish Separate Behavior
     _this.executor(transaction, (lookups) => {
-      _this.handleRounds(lookups, blockType);
+      _this.handleRounds(lookups, blockType, callback);
     });
   };
 
@@ -444,9 +448,9 @@ const Payments = function (logger, client, config, configMain) {
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval();
-      _this.handlePayments('primary');
+      _this.handlePayments('primary', () => {});
       if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
-        _this.handlePayments('auxiliary');
+        _this.handlePayments('auxiliary', () => {});
       }
     }, random);
   };

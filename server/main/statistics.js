@@ -316,7 +316,7 @@ const Statistics = function (logger, client, config, configMain, template) {
   };
 
   // Handle Statistics Updates
-  this.handleStatistics = function(minerType, blockType) {
+  this.handleStatistics = function(minerType, blockType, callback) {
 
     // Handle Initial Logging
     const minerTypeStr = minerType ? 'solo' : 'shared';
@@ -355,6 +355,7 @@ const Statistics = function (logger, client, config, configMain, template) {
         _this.handlePrimary(lookups, () => {
           const updates = [_this.text.databaseUpdatesText1(blockType, minerTypeStr)];
           _this.logger.log('Statistics', _this.config.name, updates);
+          callback();
         });
       });
       break;
@@ -365,6 +366,7 @@ const Statistics = function (logger, client, config, configMain, template) {
         _this.handleAuxiliary(lookups, () => {
           const updates = [_this.text.databaseUpdatesText1(blockType, minerTypeStr)];
           _this.logger.log('Statistics', _this.config.name, updates);
+          callback();
         });
       });
       break;
@@ -383,9 +385,9 @@ const Statistics = function (logger, client, config, configMain, template) {
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval(minerType);
-      _this.handleStatistics(minerType, 'primary');
+      _this.handleStatistics(minerType, 'primary', () => {});
       if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
-        _this.handleStatistics(minerType, 'auxiliary');
+        _this.handleStatistics(minerType, 'auxiliary', () => {});
       }
     }, random);
   };

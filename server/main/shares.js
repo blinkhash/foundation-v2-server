@@ -323,7 +323,7 @@ const Shares = function (logger, client, config, configMain) {
   };
 
   // Handle Share/Block Submissions
-  this.handleSubmissions = function(shareData, shareValid, blockValid) {
+  this.handleSubmissions = function(shareData, shareValid, blockValid, callback) {
 
     // Calculate Share Features
     let shareType = 'valid';
@@ -351,7 +351,7 @@ const Shares = function (logger, client, config, configMain) {
     case 'primary':
       _this.executor(transaction, (lookups) => {
         _this.handleShares(lookups, shareData, shareType, minerType, () => {
-          if (blockValid) _this.handlePrimary(lookups, shareData, shareType, minerType, () => {});
+          if (blockValid) _this.handlePrimary(lookups, shareData, shareType, minerType, () => callback());
         });
       });
       break;
@@ -360,7 +360,7 @@ const Shares = function (logger, client, config, configMain) {
     case 'auxiliary':
       _this.executor(transaction, (lookups) => {
         _this.handleShares(lookups, shareData, shareType, minerType, () => {
-          if (blockValid) _this.handleAuxiliary(lookups, shareData, shareType, minerType, () => {});
+          if (blockValid) _this.handleAuxiliary(lookups, shareData, shareType, minerType, () => callback());
         });
       });
       break;
@@ -375,6 +375,7 @@ const Shares = function (logger, client, config, configMain) {
               shareData.difficulty, shareData.shareDiff, shareData.addrPrimary, shareData.ip) :
             _this.text.sharesSubmissionsText2(shareData.error, shareData.addrPrimary, shareData.ip)];
           _this.logger[type]('Shares', _this.config.name, lines);
+          callback();
         });
       });
       break;
