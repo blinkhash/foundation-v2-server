@@ -35,6 +35,17 @@ describe('Test database payments functionality', () => {
     expect(payments.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
+  test('Test query handling [3]', () => {
+    const payments = new HistoricalPayments(logger, configMainCopy);
+    expect(payments.handleSpecial({ limit: '100' }, '')).toBe(' LIMIT 100');
+    expect(payments.handleSpecial({ offset: '1' }, '')).toBe(' OFFSET 1');
+    expect(payments.handleSpecial({ order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC');
+    expect(payments.handleSpecial({ direction: 'ascending' }, '')).toBe(' ORDER BY id ASC');
+    expect(payments.handleSpecial({ limit: '100', offset: '1' }, '')).toBe(' LIMIT 100 OFFSET 1');
+    expect(payments.handleSpecial({ limit: '100', offset: '1', order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+    expect(payments.handleSpecial({ limit: '100', offset: '1', order: 'parameter', direction: 'descending' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+  });
+
   test('Test payment command handling [1]', () => {
     const payments = new HistoricalPayments(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };

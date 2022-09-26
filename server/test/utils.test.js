@@ -43,6 +43,14 @@ describe('Test utility functionality', () => {
     expect(utils.countProcessForks(config)).toBe(1);
   });
 
+  test('Test implemented handleValidation', () => {
+    expect(utils.handleValidation('test', 'boolean')).toBe(false);
+    expect(utils.handleValidation('test', 'number')).toBe(false);
+    expect(utils.handleValidation('test', 'string')).toBe(true);
+    expect(utils.handleValidation('test', 'special')).toBe(true);
+    expect(utils.handleValidation('test', 'other')).toBe(false);
+  });
+
   test('Test implemented loggerSeverity', () => {
     expect(utils.loggerSeverity.debug).toBe(1);
     expect(utils.loggerSeverity.log).toBe(2);
@@ -65,5 +73,37 @@ describe('Test utility functionality', () => {
     expect(utils.roundTo(10.9318)).toBe(11);
     expect(utils.roundTo(10.31831, 1)).toBe(10.3);
     expect(utils.roundTo(10.9318, 1)).toBe(10.9);
+  });
+
+  test('Test implemented validateBooleans', () => {
+    expect(utils.validateBooleans('test')).toBe(false);
+    expect(utils.validateBooleans('true')).toBe(true);
+    expect(utils.validateBooleans('false')).toBe(true);
+  });
+
+  test('Test implemented validateNumbers', () => {
+    expect(utils.validateNumbers('test100')).toBe(false);
+    expect(utils.validateNumbers('lt100')).toBe(true);
+    expect(utils.validateNumbers('100')).toBe(true);
+    expect(utils.validateNumbers('100.00')).toBe(true);
+  });
+
+  test('Test implemented validateParameters', () => {
+    expect(utils.validateParameters('test')).toBe('test');
+    expect(utils.validateParameters('test test')).toBe('testtest');
+    expect(utils.validateParameters('; DROP TABLE test')).toBe('DROPTABLEtest');
+    expect(utils.validateParameters(';DROPTABLEtest')).toBe('DROPTABLEtest');
+    expect(utils.validateParameters('parameter')).toBe('parameter');
+    expect(utils.validateParameters('parameter!')).toBe('parameter');
+    expect(utils.validateParameters('')).toBe('');
+  });
+
+  test('Test implemented validateStrings', () => {
+    expect(utils.validateStrings('test')).toBe(true);
+    expect(utils.validateStrings('test test')).toBe(false);
+    expect(utils.validateStrings('; DROP TABLE test')).toBe(false);
+    expect(utils.validateStrings(';DROPTABLEtest')).toBe(false);
+    expect(utils.validateStrings('parameter')).toBe(true);
+    expect(utils.validateStrings('parameter!')).toBe(false);
   });
 });

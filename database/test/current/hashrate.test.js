@@ -35,6 +35,17 @@ describe('Test database hashrate functionality', () => {
     expect(hashrate.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
+  test('Test query handling [3]', () => {
+    const hashrate = new CurrentHashrate(logger, configMainCopy);
+    expect(hashrate.handleSpecial({ limit: '100' }, '')).toBe(' LIMIT 100');
+    expect(hashrate.handleSpecial({ offset: '1' }, '')).toBe(' OFFSET 1');
+    expect(hashrate.handleSpecial({ order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC');
+    expect(hashrate.handleSpecial({ direction: 'ascending' }, '')).toBe(' ORDER BY id ASC');
+    expect(hashrate.handleSpecial({ limit: '100', offset: '1' }, '')).toBe(' LIMIT 100 OFFSET 1');
+    expect(hashrate.handleSpecial({ limit: '100', offset: '1', order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+    expect(hashrate.handleSpecial({ limit: '100', offset: '1', order: 'parameter', direction: 'descending' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+  });
+
   test('Test hashrate command handling [1]', () => {
     const hashrate = new CurrentHashrate(logger, configMainCopy);
     const parameters = { timestamp: 'ge1', miner: 'miner1', solo: false, type: 'primary' };

@@ -35,6 +35,17 @@ describe('Test database workers functionality', () => {
     expect(workers.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
+  test('Test query handling [3]', () => {
+    const workers = new CurrentWorkers(logger, configMainCopy);
+    expect(workers.handleSpecial({ limit: '100' }, '')).toBe(' LIMIT 100');
+    expect(workers.handleSpecial({ offset: '1' }, '')).toBe(' OFFSET 1');
+    expect(workers.handleSpecial({ order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC');
+    expect(workers.handleSpecial({ direction: 'ascending' }, '')).toBe(' ORDER BY id ASC');
+    expect(workers.handleSpecial({ limit: '100', offset: '1' }, '')).toBe(' LIMIT 100 OFFSET 1');
+    expect(workers.handleSpecial({ limit: '100', offset: '1', order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+    expect(workers.handleSpecial({ limit: '100', offset: '1', order: 'parameter', direction: 'descending' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+  });
+
   test('Test workers command handling [1]', () => {
     const workers = new CurrentWorkers(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };

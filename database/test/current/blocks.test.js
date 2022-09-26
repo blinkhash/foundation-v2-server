@@ -35,6 +35,17 @@ describe('Test database blocks functionality', () => {
     expect(blocks.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
+  test('Test query handling [3]', () => {
+    const blocks = new CurrentBlocks(logger, configMainCopy);
+    expect(blocks.handleSpecial({ limit: '100' }, '')).toBe(' LIMIT 100');
+    expect(blocks.handleSpecial({ offset: '1' }, '')).toBe(' OFFSET 1');
+    expect(blocks.handleSpecial({ order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC');
+    expect(blocks.handleSpecial({ direction: 'ascending' }, '')).toBe(' ORDER BY id ASC');
+    expect(blocks.handleSpecial({ limit: '100', offset: '1' }, '')).toBe(' LIMIT 100 OFFSET 1');
+    expect(blocks.handleSpecial({ limit: '100', offset: '1', order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+    expect(blocks.handleSpecial({ limit: '100', offset: '1', order: 'parameter', direction: 'descending' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+  });
+
   test('Test block command handling [1]', () => {
     const blocks = new CurrentBlocks(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };

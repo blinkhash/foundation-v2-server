@@ -35,6 +35,17 @@ describe('Test database rounds functionality', () => {
     expect(rounds.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
   });
 
+  test('Test query handling [3]', () => {
+    const rounds = new CurrentRounds(logger, configMainCopy);
+    expect(rounds.handleSpecial({ limit: '100' }, '')).toBe(' LIMIT 100');
+    expect(rounds.handleSpecial({ offset: '1' }, '')).toBe(' OFFSET 1');
+    expect(rounds.handleSpecial({ order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC');
+    expect(rounds.handleSpecial({ direction: 'ascending' }, '')).toBe(' ORDER BY id ASC');
+    expect(rounds.handleSpecial({ limit: '100', offset: '1' }, '')).toBe(' LIMIT 100 OFFSET 1');
+    expect(rounds.handleSpecial({ limit: '100', offset: '1', order: 'parameter' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+    expect(rounds.handleSpecial({ limit: '100', offset: '1', order: 'parameter', direction: 'descending' }, '')).toBe(' ORDER BY parameter DESC LIMIT 100 OFFSET 1');
+  });
+
   test('Test rounds command handling [1]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const parameters = { miner: 'miner1', type: 'primary' };

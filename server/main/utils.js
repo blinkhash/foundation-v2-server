@@ -13,6 +13,7 @@ exports.checkSoloMining = function(poolConfig, data) {
 };
 
 // Count Number of Process Forks
+/* istanbul ignore next */
 exports.countProcessForks = function(configMain) {
   if (!configMain.clustering || !configMain.clustering.enabled) {
     return 1;
