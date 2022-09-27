@@ -34,12 +34,12 @@ const Stratum = function (logger, client, config, configMain, template) {
 
     // Handle Stratum Network Events
     _this.stratum.on('pool.network', (networkData) => {
-      _this.network.handleSubmissions(networkData);
+      _this.network.handleSubmissions(networkData, () => {});
     });
 
     // Handle Stratum Submission Events
     _this.stratum.on('pool.share', (shareData, shareValid, blockValid) => {
-      _this.shares.handleSubmissions(shareData, shareValid, blockValid);
+      _this.shares.handleSubmissions(shareData, shareValid, blockValid, () => {});
     });
   };
 
