@@ -69,6 +69,7 @@ describe('Test network functionality', () => {
         hashrate = EXCLUDED.hashrate,
         height = EXCLUDED.height;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(3);
       expect(transaction[1]).toBe(expected);
       done();
     });
@@ -98,6 +99,7 @@ describe('Test network functionality', () => {
         hashrate = EXCLUDED.hashrate,
         height = EXCLUDED.height;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(3);
       expect(transaction[1]).toBe(expected);
       done();
     });
@@ -127,6 +129,7 @@ describe('Test network functionality', () => {
         hashrate = EXCLUDED.hashrate,
         height = EXCLUDED.height;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(3);
       expect(transaction[1]).toBe(expected);
       done();
     });
@@ -156,6 +159,7 @@ describe('Test network functionality', () => {
         hashrate = EXCLUDED.hashrate,
         height = EXCLUDED.height;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(3);
       expect(transaction[1]).toBe(expected);
       done();
     });

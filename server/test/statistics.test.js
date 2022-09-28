@@ -176,7 +176,7 @@ describe('Test statistics functionality', () => {
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
     const metadata = {
-      timestamp: 0,
+      timestamp: 1,
       blocks: 1,
       efficiency: 100,
       effort: 100,
@@ -214,7 +214,7 @@ describe('Test statistics functionality', () => {
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
     const miners = [{
-      timestamp: 0,
+      timestamp: 1,
       miner: 'miner1',
       efficiency: 100,
       effort: 100,
@@ -240,7 +240,7 @@ describe('Test statistics functionality', () => {
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
     const network = {
-      timestamp: 0,
+      timestamp: 1,
       difficulty: 1,
       hashrate: 100,
       height: 1,
@@ -264,7 +264,7 @@ describe('Test statistics functionality', () => {
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
     const workers = [{
-      timestamp: 0,
+      timestamp: 1,
       miner: 'miner1',
       worker: 'worker1',
       efficiency: 100,
@@ -308,7 +308,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{ current_work: 100 }] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -323,7 +323,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -331,7 +331,7 @@ describe('Test statistics functionality', () => {
         type: 'primary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -340,7 +340,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,
@@ -462,6 +462,7 @@ describe('Test statistics functionality', () => {
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(9);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
       expect(transaction[3]).toBe(expectedWorkers);
@@ -495,7 +496,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{}] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -510,7 +511,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -518,7 +519,7 @@ describe('Test statistics functionality', () => {
         type: 'primary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -527,7 +528,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,
@@ -649,6 +650,7 @@ describe('Test statistics functionality', () => {
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(9);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
       expect(transaction[3]).toBe(expectedWorkers);
@@ -711,7 +713,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{ current_work: 100 }] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -726,7 +728,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -734,7 +736,7 @@ describe('Test statistics functionality', () => {
         type: 'auxiliary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -743,7 +745,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,
@@ -865,6 +867,7 @@ describe('Test statistics functionality', () => {
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(9);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
       expect(transaction[3]).toBe(expectedWorkers);
@@ -898,7 +901,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{}] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -913,7 +916,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -921,7 +924,7 @@ describe('Test statistics functionality', () => {
         type: 'auxiliary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -930,7 +933,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,
@@ -1052,6 +1055,7 @@ describe('Test statistics functionality', () => {
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(9);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
       expect(transaction[3]).toBe(expectedWorkers);
@@ -1110,7 +1114,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{ current_work: 100 }] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -1125,7 +1129,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -1133,7 +1137,7 @@ describe('Test statistics functionality', () => {
         type: 'primary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -1142,7 +1146,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,
@@ -1181,7 +1185,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{ current_work: 100 }] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -1196,7 +1200,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -1204,7 +1208,7 @@ describe('Test statistics functionality', () => {
         type: 'primary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -1213,7 +1217,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,
@@ -1252,7 +1256,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{ current_work: 100 }] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -1267,7 +1271,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -1275,7 +1279,7 @@ describe('Test statistics functionality', () => {
         type: 'auxiliary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -1284,7 +1288,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,
@@ -1323,7 +1327,7 @@ describe('Test statistics functionality', () => {
         { worker: 'miner3', current_work: 140 }]},
       { rows: [{ current_work: 100 }] },
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         blocks: 1,
         efficiency: 100,
         effort: 100,
@@ -1338,7 +1342,7 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         efficiency: 100,
         effort: 100,
@@ -1346,7 +1350,7 @@ describe('Test statistics functionality', () => {
         type: 'auxiliary',
       }]},
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         difficulty: 1,
         hashrate: 100,
         height: 1,
@@ -1355,7 +1359,7 @@ describe('Test statistics functionality', () => {
       null,
       null,
       { rows: [{
-        timestamp: 0,
+        timestamp: 1,
         miner: 'miner1',
         worker: 'worker1',
         efficiency: 100,

@@ -72,11 +72,11 @@ const Checks = function (logger, client, config, configMain) {
       const identifier = `${ round.miner }_${ round.solo }`;
       if (identifier in combined) {
         const current = combined[identifier];
-        current.invalid += round.invalid;
-        current.stale += round.stale;
+        current.invalid += round.invalid || 0;
+        current.stale += round.stale || 0;
         current.times = Math.max(current.times, round.times);
-        current.valid += round.valid;
-        current.work += round.work;
+        current.valid += round.valid || 0;
+        current.work += round.work || 0;
       } else combined[identifier] = round;
     });
 
@@ -98,22 +98,6 @@ const Checks = function (logger, client, config, configMain) {
         work: current.work,
       };
     });
-  };
-
-  // Handle Round Failure Updates
-  this.handleFailures = function(blocks, callback) {
-
-    // Build Combined Transaction
-    const transaction = ['BEGIN;'];
-
-    // Remove Finished Transactions from Table
-    const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.current.transactions.deleteCurrentTransactionsMain(
-      _this.pool, transactionsDelete));
-
-    // Insert Work into Database
-    transaction.push('COMMIT;');
-    _this.executor(transaction, () => callback());
   };
 
   // Handle Final Round Updates
@@ -154,16 +138,9 @@ const Checks = function (logger, client, config, configMain) {
     // Handle Block Categories Individually
     const flattened = blocks.flatMap((block) => block.round);
     const orphanBlocks = blocks.filter((block) => block.category === 'orphan');
-    const orphanRounds = orphanBlocks.map((orphan) => rounds[flattened.indexOf(orphan.round)]);
+    const orphanRounds = orphanBlocks.map((orphan) => rounds[flattened.indexOf(orphan.round)] || []);
     const immatureBlocks = blocks.filter((block) => block.category === 'immature');
     const generateBlocks = blocks.filter((block) => block.category === 'generate');
-
-    // Handle Historical Orphan Block Updates
-    const orphanBlocksUpdates = _this.handleCurrentBlocks(orphanBlocks);
-    if (orphanBlocksUpdates.length >= 1) {
-      transaction.push(_this.historical.blocks.insertHistoricalBlocksMain(
-        _this.pool, orphanBlocksUpdates));
-    }
 
     // Handle Orphan Block Delete Updates
     const orphanBlocksDelete = orphanBlocks.map((block) => `'${ block.round }'`);
@@ -207,6 +184,13 @@ const Checks = function (logger, client, config, configMain) {
         _this.pool, orphanRoundsUpdates));
     }
 
+    // Handle Historical Orphan Block Updates
+    const orphanBlocksUpdates = _this.handleCurrentBlocks(orphanBlocks);
+    if (orphanBlocksUpdates.length >= 1) {
+      transaction.push(_this.historical.blocks.insertHistoricalBlocksMain(
+        _this.pool, orphanBlocksUpdates));
+    }
+
     // Insert Work into Database
     transaction.push('COMMIT;');
     _this.executor(transaction, () => callback());
@@ -232,7 +216,7 @@ const Checks = function (logger, client, config, configMain) {
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
-        if (error) _this.handleFailures(updates, () => callback(error));
+        if (error) _this.handleFinal(updates, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
           _this.handleUpdates(updates, rounds, results, 'primary', () => callback(null));
         });
@@ -260,7 +244,7 @@ const Checks = function (logger, client, config, configMain) {
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
-        if (error) _this.handleFailures(updates, () => callback(error));
+        if (error) _this.handleFinal(updates, () => callback(error));
         else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
           _this.handleUpdates(updates, rounds, results, 'auxiliary', () => callback(null));
         });

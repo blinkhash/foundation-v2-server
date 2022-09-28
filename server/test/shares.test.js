@@ -498,6 +498,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND solo = false
       AND type = 'primary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -584,6 +585,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND solo = false
       AND type = 'primary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -670,6 +672,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND miner = 'miner1'
       AND solo = true AND type = 'primary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -756,6 +759,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND miner = ''
       AND solo = true AND type = 'primary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -842,6 +846,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND solo = false
       AND type = 'auxiliary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -928,6 +933,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND solo = false
       AND type = 'auxiliary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -1014,6 +1020,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND miner = 'miner1'
       AND solo = true AND type = 'auxiliary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -1100,6 +1107,7 @@ describe('Test shares functionality', () => {
       WHERE round = 'current' AND miner = ''
       AND solo = true AND type = 'auxiliary';`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(6);
       expect(transaction[1]).toBe(expectedBlocks);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedReset);
@@ -1225,12 +1233,12 @@ describe('Test shares functionality', () => {
         effort = EXCLUDED.effort,
         solo = EXCLUDED.solo;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(7);
       expect(transaction[1]).toBe(expectedHashrate);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedMiners);
       expect(transaction[4]).toBe(expectedRounds);
       expect(transaction[5]).toBe(expectedWorkers);
-      expect(transaction[6]).toBe('COMMIT;');
       done();
     });
     shares.handleShares(lookups, shareData, 'valid', false, () => {});
@@ -1346,12 +1354,12 @@ describe('Test shares functionality', () => {
         effort = EXCLUDED.effort,
         solo = EXCLUDED.solo;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(7);
       expect(transaction[1]).toBe(expectedHashrate);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedMiners);
       expect(transaction[4]).toBe(expectedRounds);
       expect(transaction[5]).toBe(expectedWorkers);
-      expect(transaction[6]).toBe('COMMIT;');
       done();
     });
     shares.handleShares(lookups, shareData, 'valid', false, () => {});
@@ -1473,12 +1481,12 @@ describe('Test shares functionality', () => {
         effort = EXCLUDED.effort,
         solo = EXCLUDED.solo;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(7);
       expect(transaction[1]).toBe(expectedHashrate);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedMiners);
       expect(transaction[4]).toBe(expectedRounds);
       expect(transaction[5]).toBe(expectedWorkers);
-      expect(transaction[6]).toBe('COMMIT;');
       done();
     });
     shares.handleShares(lookups, shareData, 'valid', true, () => {});
@@ -1594,12 +1602,12 @@ describe('Test shares functionality', () => {
         effort = EXCLUDED.effort,
         solo = EXCLUDED.solo;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(7);
       expect(transaction[1]).toBe(expectedHashrate);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedMiners);
       expect(transaction[4]).toBe(expectedRounds);
       expect(transaction[5]).toBe(expectedWorkers);
-      expect(transaction[6]).toBe('COMMIT;');
       done();
     });
     shares.handleShares(lookups, shareData, 'valid', true, () => {});
@@ -1817,6 +1825,7 @@ describe('Test shares functionality', () => {
         effort = EXCLUDED.effort,
         solo = EXCLUDED.solo;`;
     client.on('transaction', (transaction) => {
+      expect(transaction.length).toBe(12);
       expect(transaction[1]).toBe(expectedHashrate);
       expect(transaction[2]).toBe(expectedMetadata);
       expect(transaction[3]).toBe(expectedMiners);
