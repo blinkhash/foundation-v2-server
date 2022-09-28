@@ -27,13 +27,13 @@ const Shares = function (logger, client, config, configMain) {
   this.handleEfficiency = function(roundData, shareType) {
     const valid = shareType === 'valid' ? (roundData.valid || 0) + 1 : (roundData.valid || 0);
     const total = (roundData.valid || 0) + (roundData.stale || 0) + (roundData.invalid || 0) + 1;
-    return ((valid / total) || 0) * 100;
+    return Math.round(((valid / total) || 0) * 10000) / 100;
   };
 
   // Handle Effort Updates
   this.handleEffort = function(work, shareData, shareType, difficulty) {
     const total = shareType === 'valid' ? work + (shareData.difficulty || 0) : work;
-    return ((total / difficulty) || 0) * 100;
+    return Math.round(((total / difficulty) || 0) * 10000) / 100;
   };
 
   // Handle Times Updates
@@ -90,7 +90,7 @@ const Shares = function (logger, client, config, configMain) {
   };
 
   // Handle Metadata Updates
-  this.handleCurrentMetadata = function(work, difficulty, poolData, shareData, shareType, minerType, blockType) {
+  this.handleCurrentMetadata = function(work, difficulty, roundData, shareData, shareType, minerType, blockType) {
 
     // Calculate Features of Metadata
     const invalid = shareType === 'invalid' ? 1 : 0;
@@ -99,7 +99,7 @@ const Shares = function (logger, client, config, configMain) {
     const current = shareType === 'valid' ? shareData.difficulty : 0;
 
     // Calculate Efficiency/Effort Metadata
-    const efficiency = _this.handleEfficiency(poolData, shareType);
+    const efficiency = _this.handleEfficiency(roundData, shareType);
     const effort = _this.handleEffort(work, shareData, shareType, difficulty);
 
     // Return Metadata Updates
@@ -124,8 +124,8 @@ const Shares = function (logger, client, config, configMain) {
 
     // Return Miner Updates
     return {
-      miner: (worker || '').split('.')[0],
       timestamp: Date.now(),
+      miner: (worker || '').split('.')[0],
       efficiency: efficiency,
       effort: effort,
       type: blockType
@@ -172,9 +172,9 @@ const Shares = function (logger, client, config, configMain) {
 
     // Return Miner Updates
     return {
-      worker: worker,
-      miner: (worker || '').split('.')[0],
       timestamp: Date.now(),
+      miner: (worker || '').split('.')[0],
+      worker: worker,
       efficiency: efficiency,
       effort: effort,
       solo: minerType,
@@ -352,6 +352,7 @@ const Shares = function (logger, client, config, configMain) {
       _this.executor(transaction, (lookups) => {
         _this.handleShares(lookups, shareData, shareType, minerType, () => {
           if (blockValid) _this.handlePrimary(lookups, shareData, shareType, minerType, () => callback());
+          else callback();
         });
       });
       break;
@@ -361,6 +362,7 @@ const Shares = function (logger, client, config, configMain) {
       _this.executor(transaction, (lookups) => {
         _this.handleShares(lookups, shareData, shareType, minerType, () => {
           if (blockValid) _this.handleAuxiliary(lookups, shareData, shareType, minerType, () => callback());
+          else callback();
         });
       });
       break;

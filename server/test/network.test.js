@@ -36,7 +36,7 @@ describe('Test network functionality', () => {
     expect(typeof network.handlePrimary).toBe('function');
   });
 
-  test('Test network database updates [1]', () => {
+  test('Test network database updates', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -46,7 +46,7 @@ describe('Test network functionality', () => {
     expect(network.handleCurrentNetwork(current, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test network database updates [2]', (done) => {
+  test('Test network primary updates', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -75,7 +75,7 @@ describe('Test network functionality', () => {
     network.handlePrimary(current, () => {});
   });
 
-  test('Test network database updates [3]', (done) => {
+  test('Test network auxiliary updates', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -104,7 +104,7 @@ describe('Test network functionality', () => {
     network.handleAuxiliary(current, () => {});
   });
 
-  test('Test network database updates [4]', (done) => {
+  test('Test network submission handling [1]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -133,7 +133,7 @@ describe('Test network functionality', () => {
     network.handleSubmissions(current, () => {});
   });
 
-  test('Test network database updates [5]', (done) => {
+  test('Test network submission handling [2]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -162,7 +162,7 @@ describe('Test network functionality', () => {
     network.handleSubmissions(current, () => {});
   });
 
-  test('Test network database updates [5]', (done) => {
+  test('Test network submission handling [3]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
