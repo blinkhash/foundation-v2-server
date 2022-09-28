@@ -382,6 +382,7 @@ const Shares = function (logger, client, config, configMain) {
 
     // Default Behavior
     default:
+      callback();
       break;
     }
   };

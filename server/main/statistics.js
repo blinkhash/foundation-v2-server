@@ -373,6 +373,7 @@ const Statistics = function (logger, client, config, configMain, template) {
 
     // Default Behavior
     default:
+      callback();
       break;
     }
   };

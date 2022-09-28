@@ -416,6 +416,7 @@ const Payments = function (logger, client, config, configMain) {
 
     // Default Behavior
     default:
+      callback();
       break;
     }
   };
