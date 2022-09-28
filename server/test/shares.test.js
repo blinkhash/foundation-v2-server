@@ -2085,15 +2085,8 @@ describe('Test shares functionality', () => {
   });
 
   test('Test shares submission handling [8]', (done) => {
-    const lookups = [
-      null,
-      { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
-      { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
-      { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
-      { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
-      null];
     MockDate.set(1634742080841);
-    const client = mockClient(configMainCopy, lookups);
+    const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const shareData = {
