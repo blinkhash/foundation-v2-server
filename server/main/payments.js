@@ -38,8 +38,7 @@ const Payments = function (logger, client, config, configMain) {
     // Iterate Through Amounts
     const combined = {};
     Object.keys(amounts).forEach((address) => {
-      if (address in combined) combined[address].paid += amounts[address];
-      else combined[address] = { balance: 0, paid: amounts[address] };
+      combined[address] = { balance: 0, paid: amounts[address] };
     });
 
     // Iterate Through Balances
@@ -196,6 +195,27 @@ const Payments = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
 
+    // Handle Generate Block Delete Updates
+    const generateBlocksDelete = blocks.map((block) => `'${ block.round }'`);
+    if (generateBlocksDelete.length >= 1) {
+      transaction.push(_this.current.blocks.deleteCurrentBlocksMain(
+        _this.pool, generateBlocksDelete));
+    }
+
+    // Handle Miners Updates
+    const minersUpdates = _this.handleCurrentMiners(amounts, balances, blockType);
+    if (minersUpdates.length >= 1) {
+      transaction.push(_this.current.miners.insertCurrentMinersPayments(
+        _this.pool, minersUpdates));
+    }
+
+    // Handle Generate Round Delete Updates
+    const generateRoundsDelete = blocks.map((block) => `'${ block.round }'`);
+    if (generateRoundsDelete.length >= 1) {
+      transaction.push(_this.current.rounds.deleteCurrentRoundsMain(
+        _this.pool, generateRoundsDelete));
+    }
+
     // Handle Historical Generate Block Updates
     const generateBlocksUpdates = _this.handleHistoricalBlocks(blocks);
     if (generateBlocksUpdates.length >= 1) {
@@ -224,27 +244,6 @@ const Payments = function (logger, client, config, configMain) {
         _this.pool, [transactionsUpdates]));
     }
 
-    // Handle Generate Block Delete Updates
-    const generateBlocksDelete = blocks.map((block) => `'${ block.round }'`);
-    if (generateBlocksDelete.length >= 1) {
-      transaction.push(_this.current.blocks.deleteCurrentBlocksMain(
-        _this.pool, generateBlocksDelete));
-    }
-
-    // Handle Miners Updates
-    const minersUpdates = _this.handleCurrentMiners(amounts, balances, blockType);
-    if (minersUpdates.length >= 1) {
-      transaction.push(_this.current.miners.insertCurrentMinersPayments(
-        _this.pool, minersUpdates));
-    }
-
-    // Handle Generate Round Delete Updates
-    const generateRoundsDelete = blocks.map((block) => `'${ block.round }'`);
-    if (generateRoundsDelete.length >= 1) {
-      transaction.push(_this.current.rounds.deleteCurrentRoundsMain(
-        _this.pool, generateRoundsDelete));
-    }
-
     // Insert Work into Database
     transaction.push('COMMIT;');
     _this.executor(transaction, () => callback());
@@ -270,7 +269,7 @@ const Payments = function (logger, client, config, configMain) {
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
-        if (error) _this.handleFailures(updates, () => callback(error));
+        if (error) _this.handleFailures(blocks, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
           const payments = _this.handleCurrentCombined(balances, results);
 

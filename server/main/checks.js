@@ -216,7 +216,7 @@ const Checks = function (logger, client, config, configMain) {
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
-        if (error) _this.handleFinal(updates, () => callback(error));
+        if (error) _this.handleFinal(blocks, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
           _this.handleUpdates(updates, rounds, results, 'primary', () => callback(null));
         });
@@ -244,7 +244,7 @@ const Checks = function (logger, client, config, configMain) {
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
-        if (error) _this.handleFinal(updates, () => callback(error));
+        if (error) _this.handleFinal(blocks, () => callback(error));
         else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
           _this.handleUpdates(updates, rounds, results, 'auxiliary', () => callback(null));
         });

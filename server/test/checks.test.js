@@ -1297,12 +1297,13 @@ describe('Test checks functionality', () => {
       transaction: 'transaction1',
       type: 'auxiliary',
     };
-    const blocks = [
+    const initial = [
       null,
-      { rows: [{ ...initialBlock, category: 'immature', round: 'round1' }]},
-      { rows: [{ ...initialBlock, category: 'generate', round: 'round2' }]},
+      { rows: [
+        { ...initialBlock, category: 'immature', round: 'round1' },
+        { ...initialBlock, category: 'generate', round: 'round2' }]},
       null];
-    checks.handleRounds(blocks, 'primary', () => {
+    checks.handleRounds(initial, 'primary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1316,8 +1317,8 @@ describe('Test checks functionality', () => {
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const checks = new Checks(logger, client, configCopy, configMainCopy);
-    const blocks = [null, { rows: [] }, null];
-    checks.handleRounds(blocks, 'primary', () => {
+    const initial = [null, { rows: [] }, null];
+    checks.handleRounds(initial, 'primary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1348,12 +1349,13 @@ describe('Test checks functionality', () => {
       transaction: 'transaction1',
       type: 'auxiliary',
     };
-    const blocks = [
+    const initial = [
       null,
-      { rows: [{ ...initialBlock, category: 'immature', round: 'round1' }]},
-      { rows: [{ ...initialBlock, category: 'generate', round: 'round2' }]},
+      { rows: [
+        { ...initialBlock, category: 'immature', round: 'round1' },
+        { ...initialBlock, category: 'generate', round: 'round2' }]},
       null];
-    checks.handleRounds(blocks, 'auxiliary', () => {
+    checks.handleRounds(initial, 'auxiliary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1367,8 +1369,8 @@ describe('Test checks functionality', () => {
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const checks = new Checks(logger, client, configCopy, configMainCopy);
-    const blocks = [null, { rows: [] }, null];
-    checks.handleRounds(blocks, 'auxiliary', () => {
+    const initial = [null, { rows: [] }, null];
+    checks.handleRounds(initial, 'auxiliary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1381,8 +1383,8 @@ describe('Test checks functionality', () => {
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const checks = new Checks(logger, client, configCopy, configMainCopy);
-    const blocks = [null, { rows: [] }, null];
-    checks.handleRounds(blocks, 'unknown', () => done());
+    const initial = [null, { rows: [] }, null];
+    checks.handleRounds(initial, 'unknown', () => done());
   });
 
   test('Test checks submission handling', (done) => {
