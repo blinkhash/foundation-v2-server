@@ -580,6 +580,7 @@ const Schema = function (logger, executor, configMain) {
   /* istanbul ignore next */
   this.handleSchema = function(configs, callback) {
     const keys = Object.keys(configs);
+    if (keys.length < 1) callback();
     keys.reduce((promise, pool, idx) => {
       return promise.then(() => {
         _this.handleDeployment(pool).then(() => {
