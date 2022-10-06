@@ -79,6 +79,7 @@ describe('Test schema functionality', () => {
         reward FLOAT NOT NULL DEFAULT 0,
         round VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
+        submitted BIGINT NOT NULL DEFAULT -1,
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT historical_blocks_unique UNIQUE (round, type));
@@ -363,6 +364,7 @@ describe('Test schema functionality', () => {
         reward FLOAT NOT NULL DEFAULT 0,
         round VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
+        submitted BIGINT NOT NULL DEFAULT -1,
         transaction VARCHAR NOT NULL DEFAULT 'unknown',
         type VARCHAR NOT NULL DEFAULT 'primary',
         CONSTRAINT current_blocks_unique UNIQUE (round, type));
@@ -397,6 +399,8 @@ describe('Test schema functionality', () => {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
+        ip VARCHAR NOT NULL DEFAULT 'unknown',
+        share VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
         work FLOAT NOT NULL DEFAULT 0);

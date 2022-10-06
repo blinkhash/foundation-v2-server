@@ -118,6 +118,7 @@ describe('Test database blocks functionality', () => {
       reward: 100,
       round: 'current',
       solo: false,
+      submitTime: 1,
       transaction: 'transaction1',
       type: 'primary'
     };
@@ -128,8 +129,8 @@ describe('Test database blocks functionality', () => {
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1,
         'miner1',
@@ -144,6 +145,7 @@ describe('Test database blocks functionality', () => {
         100,
         'current',
         false,
+        1,
         'transaction1',
         'primary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -160,6 +162,7 @@ describe('Test database blocks functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     expect(response).toBe(expected);
@@ -181,6 +184,7 @@ describe('Test database blocks functionality', () => {
       reward: 100,
       round: 'current',
       solo: false,
+      submitTime: 1,
       transaction: 'transaction1',
       type: 'primary'
     };
@@ -191,8 +195,8 @@ describe('Test database blocks functionality', () => {
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1,
         'miner1',
@@ -207,6 +211,7 @@ describe('Test database blocks functionality', () => {
         100,
         'current',
         false,
+        1,
         'transaction1',
         'primary'), (
         1,
@@ -222,6 +227,7 @@ describe('Test database blocks functionality', () => {
         100,
         'current',
         false,
+        1,
         'transaction1',
         'primary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -238,6 +244,7 @@ describe('Test database blocks functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     expect(response).toBe(expected);
