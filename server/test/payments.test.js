@@ -111,6 +111,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'primary',
     }];
@@ -128,6 +129,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'primary',
     }];
@@ -271,6 +273,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'primary',
     };
@@ -341,8 +344,8 @@ describe('Test payments functionality', () => {
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         'miner1',
@@ -357,6 +360,7 @@ describe('Test payments functionality', () => {
         0,
         'round1',
         false,
+        2,
         'transaction1',
         'primary'), (
         1634742080841,
@@ -372,6 +376,7 @@ describe('Test payments functionality', () => {
         0,
         'round2',
         false,
+        2,
         'transaction1',
         'primary'), (
         1634742080841,
@@ -387,6 +392,7 @@ describe('Test payments functionality', () => {
         0,
         'round3',
         false,
+        2,
         'transaction1',
         'primary'), (
         1634742080841,
@@ -402,6 +408,7 @@ describe('Test payments functionality', () => {
         0,
         'round4',
         false,
+        2,
         'transaction1',
         'primary'), (
         1634742080841,
@@ -417,6 +424,7 @@ describe('Test payments functionality', () => {
         0,
         'round5',
         false,
+        2,
         'transaction1',
         'primary'), (
         1634742080841,
@@ -432,6 +440,7 @@ describe('Test payments functionality', () => {
         0,
         'round6',
         false,
+        2,
         'transaction1',
         'primary')
       ON CONFLICT DO NOTHING;`;
@@ -613,6 +622,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'primary',
     };
@@ -668,8 +678,8 @@ describe('Test payments functionality', () => {
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         'miner1',
@@ -684,6 +694,7 @@ describe('Test payments functionality', () => {
         0,
         'round1',
         false,
+        2,
         'transaction1',
         'primary'), (
         1634742080841,
@@ -699,6 +710,7 @@ describe('Test payments functionality', () => {
         0,
         'round2',
         false,
+        2,
         'transaction1',
         'primary')
       ON CONFLICT DO NOTHING;`;
@@ -1081,6 +1093,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'auxiliary',
     };
@@ -1136,8 +1149,8 @@ describe('Test payments functionality', () => {
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         'miner1',
@@ -1152,6 +1165,7 @@ describe('Test payments functionality', () => {
         0,
         'round1',
         false,
+        2,
         'transaction1',
         'auxiliary'), (
         1634742080841,
@@ -1167,6 +1181,7 @@ describe('Test payments functionality', () => {
         0,
         'round2',
         false,
+        2,
         'transaction1',
         'auxiliary')
       ON CONFLICT DO NOTHING;`;
@@ -1337,6 +1352,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'auxiliary',
     };
@@ -1408,6 +1424,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'auxiliary',
     };
@@ -1479,6 +1496,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'auxiliary',
     };
@@ -1529,6 +1547,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'auxiliary',
     };
@@ -1582,6 +1601,7 @@ describe('Test payments functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 2,
       transaction: 'transaction1',
       type: 'auxiliary',
     };

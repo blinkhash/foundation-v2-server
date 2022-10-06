@@ -78,7 +78,7 @@ describe('Test shares functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
-    const shareData = { hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
+    const shareData = { hash: 'hash', height: 1, identifier: 'master', submitTime: 1634742080840, transaction: 'transaction1' };
     const expected = {
       timestamp: 1634742080841,
       miner: 'miner1',
@@ -93,6 +93,7 @@ describe('Test shares functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 1634742080840,
       transaction: 'transaction1',
       type: 'primary',
     };
@@ -104,7 +105,7 @@ describe('Test shares functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
-    const shareData = { hash: 'hash', height: 1, transaction: 'transaction1' };
+    const shareData = { ip: '1.1.1.1', hash: 'hash', height: 1, submitTime: 1634742080840, transaction: 'transaction1' };
     const expected = {
       timestamp: 1634742080841,
       miner: '',
@@ -119,6 +120,7 @@ describe('Test shares functionality', () => {
       reward: 0,
       round: 'round',
       solo: false,
+      submitTime: 1634742080840,
       transaction: 'transaction1',
       type: 'primary',
     };
@@ -137,8 +139,10 @@ describe('Test shares functionality', () => {
       solo: false,
       type: 'primary',
       work: 1,
+      ip: '1.1.1.1',
+      share: 'valid'
     };
-    expect(shares.handleCurrentHashrate('miner1', 1, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(shares.handleCurrentHashrate('miner1', 1, '1.1.1.1', 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
   test('Test shares database updates [7]', () => {
@@ -153,8 +157,10 @@ describe('Test shares functionality', () => {
       solo: false,
       type: 'primary',
       work: 0,
+      ip: '1.1.1.1',
+      share: 'invalid'
     };
-    expect(shares.handleCurrentHashrate('miner1', 1, 'invalid', false, 'primary')).toStrictEqual(expected);
+    expect(shares.handleCurrentHashrate('miner1', 1, '1.1.1.1', 'invalid', false, 'primary')).toStrictEqual(expected);
   });
 
   test('Test shares database updates [8]', () => {
@@ -169,8 +175,10 @@ describe('Test shares functionality', () => {
       solo: false,
       type: 'primary',
       work: 1,
+      ip: '1.1.1.1',
+      share: 'valid'
     };
-    expect(shares.handleCurrentHashrate(null, 1, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(shares.handleCurrentHashrate(null, 1, '1.1.1.1', 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
   test('Test shares database updates [9]', () => {
@@ -389,13 +397,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0, work: 100 };
-    const shareData = { difficulty: 1 };
+    const shareData = { ip: '1.1.1.1', difficulty: 1 };
     const expected = {
       timestamp: 1634742080841,
       miner: 'miner1',
       worker: 'miner1',
       efficiency: 100,
       effort: 67.33,
+      ip: '1.1.1.1',
+      share: 'valid',
       solo: false,
       type: 'primary'
     };
@@ -408,11 +418,13 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0, work: 100 };
-    const shareData = { difficulty: 1 };
+    const shareData = { ip: '1.1.1.1', difficulty: 1 };
     const expected = {
       timestamp: 1634742080841,
       miner: '',
       worker: null,
+      ip: '1.1.1.1',
+      share: 'valid',
       efficiency: 100,
       effort: 67.33,
       solo: false,
@@ -427,15 +439,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null, null];
-    const shareData = { addrPrimary: 'miner1', blockDiffPrimary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
+    const shareData = { addrPrimary: 'miner1', blockDiffPrimary: 150, hash: 'hash', height: 1, identifier: 'master', submitTime: 1634742080840, transaction: 'transaction2' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         'miner1',
@@ -450,7 +462,8 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         false,
-        'transaction1',
+        1634742080840,
+        'transaction2',
         'primary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
       DO UPDATE SET
@@ -466,6 +479,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -514,15 +528,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [] }, null, { rows: [] }, null, null];
-    const shareData = { addrPrimary: null, blockDiffPrimary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
+    const shareData = { addrPrimary: null, blockDiffPrimary: null, hash: 'hash', height: 1, submitTime: 1634742080840, transaction: 'transaction1' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         '',
@@ -537,6 +551,7 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         false,
+        1634742080840,
         'transaction1',
         'primary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -553,6 +568,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -601,15 +617,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null, null];
-    const shareData = { addrPrimary: 'miner1', blockDiffPrimary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
+    const shareData = { addrPrimary: 'miner1', blockDiffPrimary: 150, hash: 'hash', height: 1, identifier: 'master', ip: '1.1.1.1', submitTime: 1634742080840, transaction: 'transaction1' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         'miner1',
@@ -624,6 +640,7 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         true,
+        1634742080840,
         'transaction1',
         'primary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -640,6 +657,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -688,15 +706,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [] }, null, { rows: [] }, null, null];
-    const shareData = { addrPrimary: null, blockDiffPrimary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
+    const shareData = { addrPrimary: null, blockDiffPrimary: null, hash: 'hash', height: 1, ip: '1.1.1.1', submitTime: 1634742080840, transaction: 'transaction1' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         '',
@@ -711,6 +729,7 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         true,
+        1634742080840,
         'transaction1',
         'primary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -727,6 +746,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -775,15 +795,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null];
-    const shareData = { addrAuxiliary: 'miner1', blockDiffAuxiliary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
+    const shareData = { addrAuxiliary: 'miner1', blockDiffAuxiliary: 150, hash: 'hash', height: 1, identifier: 'master', ip: '1.1.1.1', submitTime: 1634742080840, transaction: 'transaction1' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         'miner1',
@@ -798,6 +818,7 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         false,
+        1634742080840,
         'transaction1',
         'auxiliary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -814,6 +835,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -862,15 +884,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [] }, null, { rows: [] }, null];
-    const shareData = { addrAuxiliary: null, blockDiffAuxiliary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
+    const shareData = { addrAuxiliary: null, blockDiffAuxiliary: null, hash: 'hash', height: 1, submitTime: 1634742080840, transaction: 'transaction1' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         '',
@@ -885,6 +907,7 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         false,
+        1634742080840,
         'transaction1',
         'auxiliary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -901,6 +924,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -949,15 +973,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null];
-    const shareData = { addrAuxiliary: 'miner1', blockDiffAuxiliary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
+    const shareData = { addrAuxiliary: 'miner1', blockDiffAuxiliary: 150, hash: 'hash', height: 1, identifier: 'master', submitTime: 1634742080840, transaction: 'transaction1' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         'miner1',
@@ -972,6 +996,7 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         true,
+        1634742080840,
         'transaction1',
         'auxiliary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -988,6 +1013,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -1036,15 +1062,15 @@ describe('Test shares functionality', () => {
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [] }, null, { rows: [] }, null];
-    const shareData = { addrAuxiliary: null, blockDiffAuxiliary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
+    const shareData = { addrAuxiliary: null, blockDiffAuxiliary: null, hash: 'hash', height: 1, submitTime: 1634742080840, transaction: 'transaction1' };
     const expectedBlocks = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, miner, worker,
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES (
         1634742080841,
         '',
@@ -1059,6 +1085,7 @@ describe('Test shares functionality', () => {
         0,
         '123456789',
         true,
+        1634742080840,
         'transaction1',
         'auxiliary')
       ON CONFLICT ON CONSTRAINT current_blocks_unique
@@ -1075,6 +1102,7 @@ describe('Test shares functionality', () => {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadata = `
@@ -1136,15 +1164,18 @@ describe('Test shares functionality', () => {
       blockDiffAuxiliary: 150,
       difficulty: 1,
       identifier: 'master',
+      ip: '1.1.1.1'
     };
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
+        '1.1.1.1',
+        'valid',
         false,
         'primary',
         1);`;
@@ -1257,15 +1288,18 @@ describe('Test shares functionality', () => {
       blockDiffAuxiliary: 150,
       difficulty: 1,
       identifier: 'master',
+      ip: '1.1.1.1'
     };
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
+        '1.1.1.1',
+        'valid',
         false,
         'primary',
         1);`;
@@ -1384,15 +1418,18 @@ describe('Test shares functionality', () => {
       blockDiffAuxiliary: 150,
       difficulty: 1,
       identifier: 'master',
+      ip: '1.1.1.1'
     };
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
+        '1.1.1.1',
+        'valid',
         true,
         'primary',
         1);`;
@@ -1505,15 +1542,18 @@ describe('Test shares functionality', () => {
       blockDiffAuxiliary: 150,
       difficulty: 1,
       identifier: 'master',
+      ip: '1.1.1.1'
     };
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
+        '1.1.1.1',
+        'valid',
         true,
         'primary',
         1);`;
@@ -1633,15 +1673,18 @@ describe('Test shares functionality', () => {
       blockDiffAuxiliary: 150,
       difficulty: 1,
       identifier: 'master',
+      ip: '1.1.1.1'
     };
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
+        '1.1.1.1',
+        'valid',
         false,
         'primary',
         1);`;
@@ -1732,11 +1775,13 @@ describe('Test shares functionality', () => {
     const expectedAuxHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1634742080841,
         'auxiliary1',
         'auxiliary1',
+        '1.1.1.1',
+        'valid',
         false,
         'auxiliary',
         1);`;

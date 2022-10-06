@@ -25,13 +25,13 @@ const Endpoints = function (logger, client, configMain) {
       direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
       category: 'string', confirmations: 'number', difficulty: 'number', hash: 'string',
       height: 'number', identifier: 'string', luck: 'number', reward: 'number',
-      round: 'string', solo: 'boolean', transaction: 'string', type: 'string' };
+      round: 'string', solo: 'boolean', submitted: 'number', transaction: 'string', type: 'string' };
 
     // Accepted Values for Parameters
     const validCategories = ['pending', 'immature', 'generate', 'orphan', 'confirmed'];
     const validDirection = ['ascending', 'descending'];
     const validOrder = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
-      'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction', 'type'];
+      'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'submitted', 'transaction', 'type'];
     const validRound = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i;
     const validType = ['primary', 'auxiliary'];
 
@@ -469,13 +469,13 @@ const Endpoints = function (logger, client, configMain) {
       direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
       category: 'string', confirmations: 'number', difficulty: 'number', hash: 'string',
       height: 'number', identifier: 'string', luck: 'number', reward: 'number',
-      round: 'string', solo: 'boolean', transaction: 'string', type: 'string' };
+      round: 'string', solo: 'boolean', submitted: 'number', transaction: 'string', type: 'string' };
 
     // Accepted Values for Parameters
     const validCategories = ['pending', 'immature', 'generate', 'orphan', 'confirmed'];
     const validDirection = ['ascending', 'descending'];
     const validOrder = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
-      'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction', 'type'];
+      'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'submitted', 'transaction', 'type'];
     const validRound = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i;
     const validType = ['primary', 'auxiliary'];
 

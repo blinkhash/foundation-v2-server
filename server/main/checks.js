@@ -37,6 +37,7 @@ const Checks = function (logger, client, config, configMain) {
         reward: block.reward,
         round: block.round,
         solo: block.solo,
+        submitTime: block.submitTime,
         transaction: block.transaction,
         type: block.type,
       };

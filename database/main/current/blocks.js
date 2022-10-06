@@ -12,9 +12,8 @@ const CurrentBlocks = function (logger, configMain) {
 
   // Handle Current Parameters
   this.numbers = ['timestamp', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
-  this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
-    'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction', 'type'];
+  this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'submitTime', 'transaction', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty', 'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'submitTime', 'transaction', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -83,6 +82,7 @@ const CurrentBlocks = function (logger, configMain) {
         ${ block.reward },
         '${ block.round }',
         ${ block.solo },
+        ${ block.submitTime },
         '${ block.transaction }',
         '${ block.type }')`;
       if (idx < updates.length - 1) values += ', ';
@@ -98,8 +98,8 @@ const CurrentBlocks = function (logger, configMain) {
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES ${ _this.buildCurrentBlocksMain(updates) }
       ON CONFLICT ON CONSTRAINT current_blocks_unique
       DO UPDATE SET
@@ -115,6 +115,7 @@ const CurrentBlocks = function (logger, configMain) {
         luck = EXCLUDED.luck,
         reward = EXCLUDED.reward,
         solo = EXCLUDED.solo,
+        submitted = EXCLUDED.submitted,
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
   };
