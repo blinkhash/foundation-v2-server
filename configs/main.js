@@ -19,12 +19,12 @@ config.logger.logLevel = 'log';
 
 // Database Configuration (SQL)
 config.client = {};
-config.client.host = '';
+config.client.host = '127.0.0.1';
 config.client.port = 5432;
 config.client.username = '';
 config.client.password = '';
 config.client.database = '';
-config.client.tls = true;
+config.client.tls = false;
 
 // Clustering Configuration
 config.clustering = {};
@@ -39,7 +39,7 @@ config.tls.cert = '';
 
 // Server Configuration
 config.server = {};
-config.server.host = '0.0.0.0';
+config.server.host = '127.0.0.1';
 config.server.port = 3001;
 config.server.tls = false;
 
