@@ -67,13 +67,14 @@ const Shares = function (logger, client, config, configMain) {
       reward: 0,
       round: round,
       solo: minerType,
+      submitTime: shareData.submitTime,
       transaction: shareData.transaction,
       type: blockType,
     };
   };
 
   // Handle Hashrate Updates
-  this.handleCurrentHashrate = function(worker, difficulty, shareType, minerType, blockType) {
+  this.handleCurrentHashrate = function(worker, difficulty, ip, shareType, minerType, blockType) {
 
     // Calculate Features of Hashrate
     const current = shareType === 'valid' ? difficulty : 0;
@@ -83,6 +84,8 @@ const Shares = function (logger, client, config, configMain) {
       timestamp: Date.now(),
       miner: (worker || '').split('.')[0],
       worker: worker,
+      ip: ip,
+      share: shareType,
       solo: minerType,
       type: blockType,
       work: current,
@@ -175,6 +178,8 @@ const Shares = function (logger, client, config, configMain) {
       timestamp: Date.now(),
       miner: (worker || '').split('.')[0],
       worker: worker,
+      ip: shareData.ip,
+      share: shareType,
       efficiency: efficiency,
       effort: effort,
       solo: minerType,
@@ -271,9 +276,9 @@ const Shares = function (logger, client, config, configMain) {
 
     // Handle Hashrate Updates
     const hashrateUpdates = _this.handleCurrentHashrate(
-      shareData.addrPrimary, shareData.difficulty, shareType, minerType, 'primary');
+      shareData.addrPrimary, shareData.difficulty, shareData.ip, shareType, minerType, 'primary');
     const auxHashrateUpdates = _this.handleCurrentHashrate(
-      shareData.addrAuxiliary, shareData.difficulty, shareType, minerType, 'auxiliary');
+      shareData.addrAuxiliary, shareData.difficulty, shareData.ip, shareType, minerType, 'auxiliary');
 
     // Handle Metadata Updates
     const metadataUpdates = _this.handleCurrentMetadata(

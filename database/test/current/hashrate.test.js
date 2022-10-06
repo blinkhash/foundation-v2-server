@@ -141,6 +141,8 @@ describe('Test database hashrate functionality', () => {
       timestamp: 1,
       miner: 'miner1',
       worker: 'worker1',
+      ip: '1.1.1.1',
+      share: 'valid',
       solo: false,
       type: 'primary',
       work: 8,
@@ -149,11 +151,13 @@ describe('Test database hashrate functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1,
         'miner1',
         'worker1',
+        '1.1.1.1',
+        'valid',
         false,
         'primary',
         8);`;
@@ -166,6 +170,8 @@ describe('Test database hashrate functionality', () => {
       timestamp: 1,
       miner: 'miner1',
       worker: 'worker1',
+      ip: '1.1.1.1',
+      share: 'valid',
       solo: false,
       type: 'primary',
       work: 8,
@@ -174,17 +180,21 @@ describe('Test database hashrate functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        ip, share, solo, type, work)
       VALUES (
         1,
         'miner1',
         'worker1',
+        '1.1.1.1',
+        'valid',
         false,
         'primary',
         8), (
         1,
         'miner1',
         'worker1',
+        '1.1.1.1',
+        'valid',
         false,
         'primary',
         8);`;

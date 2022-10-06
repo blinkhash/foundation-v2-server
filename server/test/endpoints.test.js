@@ -127,7 +127,7 @@ describe('Test endpoints functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const endpoints = new Endpoints(logger, client, configMainCopy);
-    const expected = 'Invalid query parameter specified (order: timestamp, miner, worker, category, confirmations, difficulty, hash, height, identifier, luck, reward, round, solo, transaction, type). Verify your input and try again';
+    const expected = 'Invalid query parameter specified (order: timestamp, miner, worker, category, confirmations, difficulty, hash, height, identifier, luck, reward, round, solo, submitted, transaction, type). Verify your input and try again';
     const queries = { order: 'unknown' };
     endpoints.handleCurrentBlocks('Pool1', queries, (code, message) => {
       expect(code).toBe(400);
@@ -1119,7 +1119,7 @@ describe('Test endpoints functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const endpoints = new Endpoints(logger, client, configMainCopy);
-    const expected = 'Invalid query parameter specified (order: timestamp, miner, worker, category, confirmations, difficulty, hash, height, identifier, luck, reward, round, solo, transaction, type). Verify your input and try again';
+    const expected = 'Invalid query parameter specified (order: timestamp, miner, worker, category, confirmations, difficulty, hash, height, identifier, luck, reward, round, solo, submitted, transaction, type). Verify your input and try again';
     const queries = { order: 'unknown' };
     endpoints.handleHistoricalBlocks('Pool1', queries, (code, message) => {
       expect(code).toBe(400);

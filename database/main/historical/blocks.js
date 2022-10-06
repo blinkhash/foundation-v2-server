@@ -12,9 +12,9 @@ const HistoricalBlocks = function (logger, configMain) {
 
   // Handle Historical Parameters
   this.numbers = ['timestamp', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
-  this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
+  this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'submitTime', 'transaction', 'type'];
   this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
-    'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction', 'type'];
+    'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'submitTime', 'transaction', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -83,6 +83,7 @@ const HistoricalBlocks = function (logger, configMain) {
         ${ block.reward },
         '${ block.round }',
         ${ block.solo },
+        ${ block.submitTime },
         '${ block.transaction }',
         '${ block.type }')`;
       if (idx < updates.length - 1) values += ', ';
@@ -98,8 +99,8 @@ const HistoricalBlocks = function (logger, configMain) {
         category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
-        round, solo, transaction,
-        type)
+        round, solo, submitted,
+        transaction, type)
       VALUES ${ _this.buildHistoricalBlocksMain(updates) }
       ON CONFLICT DO NOTHING;`;
   };
