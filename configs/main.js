@@ -15,15 +15,15 @@ config.language = 'english';
 // Logger Configuration
 config.logger = {};
 config.logger.logColors = true;
-config.logger.logLevel = 'debug';
+config.logger.logLevel = 'log';
 
 // Database Configuration (SQL)
 config.client = {};
-config.client.host = '38.242.139.65';
+config.client.host = '';
 config.client.port = 5432;
-config.client.username = 'postgres';
-config.client.password = '62mChkvZ3Jqq8C__rZbaFPM';
-config.client.database = 'foundation3';
+config.client.username = '';
+config.client.password = '';
+config.client.database = '';
 config.client.tls = true;
 
 // Clustering Configuration
@@ -33,9 +33,9 @@ config.clustering.forks = 'auto';
 
 // TLS Configuration
 config.tls = {};
-config.tls.ca = 'rootCA.crt';
-config.tls.key = 'server.key';
-config.tls.cert = 'server.crt';
+config.tls.ca = '';
+config.tls.key = '';
+config.tls.cert = '';
 
 // Server Configuration
 config.server = {};
