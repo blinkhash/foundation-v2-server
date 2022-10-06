@@ -22,10 +22,11 @@ const Endpoints = function (logger, client, configMain) {
 
     // Validated Query Types
     const parameters = { limit: 'special', offset: 'special', order: 'special',
-      direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
-      category: 'string', confirmations: 'number', difficulty: 'number', hash: 'string',
-      height: 'number', identifier: 'string', luck: 'number', reward: 'number',
-      round: 'string', solo: 'boolean', transaction: 'string', type: 'string' };
+      direction: 'special', timestamp: 'number', submitted: 'number', miner: 'string',
+      worker: 'string', category: 'string', confirmations: 'number', difficulty: 'number',
+      hash: 'string', height: 'number', identifier: 'string', luck: 'number',
+      reward: 'number', round: 'string', solo: 'boolean', transaction: 'string',
+      type: 'string' };
 
     // Accepted Values for Parameters
     const validCategories = ['pending', 'immature', 'generate', 'orphan', 'confirmed'];
@@ -80,11 +81,13 @@ const Endpoints = function (logger, client, configMain) {
     // Validated Query Types
     const parameters = { limit: 'special', offset: 'special', order: 'special',
       direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
-      solo: 'boolean', type: 'string' };
+      identifier: 'string', ip: 'string', share: 'string', solo: 'boolean',
+      type: 'string' };
 
     // Accepted Values for Parameters
     const validDirection = ['ascending', 'descending'];
     const validOrder = ['timestamp', 'miner', 'worker', 'solo', 'type', 'work'];
+    const validShare = ['valid', 'invalid', 'stale'];
     const validType = ['primary', 'auxiliary'];
 
     // General Parameter Validation
@@ -109,6 +112,9 @@ const Endpoints = function (logger, client, configMain) {
       return;
     } else if (queries.order && !validOrder.includes(queries.order)) {
       callback(400, _this.text.websiteValidationText1('order', validOrder.join(', ')));
+      return;
+    } else if (queries.share && !validShare.includes(queries.share)) {
+      callback(400, _this.text.websiteValidationText1('share', validShare.join(', ')));
       return;
     } else if (queries.type && !validType.includes(queries.type)) {
       callback(400, _this.text.websiteValidationText1('type', validType.join(', ')));
@@ -176,7 +182,8 @@ const Endpoints = function (logger, client, configMain) {
     const parameters = { limit: 'special', offset: 'special', order: 'special',
       direction: 'special', timestamp: 'number', miner: 'string', balance: 'number',
       efficiency: 'number', effort: 'number', generate: 'number', hashrate: 'number',
-      immature: 'number', paid: 'number', type: 'string' };
+      immature: 'number', invalid: 'number', paid: 'number', stale: 'number',
+      type: 'string', valid: 'number' };
 
     // Accepted Values for Parameters
     const validDirection = ['ascending', 'descending'];
@@ -420,8 +427,8 @@ const Endpoints = function (logger, client, configMain) {
     // Validated Query Types
     const parameters = { limit: 'special', offset: 'special', order: 'special',
       direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
-      efficiency: 'number', effort: 'number', hashrate: 'number', solo: 'boolean',
-      type: 'string' };
+      efficiency: 'number', effort: 'number', hashrate: 'number', invalid: 'number',
+      solo: 'boolean', stale: 'number', type: 'string', valid: 'number' };
 
     // Accepted Values for Parameters
     const validDirection = ['ascending', 'descending'];
@@ -466,10 +473,11 @@ const Endpoints = function (logger, client, configMain) {
 
     // Validated Query Types
     const parameters = { limit: 'special', offset: 'special', order: 'special',
-      direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
-      category: 'string', confirmations: 'number', difficulty: 'number', hash: 'string',
-      height: 'number', identifier: 'string', luck: 'number', reward: 'number',
-      round: 'string', solo: 'boolean', transaction: 'string', type: 'string' };
+      direction: 'special', submitted: 'number', timestamp: 'number', miner: 'string',
+      worker: 'string', category: 'string', confirmations: 'number', difficulty: 'number',
+      hash: 'string', height: 'number', identifier: 'string', luck: 'number',
+      reward: 'number', round: 'string', solo: 'boolean', transaction: 'string',
+      type: 'string' };
 
     // Accepted Values for Parameters
     const validCategories = ['pending', 'immature', 'generate', 'orphan', 'confirmed'];
@@ -572,7 +580,8 @@ const Endpoints = function (logger, client, configMain) {
     // Validated Query Types
     const parameters = { limit: 'special', offset: 'special', order: 'special',
       direction: 'special', timestamp: 'number', miner: 'string', efficiency: 'number',
-      effort: 'number', hashrate: 'number', type: 'string' };
+      effort: 'number', hashrate: 'number', invalid: 'number', stale: 'number',
+      type: 'string', valid: 'number' };
 
     // Accepted Values for Parameters
     const validDirection = ['ascending', 'descending'];
@@ -808,8 +817,8 @@ const Endpoints = function (logger, client, configMain) {
     // Validated Query Types
     const parameters = { limit: 'special', offset: 'special', order: 'special',
       direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
-      efficiency: 'number', effort: 'number', hashrate: 'number', solo: 'boolean',
-      type: 'string' };
+      efficiency: 'number', effort: 'number', hashrate: 'number', invalid: 'number',
+      solo: 'boolean', stale: 'number', type: 'string', valid: 'number' };
 
     // Accepted Values for Parameters
     const validDirection = ['ascending', 'descending'];

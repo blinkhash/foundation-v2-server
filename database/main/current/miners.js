@@ -11,10 +11,11 @@ const CurrentMiners = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  this.numbers = ['timestamp', 'balance', 'efficiency', 'effort', 'generate', 'hashrate', 'immature', 'paid'];
+  this.numbers = ['timestamp', 'balance', 'efficiency', 'effort', 'generate', 'hashrate', 'immature',
+    'invalid', 'paid', 'stale', 'valid'];
   this.strings = ['miner', 'type'];
   this.parameters = ['timestamp', 'miner', 'balance', 'efficiency', 'effort', 'generate', 'hashrate',
-    'immature', 'paid', 'type'];
+    'immature', 'invalid', 'paid', 'stale', 'type', 'valid'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -101,7 +102,10 @@ const CurrentMiners = function (logger, configMain) {
         '${ miner.miner }',
         ${ miner.efficiency },
         ${ miner.effort },
-        '${ miner.type }')`;
+        ${ miner.invalid },
+        ${ miner.stale },
+        '${ miner.type }',
+        ${ miner.valid })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
@@ -112,13 +116,17 @@ const CurrentMiners = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".current_miners (
         timestamp, miner, efficiency,
-        effort, type)
+        effort, invalid, stale, type,
+        valid)
       VALUES ${ _this.buildCurrentMinersRounds(updates) }
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
-        effort = EXCLUDED.effort;`;
+        effort = EXCLUDED.effort,
+        invalid = "${ pool }".current_miners.invalid + EXCLUDED.invalid,
+        stale = "${ pool }".current_miners.stale + EXCLUDED.stale,
+        valid = "${ pool }".current_miners.valid + EXCLUDED.valid;`;
   };
 
   // Build Miners Values String

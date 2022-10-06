@@ -140,7 +140,7 @@ describe('Test API functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const api = new Api(logger, client, configs, configMainCopy);
-    const expected = { ports: configs['Pool1'].ports };
+    const expected = configs['Pool1'].ports;
     api.handleApiV2(request, (code, message) => {
       expect(code).toBe(200);
       expect(message).toStrictEqual(expected);

@@ -219,7 +219,10 @@ describe('Test statistics functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 100,
+      invalid: 0,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     }];
     const expected = [{
       timestamp: 1634742080841,
@@ -228,7 +231,10 @@ describe('Test statistics functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 100,
+      invalid: 0,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     }];
     expect(statistics.handleHistoricalMiners(miners)).toStrictEqual(expected);
   });
@@ -270,8 +276,11 @@ describe('Test statistics functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 100,
+      invalid: 0,
       solo: false,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     }];
     const expected = [{
       timestamp: 1634742080841,
@@ -281,8 +290,11 @@ describe('Test statistics functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 100,
+      invalid: 0,
       solo: false,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     }];
     expect(statistics.handleHistoricalWorkers(workers)).toStrictEqual(expected);
   });
@@ -298,10 +310,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{ count: 1 }] },
       { rows: [{ count: 1 }] },
+      { rows: [{ count: 2 }] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -328,7 +345,10 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
+        invalid: 0,
+        stale: 0,
         type: 'primary',
+        valid: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -346,8 +366,24 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
-        solo: false,
+        invalid: 0,
+        solo: true,
+        stale: 0,
         type: 'primary',
+        valid: 1,
+      }]},
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
+        invalid: 0,
+        solo: false,
+        stale: 0,
+        type: 'primary',
+        valid: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -359,7 +395,7 @@ describe('Test statistics functionality', () => {
         1431655765.3333333,
         1,
         'primary',
-        1)
+        3)
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
@@ -379,7 +415,22 @@ describe('Test statistics functionality', () => {
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
-    const expectedWorkers = `
+    const expectedSoloWorkers = `
+      INSERT INTO "Pool-Bitcoin".current_workers (
+        timestamp, miner, worker,
+        hashrate, solo, type)
+      VALUES (
+        1634742080841,
+        'worker1',
+        'worker1',
+        0,
+        true,
+        'primary')
+      ON CONFLICT ON CONSTRAINT current_workers_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
+    const expectedSharedWorkers = `
       INSERT INTO "Pool-Bitcoin".current_workers (
         timestamp, miner, worker,
         hashrate, solo, type)
@@ -420,7 +471,7 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        type)
+        invalid, stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -428,7 +479,10 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
-        'primary')
+        0,
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
     const expectedHistoricalNetwork = `
@@ -444,11 +498,12 @@ describe('Test statistics functionality', () => {
         'primary')
       ON CONFLICT ON CONSTRAINT historical_network_recent
       DO NOTHING;`;
-    const expectedHistoricalWorkers = `
+    const expectedSoloHistoricalWorkers = `
       INSERT INTO "Pool-Bitcoin".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, solo, type)
+        hashrate, invalid, solo,
+        stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -457,19 +512,45 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
+        0,
+        true,
+        0,
+        'primary',
+        1)
+      ON CONFLICT ON CONSTRAINT historical_workers_recent
+      DO NOTHING;`;
+    const expectedSharedHistoricalWorkers = `
+      INSERT INTO "Pool-Bitcoin".historical_workers (
+        timestamp, recent, miner,
+        worker, efficiency, effort,
+        hashrate, invalid, solo,
+        stale, type, valid)
+      VALUES (
+        1634742080841,
+        1634742000000,
+        'miner1',
+        'worker1',
+        100,
+        100,
+        100,
+        0,
         false,
-        'primary')
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(9);
+      expect(transaction.length).toBe(11);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
-      expect(transaction[3]).toBe(expectedWorkers);
-      expect(transaction[4]).toBe(expectedHistoricalMetadata);
-      expect(transaction[5]).toBe(expectedHistoricalMiners);
-      expect(transaction[6]).toBe(expectedHistoricalNetwork);
-      expect(transaction[7]).toBe(expectedHistoricalWorkers);
+      expect(transaction[3]).toBe(expectedSoloWorkers);
+      expect(transaction[4]).toBe(expectedSharedWorkers);
+      expect(transaction[5]).toBe(expectedHistoricalMetadata);
+      expect(transaction[6]).toBe(expectedHistoricalMiners);
+      expect(transaction[7]).toBe(expectedHistoricalNetwork);
+      expect(transaction[8]).toBe(expectedSoloHistoricalWorkers);
+      expect(transaction[9]).toBe(expectedSharedHistoricalWorkers);
       done();
     });
     statistics.handlePrimary(lookups, () => {});
@@ -486,10 +567,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{}] },
       { rows: [{}] },
+      { rows: [{}] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -516,7 +602,10 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
+        invalid: 0,
+        stale: 0,
         type: 'primary',
+        valid: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -534,8 +623,24 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
-        solo: false,
+        invalid: 0,
+        solo: true,
+        stale: 0,
         type: 'primary',
+        valid: 1,
+      }]},
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
+        invalid: 0,
+        solo: false,
+        stale: 0,
+        type: 'primary',
+        valid: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -567,7 +672,22 @@ describe('Test statistics functionality', () => {
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
-    const expectedWorkers = `
+    const expectedSoloWorkers = `
+      INSERT INTO "Pool-Bitcoin".current_workers (
+        timestamp, miner, worker,
+        hashrate, solo, type)
+      VALUES (
+        1634742080841,
+        'worker1',
+        'worker1',
+        0,
+        true,
+        'primary')
+      ON CONFLICT ON CONSTRAINT current_workers_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
+    const expectedSharedWorkers = `
       INSERT INTO "Pool-Bitcoin".current_workers (
         timestamp, miner, worker,
         hashrate, solo, type)
@@ -608,7 +728,7 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        type)
+        invalid, stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -616,7 +736,10 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
-        'primary')
+        0,
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
     const expectedHistoricalNetwork = `
@@ -632,11 +755,12 @@ describe('Test statistics functionality', () => {
         'primary')
       ON CONFLICT ON CONSTRAINT historical_network_recent
       DO NOTHING;`;
-    const expectedHistoricalWorkers = `
+    const expectedSoloHistoricalWorkers = `
       INSERT INTO "Pool-Bitcoin".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, solo, type)
+        hashrate, invalid, solo,
+        stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -645,19 +769,45 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
+        0,
+        true,
+        0,
+        'primary',
+        1)
+      ON CONFLICT ON CONSTRAINT historical_workers_recent
+      DO NOTHING;`;
+    const expectedSharedHistoricalWorkers = `
+      INSERT INTO "Pool-Bitcoin".historical_workers (
+        timestamp, recent, miner,
+        worker, efficiency, effort,
+        hashrate, invalid, solo,
+        stale, type, valid)
+      VALUES (
+        1634742080841,
+        1634742000000,
+        'miner1',
+        'worker1',
+        100,
+        100,
+        100,
+        0,
         false,
-        'primary')
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(9);
+      expect(transaction.length).toBe(11);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
-      expect(transaction[3]).toBe(expectedWorkers);
-      expect(transaction[4]).toBe(expectedHistoricalMetadata);
-      expect(transaction[5]).toBe(expectedHistoricalMiners);
-      expect(transaction[6]).toBe(expectedHistoricalNetwork);
-      expect(transaction[7]).toBe(expectedHistoricalWorkers);
+      expect(transaction[3]).toBe(expectedSoloWorkers);
+      expect(transaction[4]).toBe(expectedSharedWorkers);
+      expect(transaction[5]).toBe(expectedHistoricalMetadata);
+      expect(transaction[6]).toBe(expectedHistoricalMiners);
+      expect(transaction[7]).toBe(expectedHistoricalNetwork);
+      expect(transaction[8]).toBe(expectedSoloHistoricalWorkers);
+      expect(transaction[9]).toBe(expectedSharedHistoricalWorkers);
       done();
     });
     statistics.handlePrimary(lookups, () => {});
@@ -678,11 +828,14 @@ describe('Test statistics functionality', () => {
       { rows: [] },
       { rows: [] },
       { rows: [] },
+      { rows: [] },
+      { rows: [] },
       null,
       { rows: [] },
       { rows: [] },
       null,
       null,
+      { rows: [] },
       { rows: [] },
       null];
     client.on('transaction', (transaction) => {
@@ -703,10 +856,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{ count: 1 }] },
       { rows: [{ count: 1 }] },
+      { rows: [{ count: 2 }] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -733,7 +891,10 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
+        invalid: 0,
+        stale: 0,
         type: 'auxiliary',
+        valid: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -751,8 +912,24 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
-        solo: false,
+        invalid: 0,
+        solo: true,
+        stale: 0,
         type: 'auxiliary',
+        valid: 1,
+      }]},
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
+        invalid: 0,
+        solo: false,
+        stale: 0,
+        type: 'auxiliary',
+        valid: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -764,7 +941,7 @@ describe('Test statistics functionality', () => {
         1431655765.3333333,
         1,
         'auxiliary',
-        1)
+        3)
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
@@ -784,7 +961,22 @@ describe('Test statistics functionality', () => {
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
-    const expectedWorkers = `
+    const expectedSoloWorkers = `
+      INSERT INTO "Pool-Bitcoin".current_workers (
+        timestamp, miner, worker,
+        hashrate, solo, type)
+      VALUES (
+        1634742080841,
+        'worker1',
+        'worker1',
+        0,
+        true,
+        'auxiliary')
+      ON CONFLICT ON CONSTRAINT current_workers_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
+    const expectedSharedWorkers = `
       INSERT INTO "Pool-Bitcoin".current_workers (
         timestamp, miner, worker,
         hashrate, solo, type)
@@ -825,7 +1017,7 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        type)
+        invalid, stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -833,7 +1025,10 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
-        'auxiliary')
+        0,
+        0,
+        'auxiliary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
     const expectedHistoricalNetwork = `
@@ -849,11 +1044,12 @@ describe('Test statistics functionality', () => {
         'auxiliary')
       ON CONFLICT ON CONSTRAINT historical_network_recent
       DO NOTHING;`;
-    const expectedHistoricalWorkers = `
+    const expectedSoloHistoricalWorkers = `
       INSERT INTO "Pool-Bitcoin".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, solo, type)
+        hashrate, invalid, solo,
+        stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -862,19 +1058,45 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
+        0,
+        true,
+        0,
+        'auxiliary',
+        1)
+      ON CONFLICT ON CONSTRAINT historical_workers_recent
+      DO NOTHING;`;
+    const expectedSharedHistoricalWorkers = `
+      INSERT INTO "Pool-Bitcoin".historical_workers (
+        timestamp, recent, miner,
+        worker, efficiency, effort,
+        hashrate, invalid, solo,
+        stale, type, valid)
+      VALUES (
+        1634742080841,
+        1634742000000,
+        'miner1',
+        'worker1',
+        100,
+        100,
+        100,
+        0,
         false,
-        'auxiliary')
+        0,
+        'auxiliary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(9);
+      expect(transaction.length).toBe(11);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
-      expect(transaction[3]).toBe(expectedWorkers);
-      expect(transaction[4]).toBe(expectedHistoricalMetadata);
-      expect(transaction[5]).toBe(expectedHistoricalMiners);
-      expect(transaction[6]).toBe(expectedHistoricalNetwork);
-      expect(transaction[7]).toBe(expectedHistoricalWorkers);
+      expect(transaction[3]).toBe(expectedSoloWorkers);
+      expect(transaction[4]).toBe(expectedSharedWorkers);
+      expect(transaction[5]).toBe(expectedHistoricalMetadata);
+      expect(transaction[6]).toBe(expectedHistoricalMiners);
+      expect(transaction[7]).toBe(expectedHistoricalNetwork);
+      expect(transaction[8]).toBe(expectedSoloHistoricalWorkers);
+      expect(transaction[9]).toBe(expectedSharedHistoricalWorkers);
       done();
     });
     statistics.handleAuxiliary(lookups, () => {});
@@ -891,10 +1113,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{}] },
       { rows: [{}] },
+      { rows: [{}] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -921,7 +1148,10 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
+        invalid: 0,
+        stale: 0,
         type: 'auxiliary',
+        valid: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -939,8 +1169,24 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
-        solo: false,
+        invalid: 0,
+        solo: true,
+        stale: 0,
         type: 'auxiliary',
+        valid: 1,
+      }]},
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
+        invalid: 0,
+        solo: false,
+        stale: 0,
+        type: 'auxiliary',
+        valid: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -972,7 +1218,22 @@ describe('Test statistics functionality', () => {
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         hashrate = EXCLUDED.hashrate;`;
-    const expectedWorkers = `
+    const expectedSoloWorkers = `
+      INSERT INTO "Pool-Bitcoin".current_workers (
+        timestamp, miner, worker,
+        hashrate, solo, type)
+      VALUES (
+        1634742080841,
+        'worker1',
+        'worker1',
+        0,
+        true,
+        'auxiliary')
+      ON CONFLICT ON CONSTRAINT current_workers_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        hashrate = EXCLUDED.hashrate;`;
+    const expectedSharedWorkers = `
       INSERT INTO "Pool-Bitcoin".current_workers (
         timestamp, miner, worker,
         hashrate, solo, type)
@@ -1013,7 +1274,7 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        type)
+        invalid, stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1021,7 +1282,10 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
-        'auxiliary')
+        0,
+        0,
+        'auxiliary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
     const expectedHistoricalNetwork = `
@@ -1037,11 +1301,12 @@ describe('Test statistics functionality', () => {
         'auxiliary')
       ON CONFLICT ON CONSTRAINT historical_network_recent
       DO NOTHING;`;
-    const expectedHistoricalWorkers = `
+    const expectedSoloHistoricalWorkers = `
       INSERT INTO "Pool-Bitcoin".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, solo, type)
+        hashrate, invalid, solo,
+        stale, type, valid)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1050,19 +1315,45 @@ describe('Test statistics functionality', () => {
         100,
         100,
         100,
+        0,
+        true,
+        0,
+        'auxiliary',
+        1)
+      ON CONFLICT ON CONSTRAINT historical_workers_recent
+      DO NOTHING;`;
+    const expectedSharedHistoricalWorkers = `
+      INSERT INTO "Pool-Bitcoin".historical_workers (
+        timestamp, recent, miner,
+        worker, efficiency, effort,
+        hashrate, invalid, solo,
+        stale, type, valid)
+      VALUES (
+        1634742080841,
+        1634742000000,
+        'miner1',
+        'worker1',
+        100,
+        100,
+        100,
+        0,
         false,
-        'auxiliary')
+        0,
+        'auxiliary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(9);
+      expect(transaction.length).toBe(11);
       expect(transaction[1]).toBe(expectedMetadata);
       expect(transaction[2]).toBe(expectedMiners);
-      expect(transaction[3]).toBe(expectedWorkers);
-      expect(transaction[4]).toBe(expectedHistoricalMetadata);
-      expect(transaction[5]).toBe(expectedHistoricalMiners);
-      expect(transaction[6]).toBe(expectedHistoricalNetwork);
-      expect(transaction[7]).toBe(expectedHistoricalWorkers);
+      expect(transaction[3]).toBe(expectedSoloWorkers);
+      expect(transaction[4]).toBe(expectedSharedWorkers);
+      expect(transaction[5]).toBe(expectedHistoricalMetadata);
+      expect(transaction[6]).toBe(expectedHistoricalMiners);
+      expect(transaction[7]).toBe(expectedHistoricalNetwork);
+      expect(transaction[8]).toBe(expectedSoloHistoricalWorkers);
+      expect(transaction[9]).toBe(expectedSharedHistoricalWorkers);
       done();
     });
     statistics.handleAuxiliary(lookups, () => {});
@@ -1083,11 +1374,14 @@ describe('Test statistics functionality', () => {
       { rows: [] },
       { rows: [] },
       { rows: [] },
+      { rows: [] },
+      { rows: [] },
       null,
       { rows: [] },
       { rows: [] },
       null,
       null,
+      { rows: [] },
       { rows: [] },
       null];
     client.on('transaction', (transaction) => {
@@ -1104,10 +1398,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{ count: 1 }] },
       { rows: [{ count: 1 }] },
+      { rows: [{ count: 2 }] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -1152,6 +1451,16 @@ describe('Test statistics functionality', () => {
         efficiency: 100,
         effort: 100,
         hashrate: 100,
+        solo: true,
+        type: 'primary',
+      }]},
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
         solo: false,
         type: 'primary',
       }]},
@@ -1161,7 +1470,7 @@ describe('Test statistics functionality', () => {
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics(false, 'primary', () => {
+    statistics.handleStatistics('primary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1175,10 +1484,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{ count: 1 }] },
       { rows: [{ count: 1 }] },
+      { rows: [{ count: 2 }] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -1226,13 +1540,23 @@ describe('Test statistics functionality', () => {
         solo: true,
         type: 'primary',
       }]},
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
+        solo: false,
+        type: 'primary',
+      }]},
       null];
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics(true, 'primary', () => {
+    statistics.handleStatistics('primary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1246,10 +1570,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{ count: 1 }] },
       { rows: [{ count: 1 }] },
+      { rows: [{ count: 2 }] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -1287,6 +1616,16 @@ describe('Test statistics functionality', () => {
       }]},
       null,
       null,
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
+        solo: true,
+        type: 'auxiliary',
+      }]},
       { rows: [{
         timestamp: 1,
         miner: 'miner1',
@@ -1303,7 +1642,7 @@ describe('Test statistics functionality', () => {
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics(false, 'auxiliary', () => {
+    statistics.handleStatistics('auxiliary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1317,10 +1656,15 @@ describe('Test statistics functionality', () => {
       null,
       { rows: [{ count: 1 }] },
       { rows: [{ count: 1 }] },
+      { rows: [{ count: 2 }] },
       { rows: [
         { miner: 'miner1', current_work: 100 },
         { miner: 'miner2', current_work: 10 },
         { miner: 'miner3', current_work: 140 }]},
+      { rows: [
+        { worker: 'miner1', current_work: 100 },
+        { worker: 'miner2', current_work: 10 },
+        { worker: 'miner3', current_work: 140 }]},
       { rows: [
         { worker: 'miner1', current_work: 100 },
         { worker: 'miner2', current_work: 10 },
@@ -1368,13 +1712,23 @@ describe('Test statistics functionality', () => {
         solo: true,
         type: 'auxiliary',
       }]},
+      { rows: [{
+        timestamp: 1,
+        miner: 'miner1',
+        worker: 'worker1',
+        efficiency: 100,
+        effort: 100,
+        hashrate: 100,
+        solo: false,
+        type: 'auxiliary',
+      }]},
       null];
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics(true, 'auxiliary', () => {
+    statistics.handleStatistics('auxiliary', () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
@@ -1386,6 +1740,6 @@ describe('Test statistics functionality', () => {
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics(true, 'unknown', () => done());
+    statistics.handleStatistics('unknown', () => done());
   });
 });

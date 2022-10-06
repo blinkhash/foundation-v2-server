@@ -11,10 +11,11 @@ const HistoricalBlocks = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Historical Parameters
-  this.numbers = ['timestamp', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
+  this.numbers = ['timestamp', 'submitted', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
   this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'category', 'confirmations', 'difficulty',
-    'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction', 'type'];
+  this.parameters = ['timestamp', 'submitted', 'miner', 'worker', 'category', 'confirmations',
+    'difficulty', 'hash', 'height', 'identifier', 'luck', 'reward', 'round', 'solo', 'transaction',
+    'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -71,6 +72,7 @@ const HistoricalBlocks = function (logger, configMain) {
     updates.forEach((block, idx) => {
       values += `(
         ${ block.timestamp },
+        ${ block.submitted },
         '${ block.miner }',
         '${ block.worker }',
         '${ block.category }',
@@ -94,8 +96,8 @@ const HistoricalBlocks = function (logger, configMain) {
   this.insertHistoricalBlocksMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".historical_blocks (
-        timestamp, miner, worker,
-        category, confirmations,
+        timestamp, submitted, miner,
+        worker, category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
         round, solo, transaction,

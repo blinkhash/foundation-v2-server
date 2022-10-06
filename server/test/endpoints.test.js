@@ -256,6 +256,19 @@ describe('Test endpoints functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (share: valid, invalid, stale). Verify your input and try again';
+    const queries = { share: 'unknown' };
+    endpoints.handleCurrentHashrate('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCurrentHashrate endpoint [9]', (done) => {
+    const client = mockClient(configMainCopy, { rows: [] });
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
     const expected = 'Invalid query parameter specified (type: primary, auxiliary). Verify your input and try again';
     const queries = { type: 'unknown' };
     endpoints.handleCurrentHashrate('Pool1', queries, (code, message) => {

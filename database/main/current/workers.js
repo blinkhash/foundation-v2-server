@@ -11,9 +11,10 @@ const CurrentWorkers = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate'];
+  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
   this.strings = ['miner', 'worker', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'invalid',
+    'solo', 'stale', 'type', 'valid'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -103,8 +104,11 @@ const CurrentWorkers = function (logger, configMain) {
         '${ worker.worker }',
         ${ worker.efficiency },
         ${ worker.effort },
+        ${ worker.invalid },
         ${ worker.solo },
-        '${ worker.type }')`;
+        ${ worker.stale },
+        '${ worker.type }',
+        ${ worker.valid })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
@@ -115,15 +119,18 @@ const CurrentWorkers = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".current_workers (
         timestamp, miner, worker,
-        efficiency, effort, solo,
-        type)
+        efficiency, effort, invalid,
+        solo, stale, type, valid)
       VALUES ${ _this.buildCurrentWorkersRounds(updates) }
       ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
         effort = EXCLUDED.effort,
-        solo = EXCLUDED.solo;`;
+        invalid = "${ pool }".current_workers.invalid + EXCLUDED.invalid,
+        solo = EXCLUDED.solo,
+        stale = "${ pool }".current_workers.stale + EXCLUDED.stale,
+        valid = "${ pool }".current_workers.valid + EXCLUDED.valid;`;
   };
 
   // Delete Rows From Current Round

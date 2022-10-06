@@ -71,6 +71,7 @@ const CurrentRounds = function (logger, configMain) {
     updates.forEach((round, idx) => {
       values += `(
         ${ round.timestamp },
+        ${ round.recent },
         '${ round.miner }',
         '${ round.worker }',
         '${ round.identifier }',
@@ -91,10 +92,10 @@ const CurrentRounds = function (logger, configMain) {
   this.insertCurrentRoundsMain = function(pool, updates) {
     return `
       INSERT INTO "${ pool }".current_rounds (
-        timestamp, miner, worker,
-        identifier, invalid, round,
-        solo, stale, times, type,
-        valid, work)
+        timestamp, recent, miner,
+        worker, identifier, invalid,
+        round, solo, stale, times,
+        type, valid, work)
       VALUES ${ _this.buildCurrentRoundsMain(updates) }
       ON CONFLICT ON CONSTRAINT current_rounds_unique
       DO UPDATE SET
@@ -122,6 +123,13 @@ const CurrentRounds = function (logger, configMain) {
       SET round = '${ round }'
       WHERE round = 'current' AND solo = false
       AND type = '${ type }';`;
+  };
+
+  // Delete Rows From Current Round
+  this.deleteCurrentRoundsInactive = function(pool, timestamp) {
+    return `
+      DELETE FROM "${ pool }".current_rounds
+      WHERE round = 'current' AND timestamp < ${ timestamp };`;
   };
 
   // Delete Rows From Current Round

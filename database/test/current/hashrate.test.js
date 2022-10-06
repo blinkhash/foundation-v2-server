@@ -56,24 +56,23 @@ describe('Test database hashrate functionality', () => {
 
   test('Test hashrate command handling [2]', () => {
     const hashrate = new CurrentHashrate(logger, configMainCopy);
-    const response = hashrate.countCurrentHashrateMiner('Pool-Main', 1, false, 'primary');
+    const response = hashrate.countCurrentHashrateMiner('Pool-Main', 1, 'primary');
     const expected = `
       SELECT CAST(COUNT(DISTINCT miner) AS INT)
       FROM "Pool-Main".current_hashrate
       WHERE timestamp >= 1
-      AND solo = false AND type = 'primary';`;
+      AND type = 'primary';`;
     expect(response).toBe(expected);
   });
 
   test('Test hashrate command handling [3]', () => {
     const hashrate = new CurrentHashrate(logger, configMainCopy);
-    const response = hashrate.sumCurrentHashrateMiner('Pool-Main', 1, false, 'primary');
+    const response = hashrate.sumCurrentHashrateMiner('Pool-Main', 1, 'primary');
     const expected = `
       SELECT miner, SUM(work) as current_work
       FROM "Pool-Main".current_hashrate
       WHERE timestamp >= 1
-      AND solo = false AND type = 'primary'
-      GROUP BY miner;`;
+      AND type = 'primary' GROUP BY miner;`;
     expect(response).toBe(expected);
   });
 
@@ -141,6 +140,9 @@ describe('Test database hashrate functionality', () => {
       timestamp: 1,
       miner: 'miner1',
       worker: 'worker1',
+      identifier: 'master',
+      ip: '0.0.0.0',
+      share: 'valid',
       solo: false,
       type: 'primary',
       work: 8,
@@ -149,11 +151,15 @@ describe('Test database hashrate functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        identifier, ip, share, solo,
+        type, work)
       VALUES (
         1,
         'miner1',
         'worker1',
+        'master',
+        '0.0.0.0',
+        'valid',
         false,
         'primary',
         8);`;
@@ -166,6 +172,9 @@ describe('Test database hashrate functionality', () => {
       timestamp: 1,
       miner: 'miner1',
       worker: 'worker1',
+      identifier: 'master',
+      ip: '0.0.0.0',
+      share: 'valid',
       solo: false,
       type: 'primary',
       work: 8,
@@ -174,17 +183,24 @@ describe('Test database hashrate functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        identifier, ip, share, solo,
+        type, work)
       VALUES (
         1,
         'miner1',
         'worker1',
+        'master',
+        '0.0.0.0',
+        'valid',
         false,
         'primary',
         8), (
         1,
         'miner1',
         'worker1',
+        'master',
+        '0.0.0.0',
+        'valid',
         false,
         'primary',
         8);`;

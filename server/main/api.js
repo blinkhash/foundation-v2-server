@@ -74,7 +74,7 @@ const Api = function (logger, client, configs, configMain) {
       _this.endpoints.handleCurrentPayments(pool, queries, output);
       break;
     case (category === 'current' && endpoint === 'ports'):
-      callback(200, { ports: _this.configs[pool].ports });
+      callback(200, _this.configs[pool].ports);
       break;
     case (category === 'current' && endpoint === 'rounds'):
       _this.endpoints.handleCurrentRounds(pool, queries, output);

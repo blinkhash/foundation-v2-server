@@ -79,14 +79,17 @@ describe('Test database miners functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 1,
+      invalid: 0,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = miners.insertHistoricalMinersMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        type)
+        invalid, stale, type, valid)
       VALUES (
         1,
         1,
@@ -94,7 +97,10 @@ describe('Test database miners functionality', () => {
         100,
         100,
         1,
-        'primary')
+        0,
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
     expect(response).toBe(expected);
@@ -109,14 +115,17 @@ describe('Test database miners functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 1,
+      invalid: 0,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = miners.insertHistoricalMinersMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        type)
+        invalid, stale, type, valid)
       VALUES (
         1,
         1,
@@ -124,14 +133,20 @@ describe('Test database miners functionality', () => {
         100,
         100,
         1,
-        'primary'), (
+        0,
+        0,
+        'primary',
+        1), (
         1,
         1,
         'miner1',
         100,
         100,
         1,
-        'primary')
+        0,
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
     expect(response).toBe(expected);

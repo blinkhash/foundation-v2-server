@@ -139,24 +139,34 @@ describe('Test database miners functionality', () => {
       timestamp: 1,
       efficiency: 100,
       effort: 100,
+      invalid: 0,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = miners.insertCurrentMinersRounds('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, efficiency,
-        effort, type)
+        effort, invalid, stale, type,
+        valid)
       VALUES (
         1,
         'miner1',
         100,
         100,
-        'primary')
+        0,
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
-        effort = EXCLUDED.effort;`;
+        effort = EXCLUDED.effort,
+        invalid = "Pool-Main".current_miners.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".current_miners.stale + EXCLUDED.stale,
+        valid = "Pool-Main".current_miners.valid + EXCLUDED.valid;`;
     expect(response).toBe(expected);
   });
 
@@ -167,29 +177,42 @@ describe('Test database miners functionality', () => {
       timestamp: 1,
       efficiency: 100,
       effort: 100,
+      invalid: 0,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = miners.insertCurrentMinersRounds('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_miners (
         timestamp, miner, efficiency,
-        effort, type)
+        effort, invalid, stale, type,
+        valid)
       VALUES (
         1,
         'miner1',
         100,
         100,
-        'primary'), (
+        0,
+        0,
+        'primary',
+        1), (
         1,
         'miner1',
         100,
         100,
-        'primary')
+        0,
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
-        effort = EXCLUDED.effort;`;
+        effort = EXCLUDED.effort,
+        invalid = "Pool-Main".current_miners.invalid + EXCLUDED.invalid,
+        stale = "Pool-Main".current_miners.stale + EXCLUDED.stale,
+        valid = "Pool-Main".current_miners.valid + EXCLUDED.valid;`;
     expect(response).toBe(expected);
   });
 

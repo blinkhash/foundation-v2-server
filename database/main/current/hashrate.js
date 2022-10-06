@@ -12,8 +12,9 @@ const CurrentHashrate = function (logger, configMain) {
 
   // Handle Current Parameters
   this.numbers = ['timestamp', 'work'];
-  this.strings = ['miner', 'worker', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'solo', 'type', 'work'];
+  this.strings = ['miner', 'worker', 'identifier', 'ip', 'share', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'ip', 'share', 'solo',
+    'type', 'work'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -65,22 +66,21 @@ const CurrentHashrate = function (logger, configMain) {
   };
 
   // Select Count of Distinct Miners
-  this.countCurrentHashrateMiner = function(pool, timestamp, solo, type) {
+  this.countCurrentHashrateMiner = function(pool, timestamp, type) {
     return `
       SELECT CAST(COUNT(DISTINCT miner) AS INT)
       FROM "${ pool }".current_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND solo = ${ solo } AND type = '${ type }';`;
+      AND type = '${ type }';`;
   };
 
   // Select Sum of Rows Using Miners
-  this.sumCurrentHashrateMiner = function(pool, timestamp, solo, type) {
+  this.sumCurrentHashrateMiner = function(pool, timestamp, type) {
     return `
       SELECT miner, SUM(work) as current_work
       FROM "${ pool }".current_hashrate
       WHERE timestamp >= ${ timestamp }
-      AND solo = ${ solo } AND type = '${ type }'
-      GROUP BY miner;`;
+      AND type = '${ type }' GROUP BY miner;`;
   };
 
   // Select Count of Distinct Workers
@@ -119,6 +119,9 @@ const CurrentHashrate = function (logger, configMain) {
         ${ hashrate.timestamp },
         '${ hashrate.miner }',
         '${ hashrate.worker }',
+        '${ hashrate.identifier }',
+        '${ hashrate.ip }',
+        '${ hashrate.share }',
         ${ hashrate.solo },
         '${ hashrate.type }',
         ${ hashrate.work })`;
@@ -132,7 +135,8 @@ const CurrentHashrate = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".current_hashrate (
         timestamp, miner, worker,
-        solo, type, work)
+        identifier, ip, share, solo,
+        type, work)
       VALUES ${ _this.buildCurrentHashrateMain(updates) };`;
   };
 

@@ -25,6 +25,7 @@ const Checks = function (logger, client, config, configMain) {
     return blocks.map((block) => {
       return {
         timestamp: Date.now(),
+        submitted: block.submitted,
         miner: block.miner,
         worker: block.worker,
         category: block.category,
@@ -61,6 +62,11 @@ const Checks = function (logger, client, config, configMain) {
   // Handle Round Updates
   this.handleCurrentOrphans = function(rounds) {
 
+    // Calculate Features of Rounds
+    const timestamp = Date.now();
+    const interval = _this.config.settings.interval.rounds;
+    const recent = Math.round(timestamp / interval) * interval;
+
     // Flatten Nested Round Array
     const combined = {};
     if (rounds.length >= 1) {
@@ -69,7 +75,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Collect All Round Data
     rounds.forEach((round) => {
-      const identifier = `${ round.miner }_${ round.solo }`;
+      const identifier = `${ round.worker }_${ round.solo }_${ round.round }_${ round.type }`;
       if (identifier in combined) {
         const current = combined[identifier];
         current.invalid += round.invalid || 0;
@@ -84,7 +90,8 @@ const Checks = function (logger, client, config, configMain) {
     return Object.keys(combined).map((identifier) => {
       const current = combined[identifier];
       return {
-        timestamp: Date.now(),
+        timestamp: timestamp,
+        recent: recent,
         miner: current.miner,
         worker: current.worker,
         identifier: current.identifier,
@@ -347,10 +354,14 @@ const Checks = function (logger, client, config, configMain) {
     const starting = [_this.text.databaseStartingText2(blockType)];
     _this.logger.log('Checks', _this.config.name, starting);
 
+    // Calculate Checks Features
+    const roundsWindow = Date.now() - _this.config.settings.window.rounds;
+
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
       _this.current.blocks.selectCurrentBlocksMain(_this.pool, { type: blockType }),
+      _this.current.rounds.deleteCurrentRoundsInactive(_this.pool, roundsWindow),
       'COMMIT;'];
 
     // Establish Separate Behavior

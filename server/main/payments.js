@@ -66,6 +66,7 @@ const Payments = function (logger, client, config, configMain) {
     return blocks.map((block) => {
       return {
         timestamp: Date.now(),
+        submitted: block.submitted,
         miner: block.miner,
         worker: block.worker,
         category: block.category,
@@ -103,25 +104,40 @@ const Payments = function (logger, client, config, configMain) {
   this.handleHistoricalRounds = function(rounds) {
 
     // Flatten Nested Round Array
+    const combined = {};
     if (rounds.length >= 1) {
       rounds = rounds.reduce((a, b) => a.concat(b));
     }
 
-    // Return Rounds Updates
-    return rounds.map((round) => {
+    // Collect All Round Data
+    rounds.forEach((round) => {
+      const identifier = `${ round.worker }_${ round.solo }_${ round.round }_${ round.type }`;
+      if (identifier in combined) {
+        const current = combined[identifier];
+        current.invalid += round.invalid || 0;
+        current.stale += round.stale || 0;
+        current.times += round.times || 0;
+        current.valid += round.valid || 0;
+        current.work += round.work || 0;
+      } else combined[identifier] = round;
+    });
+
+    // Return Round Updates
+    return Object.keys(combined).map((identifier) => {
+      const current = combined[identifier];
       return {
         timestamp: Date.now(),
-        miner: round.miner,
-        worker: round.worker,
-        identifier: round.identifier,
-        invalid: round.invalid,
-        round: round.round,
-        solo: round.solo,
-        stale: round.stale,
-        times: round.times,
-        type: round.type,
-        valid: round.valid,
-        work: round.work,
+        miner: current.miner,
+        worker: current.worker,
+        identifier: current.identifier,
+        invalid: current.invalid,
+        round: current.round,
+        solo: current.solo,
+        stale: current.stale,
+        times: current.times,
+        type: current.type,
+        valid: current.valid,
+        work: current.work,
       };
     });
   };
@@ -427,11 +443,15 @@ const Payments = function (logger, client, config, configMain) {
     const starting = [_this.text.databaseStartingText3(blockType)];
     _this.logger.log('Payments', _this.config.name, starting);
 
+    // Calculate Checks Features
+    const roundsWindow = Date.now() - _this.config.settings.window.rounds;
+
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
       _this.current.blocks.selectCurrentBlocksMain(_this.pool, { category: 'generate', type: blockType }),
       _this.current.miners.selectCurrentMinersMain(_this.pool, { balance: 'gt0', type: blockType }),
+      _this.current.rounds.deleteCurrentRoundsInactive(_this.pool, roundsWindow),
       'COMMIT;'];
 
     // Establish Separate Behavior

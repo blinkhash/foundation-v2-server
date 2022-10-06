@@ -42,6 +42,7 @@ const Schema = function (logger, executor, configMain) {
       CREATE TABLE "${ pool }".current_blocks(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
+        submitted BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         category VARCHAR NOT NULL DEFAULT 'pending',
@@ -83,6 +84,9 @@ const Schema = function (logger, executor, configMain) {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
+        identifier VARCHAR NOT NULL DEFAULT 'master',
+        ip VARCHAR NOT NULL DEFAULT 'unknown',
+        share VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,
         type VARCHAR NOT NULL DEFAULT 'primary',
         work FLOAT NOT NULL DEFAULT 0);
@@ -147,8 +151,11 @@ const Schema = function (logger, executor, configMain) {
         generate FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
         immature FLOAT NOT NULL DEFAULT 0,
+        invalid INT NOT NULL DEFAULT 0,
         paid FLOAT NOT NULL DEFAULT 0,
+        stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
+        valid INT NOT NULL DEFAULT 0,
         CONSTRAINT current_miners_unique UNIQUE (miner, type));
       CREATE INDEX current_miners_balance ON "${ pool }".current_miners(balance, type);
       CREATE INDEX current_miners_miner ON "${ pool }".current_miners(miner, type);
@@ -220,6 +227,7 @@ const Schema = function (logger, executor, configMain) {
       CREATE TABLE "${ pool }".current_rounds(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
+        recent BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         identifier VARCHAR NOT NULL DEFAULT 'master',
@@ -231,7 +239,7 @@ const Schema = function (logger, executor, configMain) {
         type VARCHAR NOT NULL DEFAULT 'primary',
         valid INT NOT NULL DEFAULT 0,
         work FLOAT NOT NULL DEFAULT 0,
-        CONSTRAINT current_rounds_unique UNIQUE (worker, solo, round, type));
+        CONSTRAINT current_rounds_unique UNIQUE (recent, worker, solo, round, type));
       CREATE INDEX current_rounds_miner ON "${ pool }".current_rounds(miner, type);
       CREATE INDEX current_rounds_worker ON "${ pool }".current_rounds(worker, type);
       CREATE INDEX current_rounds_identifier ON "${ pool }".current_rounds(identifier, type);
@@ -285,8 +293,11 @@ const Schema = function (logger, executor, configMain) {
         efficiency FLOAT NOT NULL DEFAULT 0,
         effort FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
+        invalid INT NOT NULL DEFAULT 0,
         solo BOOLEAN NOT NULL DEFAULT false,
+        stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
+        valid INT NOT NULL DEFAULT 0,
         CONSTRAINT current_workers_unique UNIQUE (worker, solo, type));
       CREATE INDEX current_workers_miner ON "${ pool }".current_workers(miner, type);
       CREATE INDEX current_workers_solo ON "${ pool }".current_workers(solo, type);
@@ -311,6 +322,7 @@ const Schema = function (logger, executor, configMain) {
       CREATE TABLE "${ pool }".historical_blocks(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
+        submitted BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         category VARCHAR NOT NULL DEFAULT 'pending',
@@ -388,7 +400,10 @@ const Schema = function (logger, executor, configMain) {
         efficiency FLOAT NOT NULL DEFAULT 0,
         effort FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
+        invalid INT NOT NULL DEFAULT 0,
+        stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
+        valid INT NOT NULL DEFAULT 0,
         CONSTRAINT historical_miners_recent UNIQUE (recent, miner, type));
       CREATE INDEX historical_miners_miner ON "${ pool }".historical_miners(miner, type);
       CREATE INDEX historical_miners_type ON "${ pool }".historical_miners(type);`;
@@ -530,8 +545,11 @@ const Schema = function (logger, executor, configMain) {
         efficiency FLOAT NOT NULL DEFAULT 0,
         effort FLOAT NOT NULL DEFAULT 0,
         hashrate FLOAT NOT NULL DEFAULT 0,
+        invalid INT NOT NULL DEFAULT 0,
         solo BOOLEAN NOT NULL DEFAULT false,
+        stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
+        valid INT NOT NULL DEFAULT 0,
         CONSTRAINT historical_workers_recent UNIQUE (recent, worker, type));
       CREATE INDEX historical_workers_miner ON "${ pool }".historical_workers(miner, type);
       CREATE INDEX historical_workers_worker ON "${ pool }".historical_workers(worker, type);

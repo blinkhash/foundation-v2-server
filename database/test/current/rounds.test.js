@@ -106,6 +106,7 @@ describe('Test database rounds functionality', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      recent: 1,
       miner: 'miner1',
       worker: 'worker1',
       round: 'round1',
@@ -121,11 +122,12 @@ describe('Test database rounds functionality', () => {
     const response = rounds.insertCurrentRoundsMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_rounds (
-        timestamp, miner, worker,
-        identifier, invalid, round,
-        solo, stale, times, type,
-        valid, work)
+        timestamp, recent, miner,
+        worker, identifier, invalid,
+        round, solo, stale, times,
+        type, valid, work)
       VALUES (
+        1,
         1,
         'miner1',
         'worker1',
@@ -153,6 +155,7 @@ describe('Test database rounds functionality', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      recent: 1,
       miner: 'miner1',
       worker: 'worker1',
       round: 'round1',
@@ -168,11 +171,12 @@ describe('Test database rounds functionality', () => {
     const response = rounds.insertCurrentRoundsMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_rounds (
-        timestamp, miner, worker,
-        identifier, invalid, round,
-        solo, stale, times, type,
-        valid, work)
+        timestamp, recent, miner,
+        worker, identifier, invalid,
+        round, solo, stale, times,
+        type, valid, work)
       VALUES (
+        1,
         1,
         'miner1',
         'worker1',
@@ -185,6 +189,7 @@ describe('Test database rounds functionality', () => {
         'primary',
         1,
         8), (
+        1,
         1,
         'miner1',
         'worker1',
@@ -231,6 +236,15 @@ describe('Test database rounds functionality', () => {
   });
 
   test('Test rounds command handling [12]', () => {
+    const rounds = new CurrentRounds(logger, configMainCopy);
+    const response = rounds.deleteCurrentRoundsInactive('Pool-Main', 1);
+    const expected = `
+      DELETE FROM "Pool-Main".current_rounds
+      WHERE round = 'current' AND timestamp < 1;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test rounds command handling [13]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.deleteCurrentRoundsMain('Pool-Main', ['round1']);
     const expected = `

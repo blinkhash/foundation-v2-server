@@ -106,6 +106,7 @@ describe('Test database blocks functionality', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      submitted: 1,
       miner: 'miner1',
       worker: 'worker1',
       category: 'confirmed',
@@ -124,13 +125,14 @@ describe('Test database blocks functionality', () => {
     const response = blocks.insertHistoricalBlocksMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_blocks (
-        timestamp, miner, worker,
-        category, confirmations,
+        timestamp, submitted, miner,
+        worker, category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
         round, solo, transaction,
         type)
       VALUES (
+        1,
         1,
         'miner1',
         'worker1',
@@ -154,6 +156,7 @@ describe('Test database blocks functionality', () => {
     const blocks = new HistoricalBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      submitted: 1,
       miner: 'miner1',
       worker: 'worker1',
       category: 'confirmed',
@@ -172,13 +175,14 @@ describe('Test database blocks functionality', () => {
     const response = blocks.insertHistoricalBlocksMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_blocks (
-        timestamp, miner, worker,
-        category, confirmations,
+        timestamp, submitted, miner,
+        worker, category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
         round, solo, transaction,
         type)
       VALUES (
+        1,
         1,
         'miner1',
         'worker1',
@@ -194,6 +198,7 @@ describe('Test database blocks functionality', () => {
         false,
         'transaction1',
         'primary'), (
+        1,
         1,
         'miner1',
         'worker1',

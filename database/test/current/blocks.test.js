@@ -106,6 +106,7 @@ describe('Test database blocks functionality', () => {
     const blocks = new CurrentBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      submitted: 1,
       miner: 'miner1',
       worker: 'worker1',
       category: 'immature',
@@ -124,13 +125,14 @@ describe('Test database blocks functionality', () => {
     const response = blocks.insertCurrentBlocksMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_blocks (
-        timestamp, miner, worker,
-        category, confirmations,
+        timestamp, submitted, miner,
+        worker, category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
         round, solo, transaction,
         type)
       VALUES (
+        1,
         1,
         'miner1',
         'worker1',
@@ -149,6 +151,7 @@ describe('Test database blocks functionality', () => {
       ON CONFLICT ON CONSTRAINT current_blocks_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
+        submitted = EXCLUDED.submitted,
         miner = EXCLUDED.miner,
         worker = EXCLUDED.worker,
         category = EXCLUDED.category,
@@ -169,6 +172,7 @@ describe('Test database blocks functionality', () => {
     const blocks = new CurrentBlocks(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      submitted: 1,
       miner: 'miner1',
       worker: 'worker1',
       category: 'immature',
@@ -187,13 +191,14 @@ describe('Test database blocks functionality', () => {
     const response = blocks.insertCurrentBlocksMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_blocks (
-        timestamp, miner, worker,
-        category, confirmations,
+        timestamp, submitted, miner,
+        worker, category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
         round, solo, transaction,
         type)
       VALUES (
+        1,
         1,
         'miner1',
         'worker1',
@@ -209,6 +214,7 @@ describe('Test database blocks functionality', () => {
         false,
         'transaction1',
         'primary'), (
+        1,
         1,
         'miner1',
         'worker1',
@@ -227,6 +233,7 @@ describe('Test database blocks functionality', () => {
       ON CONFLICT ON CONSTRAINT current_blocks_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
+        submitted = EXCLUDED.submitted,
         miner = EXCLUDED.miner,
         worker = EXCLUDED.worker,
         category = EXCLUDED.category,

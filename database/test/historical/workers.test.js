@@ -88,15 +88,19 @@ describe('Test database workers functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 1,
+      invalid: 0,
       solo: false,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, solo, type)
+        hashrate, invalid, solo,
+        stale, type, valid)
       VALUES (
         1,
         1,
@@ -105,8 +109,11 @@ describe('Test database workers functionality', () => {
         100,
         100,
         1,
+        0,
         false,
-        'primary')
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     expect(response).toBe(expected);
@@ -122,15 +129,19 @@ describe('Test database workers functionality', () => {
       efficiency: 100,
       effort: 100,
       hashrate: 1,
+      invalid: 0,
       solo: false,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, solo, type)
+        hashrate, invalid, solo,
+        stale, type, valid)
       VALUES (
         1,
         1,
@@ -139,8 +150,11 @@ describe('Test database workers functionality', () => {
         100,
         100,
         1,
+        0,
         false,
-        'primary'), (
+        0,
+        'primary',
+        1), (
         1,
         1,
         'miner1',
@@ -148,8 +162,11 @@ describe('Test database workers functionality', () => {
         100,
         100,
         1,
+        0,
         false,
-        'primary')
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
     expect(response).toBe(expected);

@@ -150,29 +150,38 @@ describe('Test database workers functionality', () => {
       timestamp: 1,
       efficiency: 100,
       effort: 100,
+      invalid: 0,
       solo: false,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = workers.insertCurrentWorkersRounds('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
-        efficiency, effort, solo,
-        type)
+        efficiency, effort, invalid,
+        solo, stale, type, valid)
       VALUES (
         1,
         'miner1',
         'worker1',
         100,
         100,
+        0,
         false,
-        'primary')
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
         effort = EXCLUDED.effort,
-        solo = EXCLUDED.solo;`;
+        invalid = "Pool-Main".current_workers.invalid + EXCLUDED.invalid,
+        solo = EXCLUDED.solo,
+        stale = "Pool-Main".current_workers.stale + EXCLUDED.stale,
+        valid = "Pool-Main".current_workers.valid + EXCLUDED.valid;`;
     expect(response).toBe(expected);
   });
 
@@ -184,36 +193,48 @@ describe('Test database workers functionality', () => {
       timestamp: 1,
       efficiency: 100,
       effort: 100,
+      invalid: 0,
       solo: false,
+      stale: 0,
       type: 'primary',
+      valid: 1,
     };
     const response = workers.insertCurrentWorkersRounds('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
-        efficiency, effort, solo,
-        type)
+        efficiency, effort, invalid,
+        solo, stale, type, valid)
       VALUES (
         1,
         'miner1',
         'worker1',
         100,
         100,
+        0,
         false,
-        'primary'), (
+        0,
+        'primary',
+        1), (
         1,
         'miner1',
         'worker1',
         100,
         100,
+        0,
         false,
-        'primary')
+        0,
+        'primary',
+        1)
       ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
         efficiency = EXCLUDED.efficiency,
         effort = EXCLUDED.effort,
-        solo = EXCLUDED.solo;`;
+        invalid = "Pool-Main".current_workers.invalid + EXCLUDED.invalid,
+        solo = EXCLUDED.solo,
+        stale = "Pool-Main".current_workers.stale + EXCLUDED.stale,
+        valid = "Pool-Main".current_workers.valid + EXCLUDED.valid;`;
     expect(response).toBe(expected);
   });
 

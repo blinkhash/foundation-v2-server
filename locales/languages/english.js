@@ -7,10 +7,10 @@ exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;
 exports.databaseCommandsText2 = (error) => `An error was thrown when trying to handle checks and validations: ${ error }`;
 exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
-exports.databaseStartingText1 = (type, miners) => `Started updating tables with ${ type } round data for ${ miners } miners`;
+exports.databaseStartingText1 = (type) => `Started updating statistics and data for ${ type } rounds`;
 exports.databaseStartingText2 = (type) => `Started handling checks and validation for ${ type } rounds`;
 exports.databaseStartingText3 = (type) => `Started handling balances and payments for ${ type } rounds`;
-exports.databaseUpdatesText1 = (type, miners) => `Finished updating tables with ${ type } round data for ${ miners } miners`;
+exports.databaseUpdatesText1 = (type) => `Finished updating statistics and data for ${ type } rounds`;
 exports.databaseUpdatesText2 = (type, rounds) => `Finished handling checks and validation for ${ type } rounds: (${ rounds })`;
 exports.databaseUpdatesText3 = (type) => `Finished handling checks and validation for ${ type } rounds: (0)`;
 exports.databaseUpdatesText4 = (type, rounds) => `Finished handling balances and payments for ${ type } rounds: (${ rounds })`;

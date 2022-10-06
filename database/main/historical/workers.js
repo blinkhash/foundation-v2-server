@@ -11,9 +11,10 @@ const HistoricalWorkers = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Historical Parameters
-  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate'];
+  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
   this.strings = ['miner', 'worker', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'invalid',
+    'solo', 'stale', 'type', 'valid'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -76,8 +77,11 @@ const HistoricalWorkers = function (logger, configMain) {
         ${ worker.efficiency },
         ${ worker.effort },
         ${ worker.hashrate },
+        ${ worker.invalid },
         ${ worker.solo },
-        '${ worker.type }')`;
+        ${ worker.stale },
+        '${ worker.type }',
+        ${ worker.valid })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
@@ -89,7 +93,8 @@ const HistoricalWorkers = function (logger, configMain) {
       INSERT INTO "${ pool }".historical_workers (
         timestamp, recent, miner,
         worker, efficiency, effort,
-        hashrate, solo, type)
+        hashrate, invalid, solo,
+        stale, type, valid)
       VALUES ${ _this.buildHistoricalWorkersMain(updates) }
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
