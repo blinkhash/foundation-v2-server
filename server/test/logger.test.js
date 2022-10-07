@@ -1,7 +1,7 @@
 const Logger = require('../main/logger');
 /* eslint-disable-next-line no-unused-vars */
 const colors = require('colors');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 
 const logSystem = 'Test';
 const logComponent = 'Test';

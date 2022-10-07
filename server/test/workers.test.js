@@ -1,7 +1,7 @@
 const Logger = require('../main/logger');
 const Workers = require('../main/workers');
 const config = require('../../configs/pools/example');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 
 config.primary.address = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
 config.primary.recipients[0].address = '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2';

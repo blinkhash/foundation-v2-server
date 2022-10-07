@@ -1,6 +1,6 @@
 const CurrentNetwork = require('../../main/current/network');
 const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main.js');
+const configMain = require('../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////

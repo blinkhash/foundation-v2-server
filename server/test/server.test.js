@@ -2,7 +2,7 @@ const Api = require('../main/api');
 const Server = require('../main/server');
 const Logger = require('../main/logger');
 const config = require('../../configs/pools/example');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 const events = require('events');
 
 const configs = { 'Pool-Bitcoin': config };

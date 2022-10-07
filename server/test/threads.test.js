@@ -1,6 +1,6 @@
 const Logger = require('../main/logger');
 const Threads = require('../main/threads');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////
