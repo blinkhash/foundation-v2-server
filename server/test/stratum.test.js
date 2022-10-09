@@ -1,7 +1,7 @@
 const Logger = require('../main/logger');
 const Stratum = require('../main/stratum');
 const config = require('../../configs/pools/example');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 
 config.primary.address = 'ltc1qya20xua0rgq9jdteffkt83xr4aq082gruc2gry';
 config.primary.recipients[0].address = 'LRJeNFbLC28wA4hYfiV2Dyjb6hK9pLTD5y';

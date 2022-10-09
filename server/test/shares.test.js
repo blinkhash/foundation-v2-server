@@ -3,7 +3,7 @@ const Logger = require('../main/logger');
 const MockDate = require('mockdate');
 const Shares = require('../main/shares');
 const config = require('../../configs/pools/example.js');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 const events = require('events');
 
 // Mock UUID Events

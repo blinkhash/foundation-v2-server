@@ -8,7 +8,7 @@ const path = require('path');
 // Start Main Stratum Server
 /* eslint-disable */
 try {
-  const config = require(path.join(__dirname, './configs/main.js'));
+  const config = require(path.join(__dirname, './configs/main/main.js'));
   const logger = new Logger(config);
 
   // Initialize Database

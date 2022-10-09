@@ -1,6 +1,6 @@
 const Builder = require('../main/builder');
 const Logger = require('../main/logger');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////

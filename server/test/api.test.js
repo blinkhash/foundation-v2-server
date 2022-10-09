@@ -2,7 +2,7 @@ const Api = require('../main/api');
 const Commands = require('../../database/main/commands');
 const Logger = require('../main/logger');
 const config = require('../../configs/pools/example.js');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 const events = require('events');
 
 ////////////////////////////////////////////////////////////////////////////////

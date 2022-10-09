@@ -1,7 +1,7 @@
 const Commands = require('../../database/main/commands');
 const Endpoints = require('../main/endpoints');
 const Logger = require('../main/logger');
-const configMain = require('../../configs/main.js');
+const configMain = require('../../configs/main/example.js');
 const events = require('events');
 
 ////////////////////////////////////////////////////////////////////////////////
