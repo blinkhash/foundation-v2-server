@@ -86,7 +86,6 @@ const Shares = function (logger, client, config, configMain) {
       miner: (worker || '').split('.')[0],
       worker: worker,
       identifier: identifier,
-      ip: shareData.ip || '0.0.0.0',
       share: shareType,
       solo: minerType,
       type: blockType,

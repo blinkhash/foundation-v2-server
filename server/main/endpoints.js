@@ -81,8 +81,7 @@ const Endpoints = function (logger, client, configMain) {
     // Validated Query Types
     const parameters = { limit: 'special', offset: 'special', order: 'special',
       direction: 'special', timestamp: 'number', miner: 'string', worker: 'string',
-      identifier: 'string', ip: 'string', share: 'string', solo: 'boolean',
-      type: 'string' };
+      identifier: 'string', share: 'string', solo: 'boolean', type: 'string' };
 
     // Accepted Values for Parameters
     const validDirection = ['ascending', 'descending'];
