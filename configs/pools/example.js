@@ -55,14 +55,14 @@ config.primary.payments.daemon.password = '';
 // Recipients Configuration
 config.primary.recipients = [];
 
-// Statistics Configuration
-config.primary.statistics = {};
-config.primary.statistics.enabled = true;
-
 const recipient1 = {};
 recipient1.address = '[address]';
 recipient1.percentage = 0.05;
 config.primary.recipients.push(recipient1);
+
+// Statistics Configuration
+config.primary.statistics = {};
+config.primary.statistics.enabled = true;
 
 // Shared Configuration
 ////////////////////////////////////////////////////////////////////////////////

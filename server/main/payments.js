@@ -468,8 +468,8 @@ const Payments = function (logger, client, config, configMain) {
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval();
-      _this.handlePayments('primary', () => {});
-      if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
+      if (_this.config.primary.payments.enabled) _this.handlePayments('primary', () => {});
+      if (_this.config.auxiliary && _this.config.auxiliary.enabled && _this.config.auxiliary.payments.enabled) {
         _this.handlePayments('auxiliary', () => {});
       }
     }, random);

@@ -378,8 +378,8 @@ const Checks = function (logger, client, config, configMain) {
     const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
     setTimeout(() => {
       _this.handleInterval();
-      _this.handleChecks('primary', () => {});
-      if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
+      if (_this.config.primary.checks.enabled) _this.handleChecks('primary', () => {});
+      if (_this.config.auxiliary && _this.config.auxiliary.enabled && _this.config.auxiliary.checks.enabled) {
         _this.handleChecks('auxiliary', () => {});
       }
     }, random);
