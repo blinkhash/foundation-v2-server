@@ -79,8 +79,8 @@ ports1.difficulty = {};
 ports1.difficulty.initial = 32;
 ports1.difficulty.minimum = 8;
 ports1.difficulty.maximum = 512;
-ports1.difficulty.targetTime = 15;
-ports1.difficulty.retargetTime = 90;
+ports1.difficulty.targetTime = 15; // s
+ports1.difficulty.retargetTime = 90; // s
 ports1.difficulty.variance = 0.3;
 config.ports.push(ports1);
 
@@ -89,10 +89,10 @@ config.settings = {};
 
 // Banning Configuration
 config.settings.banning = {};
-config.settings.banning.banLength = 600000; // ms;
+config.settings.banning.banLength = 600000; // ms
 config.settings.banning.checkThreshold = 500;
 config.settings.banning.invalidPercent = 50;
-config.settings.banning.purgeInterval = 300000; // ms;
+config.settings.banning.purgeInterval = 300000; // ms
 
 // Timeout Configuration
 config.settings.timeout = {};
@@ -110,10 +110,10 @@ config.settings.interval.statistics = 90000; // ms
 
 // Window Configuration
 config.settings.window = {};
-config.settings.window.hashrate = 300000; // ms;
-config.settings.window.inactive = 604800000; // ms;
-config.settings.window.rounds = 21600000; // ms;
-config.settings.window.updates = 300000; // ms;
+config.settings.window.hashrate = 300000; // ms
+config.settings.window.inactive = 604800000; // ms
+config.settings.window.rounds = 21600000; // ms
+config.settings.window.updates = 300000; // ms
 
 // Export Configuration
 module.exports = config;
