@@ -40,10 +40,11 @@ const Commands = function (logger, client, configMain) {
   // Execute Commands
   /* eslint-disable */
   this.executor = function(commands, callback) {
+    const query = commands.join(' ')
     const handler = (error) => { throw new Error(error); };
-    _this.client.query(commands.join(' '), (error, results) => {
+    _this.client.query(query, (error, results) => {
       if (error) {
-        const lines = [_this.text.databaseCommandsText1(JSON.stringify(error))];
+        const lines = [_this.text.databaseCommandsText1(query, JSON.stringify(error))];
         _this.logger.error('Database', 'Commands', lines);
         handler(error);
       } else {

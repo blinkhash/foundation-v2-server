@@ -107,8 +107,8 @@ const Checks = function (logger, client, config, configMain) {
     });
   };
 
-  // Handle Final Round Updates
-  this.handleFinal = function(blocks, callback) {
+  // Handle Round Failure Updates
+  this.handleFailures = function(blocks, callback) {
 
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
@@ -223,7 +223,7 @@ const Checks = function (logger, client, config, configMain) {
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
-        if (error) _this.handleFinal(blocks, () => callback(error));
+        if (error) _this.handleFailures(blocks, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
           _this.handleUpdates(updates, rounds, results, 'primary', () => callback(null));
         });
@@ -251,7 +251,7 @@ const Checks = function (logger, client, config, configMain) {
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
-        if (error) _this.handleFinal(blocks, () => callback(error));
+        if (error) _this.handleFailures(blocks, () => callback(error));
         else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
           _this.handleUpdates(updates, rounds, results, 'auxiliary', () => callback(null));
         });
@@ -291,20 +291,18 @@ const Checks = function (logger, client, config, configMain) {
         // Blocks Exist to Validate
         if (blocks.length >= 1) {
           _this.handlePrimary(blocks, (error) => {
-            _this.handleFinal(blocks, () => {
-              const updates = [(error) ?
-                _this.text.databaseCommandsText2(JSON.stringify(error)) :
-                _this.text.databaseUpdatesText2(blockType, blocks.length)];
-              _this.logger.log('Checks', _this.config.name, updates);
-              callback();
-            });
+            const updates = [(error) ?
+              _this.text.databaseCommandsText2(JSON.stringify(error)) :
+              _this.text.databaseUpdatesText2(blockType, blocks.length)];
+            _this.logger.debug('Checks', _this.config.name, updates);
+            callback();
           });
 
         // No Blocks Exist to Validate
         } else {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText3(blockType)];
-            _this.logger.log('Checks', _this.config.name, updates);
+            _this.logger.debug('Checks', _this.config.name, updates);
             callback();
           });
         }
@@ -320,20 +318,18 @@ const Checks = function (logger, client, config, configMain) {
         // Blocks Exist to Validate
         if (blocks.length >= 1) {
           _this.handleAuxiliary(blocks, (error) => {
-            _this.handleFinal(blocks, () => {
-              const updates = [(error) ?
-                _this.text.databaseCommandsText2(JSON.stringify(error)) :
-                _this.text.databaseUpdatesText2(blockType, blocks.length)];
-              _this.logger.log('Checks', _this.config.name, updates);
-              callback();
-            });
+            const updates = [(error) ?
+              _this.text.databaseCommandsText2(JSON.stringify(error)) :
+              _this.text.databaseUpdatesText2(blockType, blocks.length)];
+            _this.logger.debug('Checks', _this.config.name, updates);
+            callback();
           });
 
         // No Blocks Exist to Validate
         } else {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText3(blockType)];
-            _this.logger.log('Checks', _this.config.name, updates);
+            _this.logger.debug('Checks', _this.config.name, updates);
             callback();
           });
         }
@@ -352,7 +348,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Handle Initial Logging
     const starting = [_this.text.databaseStartingText2(blockType)];
-    _this.logger.log('Checks', _this.config.name, starting);
+    _this.logger.debug('Checks', _this.config.name, starting);
 
     // Calculate Checks Features
     const roundsWindow = Date.now() - _this.config.settings.window.rounds;

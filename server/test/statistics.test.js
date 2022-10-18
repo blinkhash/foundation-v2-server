@@ -1392,7 +1392,6 @@ describe('Test statistics functionality', () => {
   });
 
   test('Test statistics submission handling [1]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const lookups = [
       null,
       null,
@@ -1470,15 +1469,10 @@ describe('Test statistics functionality', () => {
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics('primary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    statistics.handleStatistics('primary', () => done());
   });
 
   test('Test statistics submission handling [2]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const lookups = [
       null,
       null,
@@ -1556,15 +1550,10 @@ describe('Test statistics functionality', () => {
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics('primary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    statistics.handleStatistics('primary', () => done());
   });
 
   test('Test statistics submission handling [3]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const lookups = [
       null,
       null,
@@ -1642,15 +1631,10 @@ describe('Test statistics functionality', () => {
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics('auxiliary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    statistics.handleStatistics('auxiliary', () => done());
   });
 
   test('Test statistics submission handling [4]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const lookups = [
       null,
       null,
@@ -1728,11 +1712,7 @@ describe('Test statistics functionality', () => {
     const logger = new Logger(configMainCopy);
     const template = { algorithms: { sha256d: { multiplier: 1 }}};
     const statistics = new Statistics(logger, client, configCopy, configMainCopy, template);
-    statistics.handleStatistics('auxiliary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    statistics.handleStatistics('auxiliary', () => done());
   });
 
   test('Test statistics submission handling [5]', (done) => {

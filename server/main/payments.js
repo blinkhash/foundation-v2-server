@@ -176,22 +176,6 @@ const Payments = function (logger, client, config, configMain) {
     _this.executor(transaction, () => callback());
   };
 
-  // Handle Final Round Updates
-  this.handleFinal = function(blocks, callback) {
-
-    // Build Combined Transaction
-    const transaction = ['BEGIN;'];
-
-    // Remove Finished Transactions from Table
-    const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.current.transactions.deleteCurrentTransactionsMain(
-      _this.pool, transactionsDelete));
-
-    // Insert Work into Database
-    transaction.push('COMMIT;');
-    _this.executor(transaction, () => callback());
-  };
-
   // Handle Round Reset Updates
   this.handleReset = function(blockType, callback) {
 
@@ -380,20 +364,18 @@ const Payments = function (logger, client, config, configMain) {
         // Blocks Exist to Send Payments
         if (blocks.length >= 1) {
           _this.handlePrimary(blocks, balances, (error) => {
-            _this.handleFinal(blocks, () => {
-              const updates = [(error) ?
-                _this.text.databaseCommandsText2(JSON.stringify(error)) :
-                _this.text.databaseUpdatesText4(blockType, blocks.length)];
-              _this.logger.log('Payments', _this.config.name, updates);
-              callback();
-            });
+            const updates = [(error) ?
+              _this.text.databaseCommandsText2(JSON.stringify(error)) :
+              _this.text.databaseUpdatesText4(blockType, blocks.length)];
+            _this.logger.debug('Payments', _this.config.name, updates);
+            callback();
           });
 
         // No Blocks Exist to Send Payments
         } else {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText5(blockType)];
-            _this.logger.log('Payments', _this.config.name, updates);
+            _this.logger.debug('Payments', _this.config.name, updates);
             callback();
           });
         }
@@ -409,20 +391,18 @@ const Payments = function (logger, client, config, configMain) {
         // Blocks Exist to Send Payments
         if (blocks.length >= 1) {
           _this.handleAuxiliary(blocks, balances, (error) => {
-            _this.handleFinal(blocks, () => {
-              const updates = [(error) ?
-                _this.text.databaseCommandsText2(JSON.stringify(error)) :
-                _this.text.databaseUpdatesText4(blockType, blocks.length)];
-              _this.logger.log('Payments', _this.config.name, updates);
-              callback();
-            });
+            const updates = [(error) ?
+              _this.text.databaseCommandsText2(JSON.stringify(error)) :
+              _this.text.databaseUpdatesText4(blockType, blocks.length)];
+            _this.logger.debug('Payments', _this.config.name, updates);
+            callback();
           });
 
         // No Blocks Exist to Send Payments
         } else {
           _this.handleReset(blockType, () => {
             const updates = [_this.text.databaseUpdatesText5(blockType)];
-            _this.logger.log('Payments', _this.config.name, updates);
+            _this.logger.debug('Payments', _this.config.name, updates);
             callback();
           });
         }
@@ -441,7 +421,7 @@ const Payments = function (logger, client, config, configMain) {
 
     // Handle Initial Logging
     const starting = [_this.text.databaseStartingText3(blockType)];
-    _this.logger.log('Payments', _this.config.name, starting);
+    _this.logger.debug('Payments', _this.config.name, starting);
 
     // Calculate Checks Features
     const roundsWindow = Date.now() - _this.config.settings.window.rounds;

@@ -367,7 +367,7 @@ const Statistics = function (logger, client, config, configMain, template) {
 
     // Handle Initial Logging
     const starting = [_this.text.databaseStartingText1(blockType)];
-    _this.logger.log('Statistics', _this.config.name, starting);
+    _this.logger.debug('Statistics', _this.config.name, starting);
 
     // Calculate Statistics Features
     const hashrateWindow = Date.now() - _this.config.settings.window.hashrate;
@@ -403,7 +403,7 @@ const Statistics = function (logger, client, config, configMain, template) {
       _this.executor(transaction, (lookups) => {
         _this.handlePrimary(lookups, () => {
           const updates = [_this.text.databaseUpdatesText1(blockType)];
-          _this.logger.log('Statistics', _this.config.name, updates);
+          _this.logger.debug('Statistics', _this.config.name, updates);
           callback();
         });
       });
@@ -414,7 +414,7 @@ const Statistics = function (logger, client, config, configMain, template) {
       _this.executor(transaction, (lookups) => {
         _this.handleAuxiliary(lookups, () => {
           const updates = [_this.text.databaseUpdatesText1(blockType)];
-          _this.logger.log('Statistics', _this.config.name, updates);
+          _this.logger.debug('Statistics', _this.config.name, updates);
           callback();
         });
       });

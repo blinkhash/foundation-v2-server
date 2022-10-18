@@ -4,8 +4,11 @@ exports.builderThreadsText2 = () => 'No valid pool configs exist or are enabled.
 exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs } pool(s) on ${ numForks } thread(s)`;
 
 // Database Text
-exports.databaseCommandsText1 = (error) => `An error was thrown when trying to execute a query: ${ error }`;
+exports.databaseCommandsText1 = (query, error) => `An error was thrown when trying to execute a query (${ query }): ${ error }`;
 exports.databaseCommandsText2 = (error) => `An error was thrown when trying to handle checks and validations: ${ error }`;
+exports.databaseCommandsText3 = (retries) => `An error was thrown by the database, waiting before attempting (#${ retries + 1}) to reconnect ...`;
+exports.databaseCommandsText4 = () => 'Successfully reconnected to the database, continuing execution ...';
+exports.databaseCommandsText5 = () => 'Unable to reconnect to database, exceeded retry limits ...';
 exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
 exports.databaseStartingText1 = (type) => `Started updating statistics and data for ${ type } rounds`;
 exports.databaseStartingText2 = (type) => `Started handling checks and validation for ${ type } rounds`;

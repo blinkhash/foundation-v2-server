@@ -196,26 +196,7 @@ describe('Test checks functionality', () => {
     expect(checks.handleCurrentOrphans([])).toStrictEqual([]);
   });
 
-  test('Test checks miscellaneous updates [1]', (done) => {
-    MockDate.set(1634742080841);
-    const client = mockClient(configMainCopy, { rows: [] });
-    const logger = new Logger(configMainCopy);
-    const checks = new Checks(logger, client, configCopy, configMainCopy);
-    const blocks = [
-      { round: 'round1' }, { round: 'round2' }, { round: 'round3' },
-      { round: 'round4' }, { round: 'round5' }, { round: 'round6' }];
-    const expected = `
-      DELETE FROM "Pool-Bitcoin".current_transactions
-      WHERE round IN ('round1', 'round2', 'round3', 'round4', 'round5', 'round6');`;
-    client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(3);
-      expect(transaction[1]).toBe(expected);
-      done();
-    });
-    checks.handleFinal(blocks, () => {});
-  });
-
-  test('Test checks miscellaneous updates [2]', (done) => {
+  test('Test checks miscellaneous updates', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -1309,7 +1290,6 @@ describe('Test checks functionality', () => {
   });
 
   test('Test checks rounds updates [1]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
@@ -1338,30 +1318,20 @@ describe('Test checks functionality', () => {
         { ...initialBlock, category: 'immature', round: 'round1' },
         { ...initialBlock, category: 'generate', round: 'round2' }]},
       null];
-    checks.handleRounds(initial, 'primary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    checks.handleRounds(initial, 'primary', () => done());
   });
 
   test('Test checks rounds updates [2]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const checks = new Checks(logger, client, configCopy, configMainCopy);
     const initial = [null, { rows: [] }, null];
-    checks.handleRounds(initial, 'primary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    checks.handleRounds(initial, 'primary', () => done());
   });
 
   test('Test checks rounds updates [3]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
@@ -1390,26 +1360,17 @@ describe('Test checks functionality', () => {
         { ...initialBlock, category: 'immature', round: 'round1' },
         { ...initialBlock, category: 'generate', round: 'round2' }]},
       null];
-    checks.handleRounds(initial, 'auxiliary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    checks.handleRounds(initial, 'auxiliary', () => done());
   });
 
   test('Test checks rounds updates [4]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const checks = new Checks(logger, client, configCopy, configMainCopy);
     const initial = [null, { rows: [] }, null];
-    checks.handleRounds(initial, 'auxiliary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    checks.handleRounds(initial, 'auxiliary', () => done());
   });
 
   test('Test checks rounds updates [5]', (done) => {

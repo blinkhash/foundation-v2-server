@@ -220,25 +220,6 @@ describe('Test payments functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
-    const blocks = [
-      { round: 'round1' }, { round: 'round2' }, { round: 'round3' },
-      { round: 'round4' }, { round: 'round5' }, { round: 'round6' }];
-    const expected = `
-      DELETE FROM "Pool-Bitcoin".current_transactions
-      WHERE round IN ('round1', 'round2', 'round3', 'round4', 'round5', 'round6');`;
-    client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(3);
-      expect(transaction[1]).toBe(expected);
-      done();
-    });
-    payments.handleFinal(blocks, () => {});
-  });
-
-  test('Test payments miscellaneous updates [3]', (done) => {
-    MockDate.set(1634742080841);
-    const client = mockClient(configMainCopy, { rows: [] });
-    const logger = new Logger(configMainCopy);
-    const payments = new Payments(logger, client, configCopy, configMainCopy);
     const expected = `
       UPDATE "Pool-Bitcoin".current_miners
       SET immature = 0, generate = 0
@@ -1425,7 +1406,6 @@ describe('Test payments functionality', () => {
   });
 
   test('Test payments rounds updates [1]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
@@ -1455,30 +1435,20 @@ describe('Test payments functionality', () => {
         { ...initialBlock, category: 'generate', round: 'round2' }]},
       { rows: [] },
       null];
-    payments.handleRounds(initial, 'primary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    payments.handleRounds(initial, 'primary', () => done());
   });
 
   test('Test payments rounds updates [2]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
     const initial = [null, { rows: [] }, { rows: [] }, null];
-    payments.handleRounds(initial, 'primary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    payments.handleRounds(initial, 'primary', () => done());
   });
 
   test('Test payments rounds updates [3]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
@@ -1508,26 +1478,17 @@ describe('Test payments functionality', () => {
         { ...initialBlock, category: 'generate', round: 'round2' }]},
       { rows: [] },
       null];
-    payments.handleRounds(initial, 'auxiliary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    payments.handleRounds(initial, 'auxiliary', () => done());
   });
 
   test('Test payments rounds updates [4]', (done) => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     MockDate.set(1634742080841);
     const lookups = [null, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
     const initial = [null, { rows: [] }, { rows: [] }, null];
-    payments.handleRounds(initial, 'auxiliary', () => {
-      expect(consoleSpy).toHaveBeenCalled();
-      console.log.mockClear();
-      done();
-    });
+    payments.handleRounds(initial, 'auxiliary', () => done());
   });
 
   test('Test payments rounds updates [5]', (done) => {
