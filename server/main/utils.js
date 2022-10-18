@@ -89,8 +89,8 @@ exports.validateNumbers = function(parameter) {
   const accepted = ['lt', 'le', 'gt', 'ge', 'ne'];
   const condition = parameter.slice(0, 2);
   const remainder = parameter.slice(2);
-  if (accepted.includes(condition) && Number(remainder)) return true;
-  else if (Number(parameter)) return true;
+  if (accepted.includes(condition) && !isNaN(Number(remainder))) return true;
+  else if (!isNaN(Number(parameter))) return true; 
   else return false;
 };
 

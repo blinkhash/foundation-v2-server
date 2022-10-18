@@ -84,6 +84,7 @@ describe('Test utility functionality', () => {
   test('Test implemented validateNumbers', () => {
     expect(utils.validateNumbers('test100')).toBe(false);
     expect(utils.validateNumbers('lt100')).toBe(true);
+    expect(utils.validateNumbers('lt0')).toBe(true);
     expect(utils.validateNumbers('100')).toBe(true);
     expect(utils.validateNumbers('100.00')).toBe(true);
   });
