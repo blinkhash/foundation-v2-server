@@ -114,6 +114,8 @@ describe('Test schema functionality', () => {
         timestamp BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
+        ip_hash VARCHAR NOT NULL DEFAULT 'unknown',
+        ip_hint VARCHAR NOT NULL DEFAULT 'unknown',
         identifier VARCHAR NOT NULL DEFAULT 'master',
         share VARCHAR NOT NULL DEFAULT 'unknown',
         solo BOOLEAN NOT NULL DEFAULT false,

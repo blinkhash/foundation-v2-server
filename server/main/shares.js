@@ -1,5 +1,6 @@
 const Text = require('../../locales/index');
 const utils = require('./utils');
+const crypto = require('crypto');
 const uuid = require('uuid');
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,12 +80,24 @@ const Shares = function (logger, client, config, configMain) {
     // Calculate Features of Hashrate
     const current = shareType === 'valid' ? difficulty : 0;
     const identifier = shareData.identifier || 'master';
+    let ip = 'unknown';
+    let ipHash = 'unknown';
+    let ipHint = 'unknown';
+    
+    if (shareData.ip) {
+      const ipIndex = shareData.ip.split(':').length - 1;
+      ip = shareData.ip.split(':')[ipIndex];
+      ipHash = utils.createHash(ip);
+      ipHint = '*.*.*.' + ip.split('.')[3];
+    }
 
     // Return Hashrate Updates
     return {
       timestamp: Date.now(),
       miner: (worker || '').split('.')[0],
       worker: worker,
+      ip_hash: ipHash,
+      ip_hint: ipHint,
       identifier: identifier,
       share: shareType,
       solo: minerType,

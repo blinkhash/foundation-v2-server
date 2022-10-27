@@ -140,6 +140,8 @@ describe('Test database hashrate functionality', () => {
       timestamp: 1,
       miner: 'miner1',
       worker: 'worker1',
+      ip_hash: 'hash1',
+      ip_hint: '*.*.*.1',
       identifier: 'master',
       share: 'valid',
       solo: false,
@@ -150,12 +152,14 @@ describe('Test database hashrate functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".current_hashrate (
         timestamp, miner, worker,
-        identifier, share, solo,
-        type, work)
+        ip_hash, ip_hint, identifier,
+        share, solo, type, work)
       VALUES (
         1,
         'miner1',
         'worker1',
+        'hash1',
+        '*.*.*.1',
         'master',
         'valid',
         false,
@@ -170,6 +174,8 @@ describe('Test database hashrate functionality', () => {
       timestamp: 1,
       miner: 'miner1',
       worker: 'worker1',
+      ip_hash: 'hash1',
+      ip_hint: '*.*.*.1',
       identifier: 'master',
       share: 'valid',
       solo: false,
@@ -180,12 +186,14 @@ describe('Test database hashrate functionality', () => {
     const expected = `
       INSERT INTO "Pool-Main".current_hashrate (
         timestamp, miner, worker,
-        identifier, share, solo,
-        type, work)
+        ip_hash, ip_hint, identifier,
+        share, solo, type, work)
       VALUES (
         1,
         'miner1',
         'worker1',
+        'hash1',
+        '*.*.*.1',
         'master',
         'valid',
         false,
@@ -194,6 +202,8 @@ describe('Test database hashrate functionality', () => {
         1,
         'miner1',
         'worker1',
+        'hash1',
+        '*.*.*.1',
         'master',
         'valid',
         false,

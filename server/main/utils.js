@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const os = require('os');
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +24,14 @@ exports.countProcessForks = function(configMain) {
     return 1;
   }
   return configMain.clustering.forks;
+};
+
+// Generate SHA-1 Hash From String
+exports.createHash = function(text) {
+  const hash = crypto.createHash('sha1');
+  hash.update(text);
+  
+  return hash.digest('hex');
 };
 
 // Handle Query Validator

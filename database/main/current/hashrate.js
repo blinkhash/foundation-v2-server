@@ -12,8 +12,8 @@ const CurrentHashrate = function (logger, configMain) {
 
   // Handle Current Parameters
   this.numbers = ['timestamp', 'work'];
-  this.strings = ['miner', 'worker', 'identifier', 'share', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'share', 'solo',
+  this.strings = ['ip_hash', 'ip_hint', 'miner', 'worker', 'identifier', 'share', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'ip_hash', 'ip_hint', 'identifier', 'share', 'solo',
     'type', 'work'];
 
   // Handle String Parameters
@@ -119,6 +119,8 @@ const CurrentHashrate = function (logger, configMain) {
         ${ hashrate.timestamp },
         '${ hashrate.miner }',
         '${ hashrate.worker }',
+        '${ hashrate.ip_hash }',
+        '${ hashrate.ip_hint }',
         '${ hashrate.identifier }',
         '${ hashrate.share }',
         ${ hashrate.solo },
@@ -134,8 +136,8 @@ const CurrentHashrate = function (logger, configMain) {
     return `
       INSERT INTO "${ pool }".current_hashrate (
         timestamp, miner, worker,
-        identifier, share, solo,
-        type, work)
+        ip_hash, ip_hint, identifier,
+        share, solo, type, work)
       VALUES ${ _this.buildCurrentHashrateMain(updates) };`;
   };
 
