@@ -348,9 +348,33 @@ const Shares = function (logger, client, config, configMain) {
     _this.executor(transaction, () => callback());
   };
 
+  // Handle Meta Share Submissions
+  this.handleMetaShare = function(shareData, shareValid, blockValid, callback) {
+    shareData.shareValid = shareValid;
+    shareData.blockValid = blockValid;
+
+    // Log New Share
+    let shareType = 'valid';
+    if (shareData.error && shareData.error === 'job not found') shareType = 'stale';
+    else if (!shareValid || shareData.error) shareType = 'invalid';
+    const type = (shareType === 'valid') ? 'log' : 'error';
+    const lines = [(shareType === 'valid') ?
+      _this.text.sharesSubmissionsText1(
+        shareData.difficulty, shareData.shareDiff, shareData.addrPrimary, shareData.ip) :
+      _this.text.sharesSubmissionsText2(shareData.error, shareData.addrPrimary, shareData.ip)];
+    _this.logger[type]('Shares', _this.config.name, lines);
+
+    // Build Transaction
+    const transaction = [
+      'BEGIN;',
+      _this.current.shares.insertCurrentShares(_this.pool, [ shareData ]),
+      'COMMIT;'];
+
+    _this.executor(transaction, () => callback());
+  };
+
   // Handle Share/Block Submissions
   this.handleSubmissions = function(shareData, shareValid, blockValid, callback) {
-
     // Calculate Share Features
     let shareType = 'valid';
     const minerType = utils.checkSoloMining(_this.config, shareData);

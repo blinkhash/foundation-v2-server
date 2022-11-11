@@ -12,6 +12,12 @@ const config = {};
 config.identifier = '';
 config.language = 'english';
 
+// Stratum Configuration
+config.stratum = {};
+config.stratum.lean = true;
+config.stratum.instance = 'stratum';
+// config.stratum.instance = 'master';
+
 // Logger Configuration
 config.logger = {};
 config.logger.logColors = true;

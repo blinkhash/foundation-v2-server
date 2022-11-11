@@ -106,6 +106,7 @@ config.settings.interval.checks = 90000; // ms
 config.settings.interval.historical = 600000; // ms
 config.settings.interval.payments = 7200000; // ms
 config.settings.interval.rounds = 60000; // ms
+config.settings.interval.shares = 10000; // ms
 config.settings.interval.statistics = 90000; // ms
 
 // Window Configuration

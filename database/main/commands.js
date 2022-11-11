@@ -9,6 +9,7 @@ const CurrentMiners = require('./current/miners');
 const CurrentNetwork = require('./current/network');
 const CurrentPayments = require('./current/payments');
 const CurrentRounds = require('./current/rounds');
+const CurrentShares = require('./current/shares');
 const CurrentTransactions = require('./current/transactions');
 const CurrentWorkers = require('./current/workers');
 
@@ -74,6 +75,7 @@ const Commands = function (logger, client, configMain) {
   this.current.network = new CurrentNetwork(_this.logger, _this.configMain);
   this.current.payments = new CurrentPayments(_this.logger, _this.configMain);
   this.current.rounds = new CurrentRounds(_this.logger, _this.configMain);
+  this.current.shares = new CurrentShares(_this.logger, _this.configMain);
   this.current.transactions = new CurrentTransactions(_this.logger, _this.configMain);
   this.current.workers = new CurrentWorkers(_this.logger, _this.configMain);
 };

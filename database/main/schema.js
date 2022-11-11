@@ -248,6 +248,42 @@ const Schema = function (logger, executor, configMain) {
     _this.executor([command], () => callback());
   };
 
+  // Check if Current Shares Table Exists in Database
+  this.selectCurrentShares = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'current_shares');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Deploy Current Shares Table to Database
+  this.createCurrentShares = function(pool, callback) {
+    const command = `
+      CREATE TABLE "${ pool }".current_shares(
+        id BIGSERIAL PRIMARY KEY,
+        job VARCHAR NOT NULL DEFAULT 'unknown',
+        share_id VARCHAR NOT NULL DEFAULT 'unknown',
+        ip VARCHAR NOT NULL DEFAULT 'unknown',
+        port INT NOT NULL DEFAULT 0,
+        addr_primary VARCHAR NOT NULL DEFAULT 'unknown',
+        addr_auxiliary VARCHAR DEFAULT null,
+        block_diff_primary FLOAT NOT NULL DEFAULT 0,
+        block_type VARCHAR NOT NULL DEFAULT 'unknown',
+        difficulty FLOAT NOT NULL DEFAULT 0,
+        error VARCHAR NOT NULL DEFAULT '',
+        hash VARCHAR NOT NULL DEFAULT 'unknown',
+        height INT NOT NULL DEFAULT 0,
+        identifier VARCHAR NOT NULL DEFAULT 'unknown',
+        share_diff FLOAT NOT NULL DEFAULT 0,
+        transaction VARCHAR NOT NULL DEFAULT '0',
+        share_valid BOOLEAN NOT NULL DEFAULT false,
+        block_valid BOOLEAN DEFAULT null,
+        CONSTRAINT current_shares_unique UNIQUE (hash));`;
+    _this.executor([command], () => callback());
+  };
+
   // Check if Current Transactions Table Exists in Database
   this.selectCurrentTransactions = function(pool, callback) {
     const command = `
@@ -579,6 +615,7 @@ const Schema = function (logger, executor, configMain) {
         .then(() => _this.handlePromises(pool, _this.selectCurrentNetwork, _this.createCurrentNetwork))
         .then(() => _this.handlePromises(pool, _this.selectCurrentPayments, _this.createCurrentPayments))
         .then(() => _this.handlePromises(pool, _this.selectCurrentRounds, _this.createCurrentRounds))
+        .then(() => _this.handlePromises(pool, _this.selectCurrentShares, _this.createCurrentShares))
         .then(() => _this.handlePromises(pool, _this.selectCurrentTransactions, _this.createCurrentTransactions))
         .then(() => _this.handlePromises(pool, _this.selectCurrentWorkers, _this.createCurrentWorkers))
         .then(() => _this.handlePromises(pool, _this.selectHistoricalBlocks, _this.createHistoricalBlocks))
