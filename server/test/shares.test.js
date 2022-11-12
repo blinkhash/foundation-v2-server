@@ -138,7 +138,7 @@ describe('Test shares functionality', () => {
       miner: 'miner1',
       worker: 'miner1',
       ip_hash: '409629a08b9b3f3be610b8832cc28822f964410f',
-      ip_hint: '*.*.*.1',
+      last_octet: 1,
       identifier: 'master',
       share: 'valid',
       solo: false,
@@ -158,7 +158,7 @@ describe('Test shares functionality', () => {
       miner: 'miner1',
       worker: 'miner1',
       ip_hash: 'unknown',
-      ip_hint: 'unknown',
+      last_octet: -1,
       identifier: 'master',
       share: 'invalid',
       solo: false,
@@ -179,7 +179,7 @@ describe('Test shares functionality', () => {
       miner: '',
       worker: null,
       ip_hash: 'unknown',
-      ip_hint: 'unknown',
+      last_octet: -1,
       identifier: 'master',
       share: 'valid',
       solo: false,
@@ -1189,14 +1189,14 @@ describe('Test shares functionality', () => {
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        ip_hash, ip_hint, identifier,
+        ip_hash, last_octet, identifier,
         share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
         '409629a08b9b3f3be610b8832cc28822f964410f',
-        '*.*.*.1',
+        1,
         'master',
         'valid',
         false,
@@ -1330,14 +1330,14 @@ describe('Test shares functionality', () => {
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        ip_hash, ip_hint, identifier,
+        ip_hash, last_octet, identifier,
         share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
         '409629a08b9b3f3be610b8832cc28822f964410f',
-        '*.*.*.1',
+        1,
         'master',
         'valid',
         false,
@@ -1477,14 +1477,14 @@ describe('Test shares functionality', () => {
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        ip_hash, ip_hint, identifier,
+        ip_hash, last_octet, identifier,
         share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
         '409629a08b9b3f3be610b8832cc28822f964410f',
-        '*.*.*.1',
+        1,
         'master',
         'valid',
         true,
@@ -1618,14 +1618,14 @@ describe('Test shares functionality', () => {
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        ip_hash, ip_hint, identifier,
+        ip_hash, last_octet, identifier,
         share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
         '409629a08b9b3f3be610b8832cc28822f964410f',
-        '*.*.*.1',
+        1,
         'master',
         'valid',
         true,
@@ -1766,14 +1766,14 @@ describe('Test shares functionality', () => {
     const expectedHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        ip_hash, ip_hint, identifier,
+        ip_hash, last_octet, identifier,
         share, solo, type, work)
       VALUES (
         1634742080841,
         'primary1',
         'primary1',
         '409629a08b9b3f3be610b8832cc28822f964410f',
-        '*.*.*.1',
+        1,
         'master',
         'valid',
         false,
@@ -1880,14 +1880,14 @@ describe('Test shares functionality', () => {
     const expectedAuxHashrate = `
       INSERT INTO "Pool-Bitcoin".current_hashrate (
         timestamp, miner, worker,
-        ip_hash, ip_hint, identifier,
+        ip_hash, last_octet, identifier,
         share, solo, type, work)
       VALUES (
         1634742080841,
         'auxiliary1',
         'auxiliary1',
         '409629a08b9b3f3be610b8832cc28822f964410f',
-        '*.*.*.1',
+        1,
         'master',
         'valid',
         false,
