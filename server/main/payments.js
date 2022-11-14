@@ -255,6 +255,11 @@ const Payments = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
 
+    // Add User Payment Limits to Transaction 
+    const parameters = { type: 'primary' };
+    transaction.push(_this.current.users.selectCurrentUsersMain(
+      _this.pool, parameters));
+
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
       const parameters = { solo: block.solo, round: block.round, type: 'primary' };
@@ -265,7 +270,7 @@ const Payments = function (logger, client, config, configMain) {
     // Determine Workers for Rounds
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
-      const rounds = results.slice(1, -1).map((round) => round.rows);
+      const rounds = results.slice(2, -1).map((round) => round.rows);
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
