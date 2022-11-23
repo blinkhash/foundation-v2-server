@@ -91,14 +91,14 @@ const Stratum = function (logger, client, config, configMain, template) {
     _this.stratum.setupPrimaryBlockchain(() => {
     _this.stratum.setupAuxiliaryBlockchain(() => {
     _this.stratum.setupFirstJob(() => {
-    _this.stratum.setupBlockPolling();
+    _this.stratum.setupBlockPolling(() => {
     _this.stratum.setupNetwork(() => {
       _this.outputStratum()
       callback()
     })
 
     // Too Much Indentation
-    })})})})})});
+    })})})})})})});
   }
 };
 

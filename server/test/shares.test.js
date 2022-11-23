@@ -379,7 +379,7 @@ describe('Test shares functionality', () => {
       times: 0,
       type: 'primary',
       valid: 0,
-      work: -1,
+      work: 0,
     };
     expect(shares.handleCurrentRounds(null, workerData, shareData, 'invalid', false, 'primary')).toStrictEqual(expected);
   });
@@ -404,7 +404,7 @@ describe('Test shares functionality', () => {
       times: 0,
       type: 'primary',
       valid: 0,
-      work: -1,
+      work: 0,
     };
     expect(shares.handleCurrentRounds(null, workerData, shareData, 'stale', false, 'primary')).toStrictEqual(expected);
   });
