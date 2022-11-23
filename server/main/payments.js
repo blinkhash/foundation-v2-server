@@ -256,13 +256,13 @@ const Payments = function (logger, client, config, configMain) {
     const transaction = ['BEGIN;'];
 
     // Add User Payment Limits to Transaction 
-    const parameters = { type: 'primary' };
-    transaction.push(_this.current.users.selectCurrentUsersMain(
-      _this.pool, parameters));
+    const parameters = { type: 'primary', payout_limit: 'gt' + _this.config.primary.payments.minPayment };
+    transaction.push(_this.current.users.selectCurrentUsersMain(_this.pool, parameters));
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      const parameters = { solo: block.solo, round: block.round, type: 'primary' };
+      const roundCutoff = block.submitted - 6 * 60 * 60 * 1000;
+      const parameters = { solo: block.solo, recent: 'bw' + roundCutoff + '|' + block.submitted, type: 'primary' };
       transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
@@ -277,6 +277,14 @@ const Payments = function (logger, client, config, configMain) {
         if (error) _this.handleFailures(blocks, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
           const payments = _this.handleCurrentCombined(balances, results);
+
+          // Filter User Limits
+          if (results[1].rowCount > 0) {
+            payments.forEach(address => {
+              console.log('asd')
+            });
+          }
+          // console.log(payments)//.filter(payment => true);
 
           // Validate and Send Out Primary Payments
           _this.stratum.stratum.handlePrimaryBalances(payments, (error) => {
@@ -336,8 +344,13 @@ const Payments = function (logger, client, config, configMain) {
 
     // Build Checks for Each Block
     const checks = [];
+    let oldestBlock = Date.now();
+
     if (lookups[1].rows[0]) {
       lookups[1].rows.forEach((block) => {
+        if (block.submitted < oldestBlock) {
+          oldestBlock = block.submitted
+        }
         checks.push({ timestamp: Date.now(), round: block.round, type: blockType });
       });
     }
@@ -355,6 +368,10 @@ const Payments = function (logger, client, config, configMain) {
     if (checks.length >= 1) {
       transaction.push(_this.current.payments.insertCurrentPaymentsMain(_this.pool, checks));
     }
+
+    // Delete Old Rounds
+    const roundsWindow = oldestBlock - 6 * 60 * 60 * 1000;
+    transaction.push(_this.current.rounds.deleteCurrentRoundsInactive(_this.pool, roundsWindow)); 
 
     // Establish Separate Behavior
     transaction.push('COMMIT;');
@@ -436,7 +453,6 @@ const Payments = function (logger, client, config, configMain) {
       'BEGIN;',
       _this.current.blocks.selectCurrentBlocksMain(_this.pool, { category: 'generate', type: blockType }),
       _this.current.miners.selectCurrentMinersMain(_this.pool, { balance: 'gt0', type: blockType }),
-      _this.current.rounds.deleteCurrentRoundsInactive(_this.pool, roundsWindow),
       'COMMIT;'];
 
     // Establish Separate Behavior

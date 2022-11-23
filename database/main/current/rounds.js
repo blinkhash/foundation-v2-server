@@ -29,6 +29,12 @@ const CurrentRounds = function (logger, configMain) {
     if (query.slice(0, 2) === 'gt') return ` > ${ query.replace('gt', '') }`;
     if (query.slice(0, 2) === 'ge') return ` >= ${ query.replace('ge', '') }`;
     if (query.slice(0, 2) === 'ne') return ` != ${ query.replace('ne', '') }`;
+    if (query.slice(0, 2) === 'bw') {
+      const remainder = query.replace('bw', '');
+      const firstString = _this.handleNumbers({first: remainder.split('|')[0]}, 'first');
+      const secondString = parameter + _this.handleNumbers({second: remainder.split('|')[1]}, 'second');
+       return `${ firstString } AND ${ secondString }`;
+    } 
     else return ` = ${ query }`;
   };
 
