@@ -28,7 +28,7 @@
     "start": "nodemon ./index.js",
     "prod:start": "pm2 start ./index.js",
     "prod:stop": "pm2 stop ./index.js",
-    "prod:logs": "pm2 logs main",
+    "prod:logs": "pm2 logs index",
     "prod:update": "pm2 update",
     "clean": "eslint . --ext .js --ignore-pattern node_modules/",
     "clean:fix": "eslint . --ext .js --fix --ignore-pattern node_modules/",
