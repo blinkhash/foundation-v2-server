@@ -161,7 +161,7 @@ const Shares = function (logger, client, config, configMain) {
     const identifier = shareData.identifier || 'master';
     const times = (Object.keys(workerData).length >= 1 && shareType === 'valid') ?
       _this.handleTimes(workerData) : 0;
-    const current = shareType === 'valid' ? shareData.difficulty : -shareData.difficulty;
+    const current = shareType === 'valid' ? shareData.difficulty : 0;
 
     // Return Round Updates
     return {
