@@ -147,9 +147,13 @@ const Checks = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      const roundCutoff = block.submitted - _this.config.primary.payments.windowPPLNT;
-      const parameters = { solo: block.solo, recent: 'bwgt' + roundCutoff + '|lt' + block.submitted,
-        type: 'primary' };
+      const parameters = { solo: block.solo, type: 'primary' };
+      if (parameters.solo) {
+        parameters.round = block.round;
+      } else {
+        const roundCutoff = block.submitted - _this.config.primary.payments.windowPPLNT;
+        parameters.recent = 'bwgt' + roundCutoff + '|lt' + block.submitted;
+      }
       transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
@@ -177,9 +181,13 @@ const Checks = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      const roundCutoff = block.submitted - _this.config.primary.payments.windowPPLNT;
-      const parameters = { solo: block.solo, recent: 'bwgt' + roundCutoff + '|lt' + block.submitted,
-        type: 'auxiliary' };
+      const parameters = { solo: block.solo, type: 'primary' };
+      if (parameters.solo) {
+        parameters.round = block.round;
+      } else {
+        const roundCutoff = block.submitted - _this.config.primary.payments.windowPPLNT;
+        parameters.recent = 'bwgt' + roundCutoff + '|lt' + block.submitted;
+      }
       transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
