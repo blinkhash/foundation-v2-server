@@ -486,14 +486,14 @@ describe('Test payments functionality', () => {
         'primary')
       ON CONFLICT DO NOTHING;`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(9);
+      expect(transaction.length).toBe(7);
       expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
       expect(transaction[2]).toBe(expectedMiners);
-      expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
-      expect(transaction[4]).toBe(expectedGenerateBlocksUpdates);
-      expect(transaction[5]).toBe(expectedPayments);
-      expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
-      expect(transaction[7]).toBe(expectedTransactions);
+      // expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
+      expect(transaction[3]).toBe(expectedGenerateBlocksUpdates);
+      expect(transaction[4]).toBe(expectedPayments);
+      // expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
+      expect(transaction[5]).toBe(expectedTransactions);
       done();
     });
     payments.handleUpdates(blocks, rounds, amounts, balances, 'transaction1', 'primary', () => {});
@@ -528,6 +528,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: [{ miner: 'miner1', payout_limit: 40}, { miner: 'miner2', payout_limit: 40}, { miner: 'miner3', payout_limit: 40}]},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -733,14 +734,14 @@ describe('Test payments functionality', () => {
       ON CONFLICT DO NOTHING;`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(9);
+        expect(transaction.length).toBe(7);
         expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
         expect(transaction[2]).toBe(expectedMiners);
-        expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
-        expect(transaction[4]).toBe(expectedGenerateBlocksUpdates);
-        expect(transaction[5]).toBe(expectedPayments);
-        expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
-        expect(transaction[7]).toBe(expectedTransactions);
+        // expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
+        expect(transaction[3]).toBe(expectedGenerateBlocksUpdates);
+        expect(transaction[4]).toBe(expectedPayments);
+        // expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
+        expect(transaction[5]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handlePrimary(blocks, {}, () => done());
@@ -763,6 +764,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: []},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -834,6 +836,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: []},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -905,6 +908,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: []},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -975,6 +979,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: [{ miner: 'miner1', payout_limit: 40}, { miner: 'miner2', payout_limit: 40}, { miner: 'miner3', payout_limit: 40}]},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -1180,14 +1185,14 @@ describe('Test payments functionality', () => {
       ON CONFLICT DO NOTHING;`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(9);
+        expect(transaction.length).toBe(7);
         expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
         expect(transaction[2]).toBe(expectedMiners);
-        expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
-        expect(transaction[4]).toBe(expectedGenerateBlocksUpdates);
-        expect(transaction[5]).toBe(expectedPayments);
-        expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
-        expect(transaction[7]).toBe(expectedTransactions);
+        // expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
+        expect(transaction[3]).toBe(expectedGenerateBlocksUpdates);
+        expect(transaction[4]).toBe(expectedPayments);
+        // expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
+        expect(transaction[5]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handleAuxiliary(blocks, {}, () => done());
@@ -1210,6 +1215,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: []},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -1281,6 +1287,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: []},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -1352,6 +1359,7 @@ describe('Test payments functionality', () => {
     };
     const lookups = [
       null,
+      { rows: []},
       { rows: [{ ...initialMiner, miner: 'miner1', worker: 'miner1', round: 'round1' },
         { ...initialMiner, miner: 'miner2', worker: 'miner2', round: 'round1' },
         { ...initialMiner, miner: 'miner3', worker: 'miner2', round: 'round1' }]},
@@ -1450,12 +1458,13 @@ describe('Test payments functionality', () => {
 
   test('Test payments rounds updates [3]', (done) => {
     MockDate.set(1634742080841);
-    const lookups = [null, { rows: [] }, null];
+    const lookups = [null, { rows: [] }, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
     const initialBlock = {
       timestamp: 1,
+      submitted: 1,
       miner: 'miner1',
       worker: 'miner1',
       category: 'pending',
@@ -1474,8 +1483,8 @@ describe('Test payments functionality', () => {
     const initial = [
       null,
       { rows: [
-        { ...initialBlock, category: 'immature', round: 'round1' },
-        { ...initialBlock, category: 'generate', round: 'round2' }]},
+        { ...initialBlock, submitted: 1, category: 'immature', round: 'round1' },
+        { ...initialBlock, submitted: 2, category: 'generate', round: 'round2' }]},
       { rows: [] },
       null];
     payments.handleRounds(initial, 'auxiliary', () => done());

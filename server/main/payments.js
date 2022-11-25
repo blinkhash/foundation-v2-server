@@ -17,6 +17,7 @@ const Payments = function (logger, client, config, configMain) {
   this.executor = _this.client.commands.executor;
   this.current = _this.client.commands.current;
   this.historical = _this.client.commands.historical;
+  this.foreign = _this.client.commands.foreign;
 
   // Combine Balances and Payments
   this.handleCurrentCombined = function(balances, payments) {
@@ -210,11 +211,11 @@ const Payments = function (logger, client, config, configMain) {
     }
 
     // Handle Generate Round Delete Updates
-    const generateRoundsDelete = blocks.map((block) => `'${ block.round }'`);
-    if (generateRoundsDelete.length >= 1) {
-      transaction.push(_this.current.rounds.deleteCurrentRoundsMain(
-        _this.pool, generateRoundsDelete));
-    }
+    // const generateRoundsDelete = blocks.map((block) => `'${ block.round }'`);
+    // if (generateRoundsDelete.length >= 1) {
+      // transaction.push(_this.current.rounds.deleteCurrentRoundsMain(
+        // _this.pool, generateRoundsDelete));
+    // }
 
     // Handle Historical Generate Block Updates
     const generateBlocksUpdates = _this.handleHistoricalBlocks(blocks);
@@ -231,11 +232,12 @@ const Payments = function (logger, client, config, configMain) {
     }
 
     // Handle Historical Generate Round Updates
-    const generateRoundsUpdates = _this.handleHistoricalRounds(rounds);
-    if (generateRoundsUpdates.length >= 1) {
-      transaction.push(_this.historical.rounds.insertHistoricalRoundsMain(
-        _this.pool, generateRoundsUpdates));
-    }
+    // process "results" to create historical rounds
+    // const generateRoundsUpdates = _this.handleHistoricalRounds(rounds);
+    // if (generateRoundsUpdates.length >= 1) {
+    //   transaction.push(_this.historical.rounds.insertHistoricalRoundsMain(
+    //     _this.pool, generateRoundsUpdates));
+    // }
 
     // Handle Historical Transactions Updates
     const transactionsUpdates = _this.handleHistoricalTransactions(amounts, record, blockType);
@@ -256,13 +258,14 @@ const Payments = function (logger, client, config, configMain) {
     const transaction = ['BEGIN;'];
 
     // Add User Payment Limits to Transaction 
-    const parameters = { type: 'primary', payout_limit: 'gt' + _this.config.primary.payments.minPayment };
-    transaction.push(_this.current.users.selectCurrentUsersMain(_this.pool, parameters));
+    const parameters = { type: 'primary', payout_limit: 'ge' + _this.config.primary.payments.minPayment };
+    transaction.push(_this.foreign.users.selectUsers(_this.pool, parameters));
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      const roundCutoff = block.submitted - 6 * 60 * 60 * 1000;
-      const parameters = { solo: block.solo, recent: 'bw' + roundCutoff + '|' + block.submitted, type: 'primary' };
+      const roundCutoff = block.submitted - _this.config.primary.payments.windowPPLNT;
+      const parameters = { solo: block.solo, recent: 'bwgt' + roundCutoff + '|lt' + block.submitted,
+        type: 'primary' };
       transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
@@ -270,6 +273,8 @@ const Payments = function (logger, client, config, configMain) {
     // Determine Workers for Rounds
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
+      console.log(results);
+      const users = results[1].rows;
       const rounds = results.slice(2, -1).map((round) => round.rows);
 
       // Collect Round/Worker Data and Amounts
@@ -277,21 +282,25 @@ const Payments = function (logger, client, config, configMain) {
         if (error) _this.handleFailures(blocks, () => callback(error));
         else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
           const payments = _this.handleCurrentCombined(balances, results);
-
-          // Filter User Limits
-          if (results[1].rowCount > 0) {
-            payments.forEach(address => {
-              console.log('asd')
+          
+          // Check User Payout Limits
+          if (users.length > 0) {
+            users.forEach(user => {
+              const address = user.miner;
+              if (user.payout_limit > payments[address]) {
+                payments[address] = 0;
+              }
             });
           }
-          // console.log(payments)//.filter(payment => true);
+
+          // push blocks(updates) and rounds to updates ... save historical rounds there
 
           // Validate and Send Out Primary Payments
           _this.stratum.stratum.handlePrimaryBalances(payments, (error) => {
             if (error) _this.handleFailures(updates, () => callback(error));
             else _this.stratum.stratum.handlePrimaryPayments(payments, (error, amounts, balances, transaction) => {
               if (error) _this.handleFailures(updates, () => callback(error));
-              else _this.handleUpdates(updates, rounds, amounts, balances, transaction, 'primary', () => callback(null));
+              else _this.handleUpdates(updates, results, amounts, balances, transaction, 'primary', () => callback(null));
             });
           });
         });
@@ -305,9 +314,15 @@ const Payments = function (logger, client, config, configMain) {
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
 
+    // Add User Payment Limits to Transaction 
+    const parameters = { type: 'auxiliary', payout_limit: 'ge' + _this.config.auxiliary.payments.minPayment };
+    transaction.push(_this.foreign.users.selectUsers(_this.pool, parameters));
+
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      const parameters = { solo: block.solo, round: block.round, type: 'auxiliary' };
+      const roundCutoff = block.submitted - _this.config.auxiliary.payments.windowPPLNT;
+      const parameters = { solo: block.solo, recent: 'bwgt' + roundCutoff + '|lt' + block.submitted,
+        type: 'auxiliary' };
       transaction.push(_this.current.rounds.selectCurrentRoundsMain(
         _this.pool, parameters));
     });
@@ -315,13 +330,24 @@ const Payments = function (logger, client, config, configMain) {
     // Determine Workers for Rounds
     transaction.push('COMMIT;');
     _this.executor(transaction, (results) => {
-      const rounds = results.slice(1, -1).map((round) => round.rows);
+      const users = results[1].rows;
+      const rounds = results.slice(2, -1).map((round) => round.rows);
 
       // Collect Round/Worker Data and Amounts
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
         else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
           const payments = _this.handleCurrentCombined(balances, results);
+
+          // Check User Payout Limits
+          if (users.length > 0) {
+            users.forEach(user => {
+              const address = user.miner;
+              if (user.payout_limit > payments[address]) {
+                payments[address] = 0;
+              }
+            });
+          }
 
           // Validate and Send Out Auxiliary Payments
           _this.stratum.stratum.handleAuxiliaryBalances(payments, (error) => {
@@ -349,7 +375,7 @@ const Payments = function (logger, client, config, configMain) {
     if (lookups[1].rows[0]) {
       lookups[1].rows.forEach((block) => {
         if (block.submitted < oldestBlock) {
-          oldestBlock = block.submitted
+          oldestBlock = block.submitted;
         }
         checks.push({ timestamp: Date.now(), round: block.round, type: blockType });
       });
@@ -370,7 +396,7 @@ const Payments = function (logger, client, config, configMain) {
     }
 
     // Delete Old Rounds
-    const roundsWindow = oldestBlock - 6 * 60 * 60 * 1000;
+    const roundsWindow = oldestBlock - config.primary.payments.windowPPLNT; 
     transaction.push(_this.current.rounds.deleteCurrentRoundsInactive(_this.pool, roundsWindow)); 
 
     // Establish Separate Behavior
@@ -446,7 +472,7 @@ const Payments = function (logger, client, config, configMain) {
     _this.logger.debug('Payments', _this.config.name, starting);
 
     // Calculate Checks Features
-    const roundsWindow = Date.now() - _this.config.settings.window.rounds;
+    // const roundsWindow = Date.now() - _this.config.settings.window.rounds;
 
     // Build Combined Transaction
     const transaction = [

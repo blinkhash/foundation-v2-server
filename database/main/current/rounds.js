@@ -11,9 +11,9 @@ const CurrentRounds = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  this.numbers = ['timestamp', 'invalid', 'stale', 'times', 'valid', 'work'];
+  this.numbers = ['timestamp', 'invalid', 'recent', 'stale', 'times', 'valid', 'work'];
   this.strings = ['miner', 'worker', 'identifier', 'round', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
+  this.parameters = ['timestamp', 'recent', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
     'stale', 'times', 'type', 'valid', 'work'];
 
   // Handle String Parameters

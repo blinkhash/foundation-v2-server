@@ -21,10 +21,19 @@ config.logger.logLevel = 'log';
 config.client = {};
 config.client.host = '127.0.0.1';
 config.client.port = 5432;
-config.client.username = '';
-config.client.password = '';
-config.client.database = '';
+config.client.username = 'user1';
+config.client.password = 'pass1';
+config.client.database = 'db1';
 config.client.tls = false;
+
+// Zoneware Database Configuration (SQL)
+config.zoneware = {};
+config.zoneware.host = '127.0.0.1';
+config.zoneware.port = 5432;
+config.zoneware.username = 'user2';
+config.zoneware.password = 'pass2';
+config.zoneware.database = 'db2';
+config.zoneware.tls = false;
 
 // Clustering Configuration
 config.clustering = {};

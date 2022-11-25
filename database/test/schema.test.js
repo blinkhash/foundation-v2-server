@@ -52,6 +52,99 @@ describe('Test schema functionality', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
+        SELECT * FROM pg_extension
+        WHERE extname = 'postgres_fdw');`;
+    const executor = mockExecutor(results, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.selectExtension('Pool-Main', (results) => {
+      expect(results).toBe(true);
+    });
+  });
+
+  test('Test schema functionality [4]', () => {
+    const expected = `
+      CREATE EXTENSION IF NOT EXISTS postgres_fdw;`;
+    const executor = mockExecutor(null, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.createExtension('Pool-Main', () => {});
+  });
+
+  test('Test schema functionality [5]', () => {
+    const results = { rows: [{ exists: true }]};
+    const expected = `
+      SELECT EXISTS (
+        SELECT * FROM pg_foreign_server
+        WHERE srvname = 'zoneware_bridge');`;
+    const executor = mockExecutor(results, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.selectServer('Pool-Main', (results) => {
+      expect(results).toBe(true);
+    });
+  });
+
+  test('Test schema functionality [6]', () => {
+    const expected = `
+      CREATE SERVER IF NOT EXISTS zoneware_bridge
+        FOREIGN DATA WRAPPER postgres_fdw
+        OPTIONS (host '127.0.0.1', dbname 'db2');`;
+    const executor = mockExecutor(null, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.createServer('Pool-Main', () => {});
+  });
+
+  test('Test schema functionality [7]', () => {
+    const results = { rows: [{ exists: true }]};
+    const expected = `
+      SELECT EXISTS (
+        SELECT * FROM pg_user_mapping maps 
+        JOIN pg_catalog.pg_user users 
+        ON maps.umuser = users.usesysid
+        WHERE usename = 'user1');`;
+    const executor = mockExecutor(results, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.selectUserMapping('Pool-Main', (results) => {
+      expect(results).toBe(true);
+    });
+  });
+
+  test('Test schema functionality [8]', () => {
+    const expected = `
+      CREATE USER MAPPING IF NOT EXISTS FOR user1
+        SERVER zoneware_bridge
+        OPTIONS (user 'user2', password 'pass2');`;
+    const executor = mockExecutor(null, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.createUserMapping('Pool-Main', () => {});
+  });
+
+  test('Test schema functionality [9]', () => {
+    const results = { rows: [{ exists: true }]};
+    const expected = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'Pool-Main'
+        AND table_name = 'users');`
+    const executor = mockExecutor(results, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.selectForeignSchema('Pool-Main', (results) => {
+      expect(results).toBe(true);
+    });
+  });
+
+  test('Test schema functionality [10]', () => {
+    const expected = `
+      IMPORT FOREIGN SCHEMA "Pool-Main"
+        LIMIT TO (users)
+        FROM SERVER zoneware_bridge INTO "Pool-Main";`;
+    const executor = mockExecutor(null, expected);
+    const schema = new Schema(logger, executor, configMainCopy);
+    schema.createForeignSchema('Pool-Main', () => {});
+  });
+
+  test('Test schema functionality [11]', () => {
+    const results = { rows: [{ exists: true }]};
+    const expected = `
+      SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'Pool-Main'
         AND table_name = 'current_blocks');`;
@@ -62,7 +155,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [4]', () => {
+  test('Test schema functionality [12]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_blocks(
         id BIGSERIAL PRIMARY KEY,
@@ -93,7 +186,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentBlocks('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [5]', () => {
+  test('Test schema functionality [13]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -107,7 +200,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [6]', () => {
+  test('Test schema functionality [14]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_hashrate(
         id BIGSERIAL PRIMARY KEY,
@@ -127,7 +220,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentHashrate('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [7]', () => {
+  test('Test schema functionality [15]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -141,7 +234,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [8]', () => {
+  test('Test schema functionality [16]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_metadata(
         id BIGSERIAL PRIMARY KEY,
@@ -164,7 +257,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentMetadata('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [9]', () => {
+  test('Test schema functionality [17]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -178,7 +271,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [10]', () => {
+  test('Test schema functionality [18]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_miners(
         id BIGSERIAL PRIMARY KEY,
@@ -204,7 +297,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentMiners('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [11]', () => {
+  test('Test schema functionality [19]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -218,7 +311,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [12]', () => {
+  test('Test schema functionality [20]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_network(
         id BIGSERIAL PRIMARY KEY,
@@ -234,7 +327,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentNetwork('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [13]', () => {
+  test('Test schema functionality [21]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -248,7 +341,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [14]', () => {
+  test('Test schema functionality [22]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_payments(
         id BIGSERIAL PRIMARY KEY,
@@ -262,7 +355,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentPayments('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [15]', () => {
+  test('Test schema functionality [23]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -276,7 +369,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [16]', () => {
+  test('Test schema functionality [24]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_rounds(
         id BIGSERIAL PRIMARY KEY,
@@ -305,7 +398,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentRounds('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [17]', () => {
+  test('Test schema functionality [25]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -319,7 +412,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [18]', () => {
+  test('Test schema functionality [26]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_transactions(
         id BIGSERIAL PRIMARY KEY,
@@ -333,7 +426,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentTransactions('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [19]', () => {
+  test('Test schema functionality [27]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -347,7 +440,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [20]', () => {
+  test('Test schema functionality [28]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".current_workers(
         id BIGSERIAL PRIMARY KEY,
@@ -372,7 +465,7 @@ describe('Test schema functionality', () => {
     schema.createCurrentWorkers('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [21]', () => {
+  test('Test schema functionality [29]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -386,7 +479,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [22]', () => {
+  test('Test schema functionality [30]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_blocks(
         id BIGSERIAL PRIMARY KEY,
@@ -417,7 +510,7 @@ describe('Test schema functionality', () => {
     schema.createHistoricalBlocks('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [23]', () => {
+  test('Test schema functionality [31]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -431,7 +524,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [24]', () => {
+  test('Test schema functionality [32]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_metadata(
         id BIGSERIAL PRIMARY KEY,
@@ -455,7 +548,7 @@ describe('Test schema functionality', () => {
     schema.createHistoricalMetadata('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [25]', () => {
+  test('Test schema functionality [33]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -469,7 +562,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [26]', () => {
+  test('Test schema functionality [34]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_miners(
         id BIGSERIAL PRIMARY KEY,
@@ -491,7 +584,7 @@ describe('Test schema functionality', () => {
     schema.createHistoricalMiners('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [27]', () => {
+  test('Test schema functionality [35]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -505,7 +598,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [28]', () => {
+  test('Test schema functionality [36]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_network(
         id BIGSERIAL PRIMARY KEY,
@@ -522,7 +615,7 @@ describe('Test schema functionality', () => {
     schema.createHistoricalNetwork('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [29]', () => {
+  test('Test schema functionality [37]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -536,7 +629,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [30]', () => {
+  test('Test schema functionality [38]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_payments(
         id BIGSERIAL PRIMARY KEY,
@@ -553,7 +646,7 @@ describe('Test schema functionality', () => {
     schema.createHistoricalPayments('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [31]', () => {
+  test('Test schema functionality [39]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -567,7 +660,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [32]', () => {
+  test('Test schema functionality [40]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_rounds(
         id BIGSERIAL PRIMARY KEY,
@@ -595,7 +688,7 @@ describe('Test schema functionality', () => {
     schema.createHistoricalRounds('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [33]', () => {
+  test('Test schema functionality [41]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -609,7 +702,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [34]', () => {
+  test('Test schema functionality [42]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_transactions(
         id BIGSERIAL PRIMARY KEY,
@@ -624,7 +717,7 @@ describe('Test schema functionality', () => {
     schema.createHistoricalTransactions('Pool-Main', () => {});
   });
 
-  test('Test schema functionality [35]', () => {
+  test('Test schema functionality [43]', () => {
     const results = { rows: [{ exists: true }]};
     const expected = `
       SELECT EXISTS (
@@ -638,7 +731,7 @@ describe('Test schema functionality', () => {
     });
   });
 
-  test('Test schema functionality [36]', () => {
+  test('Test schema functionality [44]', () => {
     const expected = `
       CREATE TABLE "Pool-Main".historical_workers(
         id BIGSERIAL PRIMARY KEY,
