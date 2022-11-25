@@ -210,6 +210,7 @@ const Payments = function (logger, client, config, configMain) {
         _this.pool, minersUpdates));
     }
 
+    console.log(blocks, rounds);
     // Handle Generate Round Delete Updates
     // const generateRoundsDelete = blocks.map((block) => `'${ block.round }'`);
     // if (generateRoundsDelete.length >= 1) {
@@ -293,14 +294,12 @@ const Payments = function (logger, client, config, configMain) {
             });
           }
 
-          // push blocks(updates) and rounds to updates ... save historical rounds there
-
           // Validate and Send Out Primary Payments
           _this.stratum.stratum.handlePrimaryBalances(payments, (error) => {
             if (error) _this.handleFailures(updates, () => callback(error));
             else _this.stratum.stratum.handlePrimaryPayments(payments, (error, amounts, balances, transaction) => {
               if (error) _this.handleFailures(updates, () => callback(error));
-              else _this.handleUpdates(updates, results, amounts, balances, transaction, 'primary', () => callback(null));
+              else _this.handleUpdates(updates, rounds, amounts, balances, transaction, 'primary', () => callback(null));
             });
           });
         });

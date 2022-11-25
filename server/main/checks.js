@@ -299,14 +299,10 @@ const Checks = function (logger, client, config, configMain) {
     const starting = [_this.text.databaseStartingText2(blockType)];
     _this.logger.debug('Checks', _this.config.name, starting);
 
-    // Calculate Checks Features
-    // const roundsWindow = Date.now() - _this.config.settings.window.rounds;
-
     // Build Combined Transaction
     const transaction = [
       'BEGIN;',
       _this.current.blocks.selectCurrentBlocksMain(_this.pool, { type: blockType }),
-      // _this.current.rounds.deleteCurrentRoundsInactive(_this.pool, roundsWindow),
       'COMMIT;'];
 
     // Establish Separate Behavior
