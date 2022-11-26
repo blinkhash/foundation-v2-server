@@ -229,12 +229,12 @@ const Checks = function (logger, client, config, configMain) {
     // Delete Old Rounds
     const roundsWindow = oldestBlock - _this.config.primary.payments.windowPPLNT;
     transaction.push(_this.current.rounds.deleteCurrentRoundsInactive(_this.pool, roundsWindow)); 
-    
+
     // Add Checks to Transactions Table
     if (checks.length >= 1) {
       transaction.push(_this.current.transactions.insertCurrentTransactionsMain(_this.pool, checks));
     }
-
+    
     // Establish Separate Behavior
     transaction.push('COMMIT;');
     switch (blockType) {
@@ -242,7 +242,7 @@ const Checks = function (logger, client, config, configMain) {
     // Primary Behavior
     case 'primary':
       _this.executor(transaction, (results) => {
-        results = results[1].rows.map((block) => block.round);
+        results = results[2].rows.map((block) => block.round);
         const blocks = lookups[1].rows.filter((block) => results.includes((block || {}).round));
 
         // Blocks Exist to Validate
@@ -269,7 +269,7 @@ const Checks = function (logger, client, config, configMain) {
     // Auxiliary Behavior
     case 'auxiliary':
       _this.executor(transaction, (results) => {
-        results = results[1].rows.map((block) => block.round);
+        results = results[2].rows.map((block) => block.round);
         const blocks = lookups[1].rows.filter((block) => results.includes((block || {}).round));
 
         // Blocks Exist to Validate

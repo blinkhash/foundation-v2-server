@@ -235,10 +235,10 @@ const Payments = function (logger, client, config, configMain) {
     // Handle Historical Generate Round Updates
     // const generateRoundsUpdates = _this.handleHistoricalRounds(rounds);
     if (rounds.length >= 1) {
-      transaction.push(_this.historical.rounds.insertHistoricalRoundsMain(
-        _this.pool, rounds));
+      console.log(rounds)
+      // transaction.push(_this.historical.rounds.insertHistoricalRoundsMain(
+        // _this.pool, rounds));
     }
-
 
     // Handle Historical Transactions Updates
     const transactionsUpdates = _this.handleHistoricalTransactions(amounts, record, blockType);

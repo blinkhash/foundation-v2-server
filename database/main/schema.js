@@ -38,7 +38,7 @@ const Schema = function (logger, executor, configMain) {
   // Check if Foreign Data Wrapper Extension Enabled
   this.createExtension = function(pool, callback) {
     const command = `
-      CREATE EXTENSION IF NOT EXISTS postgres_fdw;`;
+      CREATE EXTENSION IF NOT EXISTS postgres_fdw SCHEMA "${ pool }";`;
     _this.executor([command], () => callback());
   };
   
@@ -86,7 +86,8 @@ const Schema = function (logger, executor, configMain) {
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = '${ pool }'
-        AND table_name = 'users');`;
+        AND table_name = 'users'
+        OR table_name = 'foundation_shares');`;
     _this.executor([command], (results) => callback(results.rows[0].exists));
   };
 
@@ -94,7 +95,7 @@ const Schema = function (logger, executor, configMain) {
   this.createForeignSchema = function(pool, callback) {
     const command = `
       IMPORT FOREIGN SCHEMA "${ pool }"
-        LIMIT TO (users)
+        LIMIT TO (users, foundation_shares)
         FROM SERVER zoneware_bridge INTO "${ pool }";`;
     _this.executor([command], () => callback());
   };
