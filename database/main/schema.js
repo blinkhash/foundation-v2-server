@@ -26,6 +26,80 @@ const Schema = function (logger, executor, configMain) {
     _this.executor([command], () => callback());
   };
 
+  // Check if Foreign Data Wrapper Extension Enabled
+  this.selectExtension = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT * FROM pg_extension
+        WHERE extname = 'postgres_fdw');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Check if Foreign Data Wrapper Extension Enabled
+  this.createExtension = function(pool, callback) {
+    const command = `
+      CREATE EXTENSION IF NOT EXISTS postgres_fdw SCHEMA "${ pool }";`;
+    _this.executor([command], () => callback());
+  };
+  
+  // Check if Foreign Data Wrapper Server Exists
+  this.selectServer = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT * FROM pg_foreign_server
+        WHERE srvname = 'zoneware_bridge');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Create Foreign Data Wrapper Server
+  this.createServer = function(pool, callback) {
+    const command = `
+      CREATE SERVER IF NOT EXISTS zoneware_bridge
+        FOREIGN DATA WRAPPER postgres_fdw
+        OPTIONS (host '${ configMain.zoneware.host }', dbname '${ configMain.zoneware.database }');`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if User Mapping Exists
+  this.selectUserMapping = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT * FROM pg_user_mapping maps 
+        JOIN pg_catalog.pg_user users 
+        ON maps.umuser = users.usesysid
+        WHERE usename = '${ configMain.client.username}');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Create User Mapping
+  this.createUserMapping = function(pool, callback) {
+    const command = `
+      CREATE USER MAPPING IF NOT EXISTS FOR ${ configMain.client.username}
+        SERVER zoneware_bridge
+        OPTIONS (user '${ configMain.zoneware.username }', password '${ configMain.zoneware.password }');`;
+    _this.executor([command], () => callback());
+  };
+
+  // Check if Foreign Tables Exists in Database
+  this.selectForeignSchema = function(pool, callback) {
+    const command = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = '${ pool }'
+        AND table_name = 'users'
+        OR table_name = 'foundation_shares');`;
+    _this.executor([command], (results) => callback(results.rows[0].exists));
+  };
+
+  // Import Foreign Schema to Database
+  this.createForeignSchema = function(pool, callback) {
+    const command = `
+      IMPORT FOREIGN SCHEMA "${ pool }"
+        LIMIT TO (users, foundation_shares)
+        FROM SERVER zoneware_bridge INTO "${ pool }";`;
+    _this.executor([command], () => callback());
+  };
+
   // Check if Current Blocks Table Exists in Database
   this.selectCurrentBlocks = function(pool, callback) {
     const command = `
@@ -574,6 +648,13 @@ const Schema = function (logger, executor, configMain) {
   this.handleDeployment = function(pool) {
     return new Promise((resolve) => {
       _this.handlePromises(pool, _this.selectSchema, _this.createSchema)
+        // Setup Database
+        .then(() => _this.handlePromises(pool, _this.selectExtension, _this.createExtension))
+        .then(() => _this.handlePromises(pool, _this.selectServer, _this.createServer))
+        .then(() => _this.handlePromises(pool, _this.selectUserMapping, _this.createUserMapping))
+        .then(() => _this.handlePromises(pool, _this.selectForeignSchema, _this.createForeignSchema))  
+
+        // Create Tables
         .then(() => _this.handlePromises(pool, _this.selectCurrentBlocks, _this.createCurrentBlocks))
         .then(() => _this.handlePromises(pool, _this.selectCurrentHashrate, _this.createCurrentHashrate))
         .then(() => _this.handlePromises(pool, _this.selectCurrentMetadata, _this.createCurrentMetadata))

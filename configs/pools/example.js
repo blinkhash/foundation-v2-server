@@ -46,6 +46,7 @@ config.primary.payments.enabled = true;
 config.primary.payments.minConfirmations = 10;
 config.primary.payments.minPayment = 0.005;
 config.primary.payments.transactionFee = 0.004;
+config.primary.payments.windowPPLNT = 21600000; //ms
 config.primary.payments.daemon = {};
 config.primary.payments.daemon.host = '127.0.0.1';
 config.primary.payments.daemon.port = 8332;
@@ -63,6 +64,15 @@ config.primary.recipients.push(recipient1);
 // Statistics Configuration
 config.primary.statistics = {};
 config.primary.statistics.enabled = true;
+
+// Auxiliary Configuration
+////////////////////////////////////////////////////////////////////////////////
+
+config.auxiliary = {};
+
+// Payment Configuration
+config.auxiliary.payments = {};
+config.auxiliary.payments.minPayment = 0.005;
 
 // Shared Configuration
 ////////////////////////////////////////////////////////////////////////////////

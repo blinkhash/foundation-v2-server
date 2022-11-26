@@ -22,6 +22,8 @@ const HistoricalRounds = require('./historical/rounds');
 const HistoricalTransactions = require('./historical/transactions');
 const HistoricalWorkers = require('./historical/workers');
 
+// Historical Table Commands
+const ForeignUsers = require('./foreign/users');
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Command Function
@@ -36,6 +38,7 @@ const Commands = function (logger, client, configMain) {
   // Database Table Structure
   this.current = {};
   this.historical = {};
+  this.foreign = {};
 
   // Execute Commands
   /* eslint-disable */
@@ -76,6 +79,9 @@ const Commands = function (logger, client, configMain) {
   this.current.rounds = new CurrentRounds(_this.logger, _this.configMain);
   this.current.transactions = new CurrentTransactions(_this.logger, _this.configMain);
   this.current.workers = new CurrentWorkers(_this.logger, _this.configMain);
+
+  // Initialize Foreign Commands
+  this.foreign.users = new ForeignUsers(_this.logger, _this.configMain);
 };
 
 module.exports = Commands;

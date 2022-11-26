@@ -11,9 +11,9 @@ const CurrentRounds = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  this.numbers = ['timestamp', 'invalid', 'stale', 'times', 'valid', 'work'];
+  this.numbers = ['timestamp', 'invalid', 'recent', 'stale', 'times', 'valid', 'work'];
   this.strings = ['miner', 'worker', 'identifier', 'round', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
+  this.parameters = ['timestamp', 'recent', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
     'stale', 'times', 'type', 'valid', 'work'];
 
   // Handle String Parameters
@@ -29,6 +29,12 @@ const CurrentRounds = function (logger, configMain) {
     if (query.slice(0, 2) === 'gt') return ` > ${ query.replace('gt', '') }`;
     if (query.slice(0, 2) === 'ge') return ` >= ${ query.replace('ge', '') }`;
     if (query.slice(0, 2) === 'ne') return ` != ${ query.replace('ne', '') }`;
+    if (query.slice(0, 2) === 'bw') {
+      const remainder = query.replace('bw', '');
+      const firstString = _this.handleNumbers({first: remainder.split('|')[0]}, 'first');
+      const secondString = parameter + _this.handleNumbers({second: remainder.split('|')[1]}, 'second');
+       return `${ firstString } AND ${ secondString }`;
+    } 
     else return ` = ${ query }`;
   };
 

@@ -33,6 +33,7 @@ describe('Test database rounds functionality', () => {
     expect(rounds.handleNumbers({ timestamp: 'gt100' }, 'timestamp')).toBe(' > 100');
     expect(rounds.handleNumbers({ timestamp: 'ge100' }, 'timestamp')).toBe(' >= 100');
     expect(rounds.handleNumbers({ timestamp: 'ne100' }, 'timestamp')).toBe(' != 100');
+    expect(rounds.handleNumbers({ timestamp: 'bwgt100|lt101' }, 'timestamp')).toBe(' > 100 AND timestamp < 101');
   });
 
   test('Test query handling [3]', () => {
