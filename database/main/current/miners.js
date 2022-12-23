@@ -183,16 +183,15 @@ const CurrentMiners = function (logger, configMain) {
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        generate = EXCLUDED.generate,
-        immature = EXCLUDED.immature;`;
+        generate = "${ pool }".current_miners.generate + EXCLUDED.generate,
+        immature = "${ pool }".current_miners.immature + EXCLUDED.immature;`;
   };
 
   // Insert Rows Using Reset
   this.insertCurrentMinersReset = function(pool, type) {
     return `
       UPDATE "${ pool }".current_miners
-      SET immature = 0, generate = 0
-      WHERE type = '${ type }';`;
+      SET generate = 0 WHERE type = '${ type }';`;
   };
 
   // Delete Rows From Current Round

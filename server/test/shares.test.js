@@ -66,11 +66,11 @@ describe('Test shares functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
-    expect(shares.handleTimes({ timestamp: 1634742080000, times: 0 })).toBe(0.841);
-    expect(shares.handleTimes({ timestamp: 1634742070000, times: 145 })).toBe(155.841);
-    expect(shares.handleTimes({ timestamp: 1634742050000, times: 145 })).toBe(175.841);
-    expect(shares.handleTimes({ timestamp: 1634740000000, times: 145 })).toBe(145);
-    expect(shares.handleTimes({ times: 145 })).toBe(145);
+    expect(shares.handleTimes({ timestamp: 1634742080841, times: 0 }, 1634742290841)).toBe(210);
+    expect(shares.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742180841)).toBe(245);
+    expect(shares.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742830841)).toBe(895);
+    expect(shares.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742370841)).toBe(435);
+    expect(shares.handleTimes({ times: 145 }, 1634742530841)).toBe(595);
   });
 
   test('Test shares database updates [4]', () => {

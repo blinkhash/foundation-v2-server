@@ -196,7 +196,7 @@ describe('Test payments functionality', () => {
     expect(payments.handleHistoricalTransactions(amounts, 'transaction1', 'primary')).toStrictEqual(expected);
   });
 
-  test('Test payments miscellaneous updates [1]', (done) => {
+  test('Test payments miscellaneous updates', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -213,23 +213,6 @@ describe('Test payments functionality', () => {
       done();
     });
     payments.handleFailures(blocks, () => {});
-  });
-
-  test('Test payments miscellaneous updates [2]', (done) => {
-    MockDate.set(1634742080841);
-    const client = mockClient(configMainCopy, { rows: [] });
-    const logger = new Logger(configMainCopy);
-    const payments = new Payments(logger, client, configCopy, configMainCopy);
-    const expected = `
-      UPDATE "Pool-Bitcoin".current_miners
-      SET immature = 0, generate = 0
-      WHERE type = 'primary';`;
-    client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(3);
-      expect(transaction[1]).toBe(expected);
-      done();
-    });
-    payments.handleReset('primary', () => {});
   });
 
   test('Test payments main updates [1]', (done) => {
@@ -288,6 +271,9 @@ describe('Test payments functionality', () => {
     const expectedGenerateBlocksDeletes = `
       DELETE FROM "Pool-Bitcoin".current_blocks
       WHERE round IN ('round1', 'round2', 'round3', 'round4', 'round5', 'round6');`;
+    const expectedResetMiners = `
+      UPDATE "Pool-Bitcoin".current_miners
+      SET generate = 0 WHERE type = 'primary';`;
     const expectedMiners = `
       INSERT INTO "Pool-Bitcoin".current_miners (
         timestamp, miner, balance,
@@ -486,14 +472,15 @@ describe('Test payments functionality', () => {
         'primary')
       ON CONFLICT DO NOTHING;`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(9);
+      expect(transaction.length).toBe(10);
       expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
-      expect(transaction[2]).toBe(expectedMiners);
-      expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
-      expect(transaction[4]).toBe(expectedGenerateBlocksUpdates);
-      expect(transaction[5]).toBe(expectedPayments);
-      expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
-      expect(transaction[7]).toBe(expectedTransactions);
+      expect(transaction[2]).toBe(expectedResetMiners);
+      expect(transaction[3]).toBe(expectedMiners);
+      expect(transaction[4]).toBe(expectedGenerateRoundsDeletes);
+      expect(transaction[5]).toBe(expectedGenerateBlocksUpdates);
+      expect(transaction[6]).toBe(expectedPayments);
+      expect(transaction[7]).toBe(expectedGenerateRoundsUpdates);
+      expect(transaction[8]).toBe(expectedTransactions);
       done();
     });
     payments.handleUpdates(blocks, rounds, amounts, balances, 'transaction1', 'primary', () => {});
@@ -504,8 +491,12 @@ describe('Test payments functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
+    const expectedResetMiners = `
+      UPDATE "Pool-Bitcoin".current_miners
+      SET generate = 0 WHERE type = 'primary';`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(2);
+      expect(transaction.length).toBe(3);
+      expect(transaction[1]).toBe(expectedResetMiners);
       done();
     });
     payments.handleUpdates([], [], {}, {}, null, 'primary', () => {});
@@ -566,7 +557,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handlePrimaryRounds: (blocks, callback) => callback(null, blocks),
-      handlePrimaryWorkers: (blocks, rounds, callback) => callback(current),
+      handlePrimaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handlePrimaryBalances: (current, callback) => callback(null),
       handlePrimaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
@@ -574,6 +565,9 @@ describe('Test payments functionality', () => {
     const expectedGenerateBlocksDeletes = `
       DELETE FROM "Pool-Bitcoin".current_blocks
       WHERE round IN ('round1', 'round2');`;
+    const expectedResetMiners = `
+      UPDATE "Pool-Bitcoin".current_miners
+      SET generate = 0 WHERE type = 'primary';`;
     const expectedMiners = `
       INSERT INTO "Pool-Bitcoin".current_miners (
         timestamp, miner, balance,
@@ -733,14 +727,15 @@ describe('Test payments functionality', () => {
       ON CONFLICT DO NOTHING;`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(9);
+        expect(transaction.length).toBe(10);
         expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
-        expect(transaction[2]).toBe(expectedMiners);
-        expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
-        expect(transaction[4]).toBe(expectedGenerateBlocksUpdates);
-        expect(transaction[5]).toBe(expectedPayments);
-        expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
-        expect(transaction[7]).toBe(expectedTransactions);
+        expect(transaction[2]).toBe(expectedResetMiners);
+        expect(transaction[3]).toBe(expectedMiners);
+        expect(transaction[4]).toBe(expectedGenerateRoundsDeletes);
+        expect(transaction[5]).toBe(expectedGenerateBlocksUpdates);
+        expect(transaction[6]).toBe(expectedPayments);
+        expect(transaction[7]).toBe(expectedGenerateRoundsUpdates);
+        expect(transaction[8]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handlePrimary(blocks, {}, () => done());
@@ -800,7 +795,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handlePrimaryRounds: (blocks, callback) => callback(true, blocks),
-      handlePrimaryWorkers: (blocks, rounds, callback) => callback(current),
+      handlePrimaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handlePrimaryBalances: (current, callback) => callback(null),
       handlePrimaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
@@ -871,7 +866,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handlePrimaryRounds: (blocks, callback) => callback(null, blocks),
-      handlePrimaryWorkers: (blocks, rounds, callback) => callback(current),
+      handlePrimaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handlePrimaryBalances: (current, callback) => callback(true),
       handlePrimaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
@@ -941,7 +936,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handlePrimaryRounds: (blocks, callback) => callback(null, blocks),
-      handlePrimaryWorkers: (blocks, rounds, callback) => callback(current),
+      handlePrimaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handlePrimaryBalances: (current, callback) => callback(null),
       handlePrimaryPayments: (current, callback) => callback(true, {}, {}, null),
     }};
@@ -1013,7 +1008,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handleAuxiliaryRounds: (blocks, callback) => callback(null, blocks),
-      handleAuxiliaryWorkers: (blocks, rounds, callback) => callback(current),
+      handleAuxiliaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handleAuxiliaryBalances: (current, callback) => callback(null),
       handleAuxiliaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
@@ -1021,6 +1016,9 @@ describe('Test payments functionality', () => {
     const expectedGenerateBlocksDeletes = `
       DELETE FROM "Pool-Bitcoin".current_blocks
       WHERE round IN ('round1', 'round2');`;
+    const expectedResetMiners = `
+      UPDATE "Pool-Bitcoin".current_miners
+      SET generate = 0 WHERE type = 'auxiliary';`;
     const expectedMiners = `
       INSERT INTO "Pool-Bitcoin".current_miners (
         timestamp, miner, balance,
@@ -1180,14 +1178,15 @@ describe('Test payments functionality', () => {
       ON CONFLICT DO NOTHING;`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(9);
+        expect(transaction.length).toBe(10);
         expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
-        expect(transaction[2]).toBe(expectedMiners);
-        expect(transaction[3]).toBe(expectedGenerateRoundsDeletes);
-        expect(transaction[4]).toBe(expectedGenerateBlocksUpdates);
-        expect(transaction[5]).toBe(expectedPayments);
-        expect(transaction[6]).toBe(expectedGenerateRoundsUpdates);
-        expect(transaction[7]).toBe(expectedTransactions);
+        expect(transaction[2]).toBe(expectedResetMiners);
+        expect(transaction[3]).toBe(expectedMiners);
+        expect(transaction[4]).toBe(expectedGenerateRoundsDeletes);
+        expect(transaction[5]).toBe(expectedGenerateBlocksUpdates);
+        expect(transaction[6]).toBe(expectedPayments);
+        expect(transaction[7]).toBe(expectedGenerateRoundsUpdates);
+        expect(transaction[8]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handleAuxiliary(blocks, {}, () => done());
@@ -1247,7 +1246,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handleAuxiliaryRounds: (blocks, callback) => callback(true, blocks),
-      handleAuxiliaryWorkers: (blocks, rounds, callback) => callback(current),
+      handleAuxiliaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handleAuxiliaryBalances: (current, callback) => callback(null),
       handleAuxiliaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
@@ -1318,7 +1317,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handleAuxiliaryRounds: (blocks, callback) => callback(null, blocks),
-      handleAuxiliaryWorkers: (blocks, rounds, callback) => callback(current),
+      handleAuxiliaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handleAuxiliaryBalances: (current, callback) => callback(true),
       handleAuxiliaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
@@ -1388,7 +1387,7 @@ describe('Test payments functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     payments.stratum = { stratum: {
       handleAuxiliaryRounds: (blocks, callback) => callback(null, blocks),
-      handleAuxiliaryWorkers: (blocks, rounds, callback) => callback(current),
+      handleAuxiliaryWorkers: (blocks, rounds, sending, callback) => callback(current),
       handleAuxiliaryBalances: (current, callback) => callback(null),
       handleAuxiliaryPayments: (current, callback) => callback(true, {}, {}, null),
     }};

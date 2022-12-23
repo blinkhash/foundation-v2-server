@@ -196,23 +196,6 @@ describe('Test checks functionality', () => {
     expect(checks.handleCurrentOrphans([])).toStrictEqual([]);
   });
 
-  test('Test checks miscellaneous updates', (done) => {
-    MockDate.set(1634742080841);
-    const client = mockClient(configMainCopy, { rows: [] });
-    const logger = new Logger(configMainCopy);
-    const checks = new Checks(logger, client, configCopy, configMainCopy);
-    const expected = `
-      UPDATE "Pool-Bitcoin".current_miners
-      SET immature = 0, generate = 0
-      WHERE type = 'primary';`;
-    client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(3);
-      expect(transaction[1]).toBe(expected);
-      done();
-    });
-    checks.handleReset('primary', () => {});
-  });
-
   test('Test checks main updates [1]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
@@ -410,8 +393,8 @@ describe('Test checks functionality', () => {
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        generate = EXCLUDED.generate,
-        immature = EXCLUDED.immature;`;
+        generate = "Pool-Bitcoin".current_miners.generate + EXCLUDED.generate,
+        immature = "Pool-Bitcoin".current_miners.immature + EXCLUDED.immature;`;
     const expectedOrphanRoundsDeletes = `
       DELETE FROM "Pool-Bitcoin".current_rounds
       WHERE round IN ('round1', 'round5');`;
@@ -880,7 +863,7 @@ describe('Test checks functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     checks.stratum = { stratum: {
       handlePrimaryRounds: (blocks, callback) => callback(null, blocks),
-      handlePrimaryWorkers: (blocks, rounds, callback) => callback(payments)
+      handlePrimaryWorkers: (blocks, rounds, sending, callback) => callback(payments)
     }};
     const expectedImmatureUpdates = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
@@ -989,8 +972,8 @@ describe('Test checks functionality', () => {
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        generate = EXCLUDED.generate,
-        immature = EXCLUDED.immature;`;
+        generate = "Pool-Bitcoin".current_miners.generate + EXCLUDED.generate,
+        immature = "Pool-Bitcoin".current_miners.immature + EXCLUDED.immature;`;
     let currentIdx = 0;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
@@ -1112,7 +1095,7 @@ describe('Test checks functionality', () => {
       'miner3': { miner: 'miner3', generate: 100, immature: 100 }};
     checks.stratum = { stratum: {
       handleAuxiliaryRounds: (blocks, callback) => callback(null, blocks),
-      handleAuxiliaryWorkers: (blocks, rounds, callback) => callback(payments)
+      handleAuxiliaryWorkers: (blocks, rounds, sending, callback) => callback(payments)
     }};
     const expectedImmatureUpdates = `
       INSERT INTO "Pool-Bitcoin".current_blocks (
@@ -1221,8 +1204,8 @@ describe('Test checks functionality', () => {
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        generate = EXCLUDED.generate,
-        immature = EXCLUDED.immature;`;
+        generate = "Pool-Bitcoin".current_miners.generate + EXCLUDED.generate,
+        immature = "Pool-Bitcoin".current_miners.immature + EXCLUDED.immature;`;
     let currentIdx = 0;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {

@@ -37,11 +37,11 @@ const Shares = function (logger, client, config, configMain) {
   };
 
   // Handle Times Updates
-  this.handleTimes = function(sharePrevious) {
+  this.handleTimes = function(sharePrevious, timestamp) {
     let times = sharePrevious.times || 0;
     const lastTime = sharePrevious.timestamp || Date.now();
-    const timeChange = utils.roundTo(Math.max(Date.now() - lastTime, 0) / 1000, 4);
-    if (timeChange < 900) times = times + timeChange;
+    const timeChange = utils.roundTo(Math.max(timestamp - lastTime, 0) / 1000, 4);
+    if (timeChange < 900) times += timeChange;
     return times;
   };
 
@@ -159,8 +159,9 @@ const Shares = function (logger, client, config, configMain) {
 
     // Calculate Features of Round Share [2]
     const identifier = shareData.identifier || 'master';
+    const submitTime = shareData.submitTime || Date.now();
     const times = (Object.keys(workerData).length >= 1 && shareType === 'valid') ?
-      _this.handleTimes(workerData) : 0;
+      _this.handleTimes(workerData, submitTime) : 0;
     const current = shareType === 'valid' ? shareData.difficulty : 0;
 
     // Return Round Updates
@@ -358,8 +359,8 @@ const Shares = function (logger, client, config, configMain) {
     else if (!shareValid || shareData.error) shareType = 'invalid';
 
     // Build Round Parameters
-    const parameters = { worker: shareData.addrPrimary, solo: minerType, type: 'primary' };
-    const auxParameters = { worker: shareData.addrAuxiliary, solo: minerType, type: 'auxiliary' };
+    const parameters = { worker: shareData.addrPrimary, solo: minerType, type: 'primary', order: 'timestamp', direction: 'descending' };
+    const auxParameters = { worker: shareData.addrAuxiliary, solo: minerType, type: 'auxiliary', order: 'timestamp', direction: 'descending' };
 
     // Build Combined Transaction
     const transaction = [

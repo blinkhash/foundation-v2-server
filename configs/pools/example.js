@@ -64,6 +64,12 @@ config.primary.recipients.push(recipient1);
 config.primary.statistics = {};
 config.primary.statistics.enabled = true;
 
+// ZMQ Configuration
+config.primary.zmq = {};
+config.primary.zmq.enabled = false;
+config.primary.zmq.host = '127.0.0.1';
+config.primary.zmq.port = 29000;
+
 // Shared Configuration
 ////////////////////////////////////////////////////////////////////////////////
 

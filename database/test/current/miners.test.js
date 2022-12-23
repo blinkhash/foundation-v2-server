@@ -300,8 +300,8 @@ describe('Test database miners functionality', () => {
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        generate = EXCLUDED.generate,
-        immature = EXCLUDED.immature;`;
+        generate = "Pool-Main".current_miners.generate + EXCLUDED.generate,
+        immature = "Pool-Main".current_miners.immature + EXCLUDED.immature;`;
     expect(response).toBe(expected);
   });
 
@@ -333,8 +333,8 @@ describe('Test database miners functionality', () => {
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        generate = EXCLUDED.generate,
-        immature = EXCLUDED.immature;`;
+        generate = "Pool-Main".current_miners.generate + EXCLUDED.generate,
+        immature = "Pool-Main".current_miners.immature + EXCLUDED.immature;`;
     expect(response).toBe(expected);
   });
 
@@ -343,8 +343,7 @@ describe('Test database miners functionality', () => {
     const response = miners.insertCurrentMinersReset('Pool-Main', 'primary');
     const expected = `
       UPDATE "Pool-Main".current_miners
-      SET immature = 0, generate = 0
-      WHERE type = 'primary';`;
+      SET generate = 0 WHERE type = 'primary';`;
     expect(response).toBe(expected);
   });
 

@@ -176,19 +176,6 @@ const Payments = function (logger, client, config, configMain) {
     _this.executor(transaction, () => callback());
   };
 
-  // Handle Round Reset Updates
-  this.handleReset = function(blockType, callback) {
-
-    // Build Combined Transaction
-    const transaction = [
-      'BEGIN;',
-      _this.current.miners.insertCurrentMinersReset(_this.pool, blockType),
-      'COMMIT;'];
-
-    // Insert Work into Database
-    _this.executor(transaction, () => callback());
-  };
-
   // Handle Round Success Updates
   this.handleUpdates = function(blocks, rounds, amounts, balances, record, blockType, callback) {
 
@@ -204,6 +191,7 @@ const Payments = function (logger, client, config, configMain) {
 
     // Handle Miners Updates
     const minersUpdates = _this.handleCurrentMiners(amounts, balances, blockType);
+    transaction.push(_this.current.miners.insertCurrentMinersReset(_this.pool, blockType));
     if (minersUpdates.length >= 1) {
       transaction.push(_this.current.miners.insertCurrentMinersPayments(
         _this.pool, minersUpdates));
@@ -268,9 +256,10 @@ const Payments = function (logger, client, config, configMain) {
       const rounds = results.slice(1, -1).map((round) => round.rows);
 
       // Collect Round/Worker Data and Amounts
+      const sending = true;
       _this.stratum.stratum.handlePrimaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(blocks, () => callback(error));
-        else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, (results) => {
+        else _this.stratum.stratum.handlePrimaryWorkers(blocks, rounds, sending, (results) => {
           const payments = _this.handleCurrentCombined(balances, results);
 
           // Validate and Send Out Primary Payments
@@ -305,9 +294,10 @@ const Payments = function (logger, client, config, configMain) {
       const rounds = results.slice(1, -1).map((round) => round.rows);
 
       // Collect Round/Worker Data and Amounts
+      const sending = true;
       _this.stratum.stratum.handleAuxiliaryRounds(blocks, (error, updates) => {
         if (error) _this.handleFailures(updates, () => callback(error));
-        else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, (results) => {
+        else _this.stratum.stratum.handleAuxiliaryWorkers(blocks, rounds, sending, (results) => {
           const payments = _this.handleCurrentCombined(balances, results);
 
           // Validate and Send Out Auxiliary Payments
@@ -373,11 +363,9 @@ const Payments = function (logger, client, config, configMain) {
 
         // No Blocks Exist to Send Payments
         } else {
-          _this.handleReset(blockType, () => {
-            const updates = [_this.text.databaseUpdatesText5(blockType)];
-            _this.logger.debug('Payments', _this.config.name, updates);
-            callback();
-          });
+          const updates = [_this.text.databaseUpdatesText5(blockType)];
+          _this.logger.debug('Payments', _this.config.name, updates);
+          callback();
         }
       });
       break;
@@ -400,11 +388,9 @@ const Payments = function (logger, client, config, configMain) {
 
         // No Blocks Exist to Send Payments
         } else {
-          _this.handleReset(blockType, () => {
-            const updates = [_this.text.databaseUpdatesText5(blockType)];
-            _this.logger.debug('Payments', _this.config.name, updates);
-            callback();
-          });
+          const updates = [_this.text.databaseUpdatesText5(blockType)];
+          _this.logger.debug('Payments', _this.config.name, updates);
+          callback();
         }
       });
       break;
