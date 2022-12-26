@@ -91,12 +91,14 @@ const Server = function (logger, client) {
 
   // Start Worker Capabilities
   this.setupServer = function(callback) {
-    _this.buildServer();
-    _this.server.listen(_this.configMain.server.port, _this.configMain.server.host, () => {
-      const lines = [_this.text.websiteStartingText2(_this.configMain.server.host, _this.configMain.server.port)];
-      _this.logger.log('Server', 'Website', lines, true);
-      callback();
-    });
+    if (_this.configMain.server.enabled) {
+      _this.buildServer();
+      _this.server.listen(_this.configMain.server.port, _this.configMain.server.host, () => {
+        const lines = [_this.text.websiteStartingText2(_this.configMain.server.host, _this.configMain.server.port)];
+        _this.logger.log('Server', 'Website', lines, true);
+        callback();
+      });
+    }
   };
 };
 

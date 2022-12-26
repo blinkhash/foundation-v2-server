@@ -39,6 +39,7 @@ config.tls.cert = '';
 
 // Server Configuration
 config.server = {};
+config.server.enabled = true;
 config.server.host = '127.0.0.1';
 config.server.port = 3001;
 config.server.tls = false;

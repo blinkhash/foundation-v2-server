@@ -112,6 +112,14 @@ const Api = function (logger, client, configs, configMain) {
       _this.endpoints.handleHistoricalWorkers(pool, queries, output);
       break;
 
+    // Combined Endpoints
+    case (category === 'combined' && endpoint === 'blocks'):
+      _this.endpoints.handleCombinedBlocks(pool, queries, output);
+      break;
+    case (category === 'combined' && endpoint === 'rounds'):
+      _this.endpoints.handleCombinedRounds(pool, queries, output);
+      break;
+
     // Miscellaneous Endpoints
     case (Object.keys(_this.configs).includes(pool) && category === '' && endpoint === ''):
       _this.endpoints.handleCurrentMetadata(pool, queries, output);

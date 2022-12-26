@@ -1900,4 +1900,257 @@ describe('Test endpoints functionality', () => {
       done();
     });
   });
+
+  test('Test handleCombinedBlocks endpoint [1]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = [
+      'SELECT * FROM "Pool1".current_blocks;',
+      'SELECT * FROM "Pool1".historical_blocks;'];
+    client.on('transaction', (transaction) => {
+      expect(transaction).toStrictEqual(expected);
+      done();
+    });
+    endpoints.handleCombinedBlocks('Pool1', {}, () => {});
+  });
+
+  test('Test handleCombinedBlocks endpoint [2]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const queries = { limit: 100 };
+    const expected = [
+      'SELECT * FROM "Pool1".current_blocks LIMIT 100;',
+      'SELECT * FROM "Pool1".historical_blocks LIMIT 100;'];
+    client.on('transaction', (transaction) => {
+      expect(transaction).toStrictEqual(expected);
+      done();
+    });
+    endpoints.handleCombinedBlocks('Pool1', queries, () => {});
+  });
+
+  test('Test handleCombinedBlocks endpoint [3]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (unknown: <unknown>). Verify your input and try again';
+    const queries = { unknown: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedBlocks endpoint [4]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (category: pending, immature, generate, orphan, confirmed). Verify your input and try again';
+    const queries = { category: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedBlocks endpoint [5]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (direction: ascending, descending). Verify your input and try again';
+    const queries = { direction: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedBlocks endpoint [6]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (limit: <number>). Verify your input and try again';
+    const queries = { limit: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedBlocks endpoint [7]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (offset: <number>). Verify your input and try again';
+    const queries = { offset: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedBlocks endpoint [8]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (order: timestamp, miner, worker, category, confirmations, difficulty, hash, height, identifier, luck, reward, round, solo, transaction, type). Verify your input and try again';
+    const queries = { order: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedBlocks endpoint [9]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (round: <uuid>). Verify your input and try again';
+    const queries = { round: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedBlocks endpoint [10]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (type: primary, auxiliary). Verify your input and try again';
+    const queries = { type: 'unknown' };
+    endpoints.handleCombinedBlocks('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedRounds endpoint [1]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = [
+      'SELECT * FROM "Pool1".current_rounds;',
+      'SELECT * FROM "Pool1".historical_rounds;'];
+    client.on('transaction', (transaction) => {
+      expect(transaction).toStrictEqual(expected);
+      done();
+    });
+    endpoints.handleCombinedRounds('Pool1', {}, () => {});
+  });
+
+  test('Test handleCombinedRounds endpoint [2]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const queries = { limit: 100 };
+    const expected = [
+      'SELECT * FROM "Pool1".current_rounds LIMIT 100;',
+      'SELECT * FROM "Pool1".historical_rounds LIMIT 100;'];
+    client.on('transaction', (transaction) => {
+      expect(transaction).toStrictEqual(expected);
+      done();
+    });
+    endpoints.handleCombinedRounds('Pool1', queries, () => {});
+  });
+
+  test('Test handleCombinedRounds endpoint [3]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (unknown: <unknown>). Verify your input and try again';
+    const queries = { unknown: 'unknown' };
+    endpoints.handleCombinedRounds('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedRounds endpoint [4]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (direction: ascending, descending). Verify your input and try again';
+    const queries = { direction: 'unknown' };
+    endpoints.handleCombinedRounds('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedRounds endpoint [5]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (limit: <number>). Verify your input and try again';
+    const queries = { limit: 'unknown' };
+    endpoints.handleCombinedRounds('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedRounds endpoint [6]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (offset: <number>). Verify your input and try again';
+    const queries = { offset: 'unknown' };
+    endpoints.handleCombinedRounds('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedRounds endpoint [7]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (order: timestamp, miner, worker, identifier, invalid, round, solo, stale, times, type, valid, work). Verify your input and try again';
+    const queries = { order: 'unknown' };
+    endpoints.handleCombinedRounds('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedRounds endpoint [8]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (round: current, <uuid>). Verify your input and try again';
+    const queries = { round: 'unknown' };
+    endpoints.handleCombinedRounds('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
+
+  test('Test handleCombinedRounds endpoint [9]', (done) => {
+    const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
+    const logger = new Logger(configMainCopy);
+    const endpoints = new Endpoints(logger, client, configMainCopy);
+    const expected = 'Invalid query parameter specified (type: primary, auxiliary). Verify your input and try again';
+    const queries = { type: 'unknown' };
+    endpoints.handleCombinedRounds('Pool1', queries, (code, message) => {
+      expect(code).toBe(400);
+      expect(message).toBe(expected);
+      done();
+    });
+  });
 });
