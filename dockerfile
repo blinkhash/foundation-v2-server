@@ -29,5 +29,4 @@ COPY configs/pools/bitcoin.js configs/pools/bitcoin.js
 EXPOSE 3001 3002
 
 # Start the mining pool
-CMD ["npm", "run", "start"]
-
+CMD /usr/local/bin/node index.js
