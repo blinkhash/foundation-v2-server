@@ -1,4 +1,4 @@
-const Text = require('../../locales/index');
+const Text = require('../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -603,7 +603,7 @@ const Schema = function (logger, executor, configMain) {
         _this.handleDeployment(pool).then(() => {
           const lastIdx = idx === keys.length - 1;
           const lines = [_this.text.databaseSchemaText1(pool)];
-          _this.logger.log('Database', 'Schema', lines);
+          _this.logger.log('Database', 'Master', lines);
           if (lastIdx) callback();
         });
       });

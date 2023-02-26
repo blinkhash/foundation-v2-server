@@ -1,20 +1,19 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const HistoricalMiners = function (logger, configMain) {
+const CurrentTransactions = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Historical Parameters
-  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
-  this.strings = ['miner', 'type'];
-  this.parameters = ['timestamp', 'miner', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale',
-    'type', 'valid'];
+  // Handle Current Parameters
+  this.numbers = ['timestamp'];
+  this.strings = ['round', 'type'];
+  this.parameters = ['timestamp', 'round', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -51,9 +50,9 @@ const HistoricalMiners = function (logger, configMain) {
     return output;
   };
 
-  // Select Historical Miners Using Parameters
-  this.selectHistoricalMinersMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".historical_miners`;
+  // Select Current Transactions Using Parameters
+  this.selectCurrentTransactionsMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_transactions`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -65,37 +64,42 @@ const HistoricalMiners = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Miners Values String
-  this.buildHistoricalMinersMain = function(updates) {
+  // Build Transactions Values String
+  this.buildCurrentTransactionsMain = function(updates) {
     let values = '';
-    updates.forEach((miner, idx) => {
+    updates.forEach((transaction, idx) => {
       values += `(
-        ${ miner.timestamp },
-        ${ miner.recent },
-        '${ miner.miner }',
-        ${ miner.efficiency },
-        ${ miner.effort },
-        ${ miner.hashrate },
-        ${ miner.invalid },
-        ${ miner.stale },
-        '${ miner.type }',
-        ${ miner.valid })`;
+        ${ transaction.timestamp },
+        '${ transaction.round }',
+        '${ transaction.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
-  // Insert Rows Using Historical Data
-  this.insertHistoricalMinersMain = function(pool, updates) {
+  // Insert Rows Using Transactions Data
+  this.insertCurrentTransactionsMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".historical_miners (
-        timestamp, recent, miner,
-        efficiency, effort, hashrate,
-        invalid, stale, type, valid)
-      VALUES ${ _this.buildHistoricalMinersMain(updates) }
-      ON CONFLICT ON CONSTRAINT historical_miners_recent
-      DO NOTHING;`;
+      INSERT INTO "${ pool }".current_transactions (
+        timestamp, round, type)
+      VALUES ${ _this.buildCurrentTransactionsMain(updates) }
+      ON CONFLICT ON CONSTRAINT current_transactions_unique
+      DO NOTHING RETURNING round;`;
+  };
+
+  // Delete Rows From Current Rounds
+  this.deleteCurrentTransactionsMain = function(pool, rounds) {
+    return `
+      DELETE FROM "${ pool }".current_transactions
+      WHERE round IN (${ rounds.join(', ') });`;
+  };
+
+  // Delete Rows From Current Round
+  this.deleteCurrentTransactionsInactive = function(pool, timestamp) {
+    return `
+      DELETE FROM "${ pool }".current_transactions
+      WHERE timestamp < ${ timestamp };`;
   };
 };
 
-module.exports = HistoricalMiners;
+module.exports = CurrentTransactions;

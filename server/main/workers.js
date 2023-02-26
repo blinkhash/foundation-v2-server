@@ -1,5 +1,6 @@
 const Checks = require('./checks');
 const Payments = require('./payments');
+const Rounds = require('./rounds');
 const Statistics = require('./statistics');
 const Stratum = require('./stratum');
 
@@ -25,6 +26,7 @@ const Workers = function (logger, client) {
       // Build Out Individual Modules
       const checks = new Checks(_this.logger, _this.client, config, _this.configMain);
       const payments = new Payments(_this.logger, _this.client, config, _this.configMain);
+      const rounds = new Rounds(_this.logger, _this.client, config, _this.configMain);
       const statistics = new Statistics(_this.logger, _this.client, config, _this.configMain, template);
       const stratum = new Stratum(_this.logger, _this.client, config, _this.configMain, template);
 
@@ -32,6 +34,7 @@ const Workers = function (logger, client) {
       stratum.setupStratum(() => {
         checks.setupChecks(stratum, () => {
           payments.setupPayments(stratum, () => {
+            rounds.setupRounds(() => {});
             statistics.setupStatistics(() => {});
           });
         });

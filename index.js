@@ -11,10 +11,12 @@ try {
   const config = require(path.join(__dirname, './configs/main/config.js'));
   const logger = new Logger(config);
 
-  // Initialize Database
+  // Initialize Local/Remote Databases
   const client = new Client(logger, config);
-  client.handleClient(() => {
-    const threads = new Threads(logger, client, config).setupThreads();
+  client.handleClientMaster(() => {
+    client.handleClientWorker(() => {
+      const threads = new Threads(logger, client, config).setupThreads();
+    });
   });
 
 // Error on Startup

@@ -1,5 +1,5 @@
 const Schema = require('./schema');
-const Text = require('../../locales/index');
+const Text = require('../../../locales/index');
 
 // Current Table Commands
 const CurrentBlocks = require('./current/blocks');
@@ -45,7 +45,7 @@ const Commands = function (logger, client, configMain) {
     _this.client.query(query, (error, results) => {
       if (error) {
         const lines = [_this.text.databaseCommandsText1(query, JSON.stringify(error))];
-        _this.logger.error('Database', 'Commands', lines);
+        _this.logger.error('Database', 'Master', lines);
         handler(error);
       } else {
         callback(results);

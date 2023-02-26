@@ -1,9 +1,9 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const HistoricalPayments = function (logger, configMain) {
+const HistoricalTransactions = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
@@ -12,8 +12,8 @@ const HistoricalPayments = function (logger, configMain) {
 
   // Handle Historical Parameters
   this.numbers = ['timestamp', 'amount'];
-  this.strings = ['miner', 'transaction', 'type'];
-  this.parameters = ['timestamp', 'miner', 'amount', 'transaction', 'type'];
+  this.strings = ['transaction', 'type'];
+  this.parameters = ['timestamp', 'amount', 'transaction', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -50,9 +50,9 @@ const HistoricalPayments = function (logger, configMain) {
     return output;
   };
 
-  // Select Historical Payments Using Parameters
-  this.selectHistoricalPaymentsMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".historical_payments`;
+  // Select Historical Transactions Using Parameters
+  this.selectHistoricalTransactionsMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_transactions`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -64,30 +64,29 @@ const HistoricalPayments = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Payments Values String
-  this.buildHistoricalPaymentsMain = function(updates) {
+  // Build Transactions Values String
+  this.buildHistoricalTransactionsMain = function(updates) {
     let values = '';
-    updates.forEach((payment, idx) => {
+    updates.forEach((transaction, idx) => {
       values += `(
-        ${ payment.timestamp },
-        '${ payment.miner }',
-        ${ payment.amount },
-        '${ payment.transaction }',
-        '${ payment.type }')`;
+        ${ transaction.timestamp },
+        ${ transaction.amount },
+        '${ transaction.transaction }',
+        '${ transaction.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
   // Insert Rows Using Historical Data
-  this.insertHistoricalPaymentsMain = function(pool, updates) {
+  this.insertHistoricalTransactionsMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".historical_payments (
-        timestamp, miner, amount,
+      INSERT INTO "${ pool }".historical_transactions (
+        timestamp, amount,
         transaction, type)
-      VALUES ${ _this.buildHistoricalPaymentsMain(updates) }
+      VALUES ${ _this.buildHistoricalTransactionsMain(updates) }
       ON CONFLICT DO NOTHING;`;
   };
 };
 
-module.exports = HistoricalPayments;
+module.exports = HistoricalTransactions;

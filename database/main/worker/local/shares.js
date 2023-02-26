@@ -1,19 +1,20 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const HistoricalTransactions = function (logger, configMain) {
+const LocalShares = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Historical Parameters
-  this.numbers = ['timestamp', 'amount'];
-  this.strings = ['transaction', 'type'];
-  this.parameters = ['timestamp', 'amount', 'transaction', 'type'];
+  // Handle Local Parameters
+  this.numbers = ['timestamp', 'submitted', 'blockdiff', 'clientdiff', 'headerdiff', 'height', 'reward', 'sharediff'];
+  this.strings = ['error', 'uuid', 'miner', 'worker', 'ip', 'port', 'hash', 'hex', 'identifier', 'transaction', 'type'];
+  this.parameters = ['error', 'uuid', 'timestamp', 'submitted', 'miner', 'worker', 'ip', 'port', 'blockdiff',
+    'clientdiff', 'hash', 'hex', 'headerdiff', 'height', 'identifier', 'reward', 'sharediff', 'transaction', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -50,9 +51,9 @@ const HistoricalTransactions = function (logger, configMain) {
     return output;
   };
 
-  // Select Historical Transactions Using Parameters
-  this.selectHistoricalTransactionsMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".historical_transactions`;
+  // Select Local Shares Using Parameters
+  this.selectLocalSharesMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".local_shares`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -64,29 +65,58 @@ const HistoricalTransactions = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Transactions Values String
-  this.buildHistoricalTransactionsMain = function(updates) {
+  // Build Shares Values String
+  this.buildLocalSharesMain = function(updates) {
     let values = '';
-    updates.forEach((transaction, idx) => {
+    updates.forEach((share, idx) => {
       values += `(
-        ${ transaction.timestamp },
-        ${ transaction.amount },
-        '${ transaction.transaction }',
-        '${ transaction.type }')`;
+        '${ share.error }',
+        '${ share.uuid }',
+        ${ share.timestamp },
+        ${ share.submitted },
+        '${ share.ip }',
+        '${ share.port }',
+        '${ share.addrprimary }',
+        '${ share.addrauxiliary }',
+        ${ share.blockdiffprimary },
+        ${ share.blockdiffauxiliary },
+        ${ share.blockvalid },
+        '${ share.blocktype }',
+        ${ share.clientdiff },
+        '${ share.hash }',
+        ${ share.height },
+        '${ share.identifier }',
+        ${ share.reward },
+        ${ share.sharediff },
+        ${ share.sharevalid },
+        '${ share.transaction }')`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
-  // Insert Rows Using Historical Data
-  this.insertHistoricalTransactionsMain = function(pool, updates) {
+  // Insert Rows Using Shares Data
+  this.insertLocalSharesMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".historical_transactions (
-        timestamp, amount,
-        transaction, type)
-      VALUES ${ _this.buildHistoricalTransactionsMain(updates) }
-      ON CONFLICT DO NOTHING;`;
+      INSERT INTO "${ pool }".local_shares (
+        error, uuid, timestamp,
+        submitted, ip, port, addrprimary,
+        addrauxiliary, blockdiffprimary,
+        blockdiffauxiliary, blockvalid,
+        blocktype, clientdiff, hash, height,
+        identifier, reward, sharediff,
+        sharevalid, transaction)
+      VALUES ${ _this.buildLocalSharesMain(updates) }
+      ON CONFLICT ON CONSTRAINT local_shares_unique
+      DO NOTHING;`;
   };
-};
 
-module.exports = HistoricalTransactions;
+  // Delete Rows From Shares
+  this.deleteLocalSharesMain = function(pool, uuids) {
+    return `
+      DELETE FROM "${ pool }".local_shares
+      WHERE uuid IN (${ uuids.join(', ') });`;
+  };
+}
+
+module.exports = LocalShares;

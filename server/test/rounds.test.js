@@ -1,7 +1,7 @@
 const Commands = require('../../database/main/commands');
 const Logger = require('../main/logger');
 const MockDate = require('mockdate');
-const Shares = require('../main/shares');
+const Rounds = require('../main/rounds');
 const config = require('../../configs/pools/example.js');
 const configMain = require('../../configs/main/example.js');
 const events = require('events');
@@ -23,7 +23,7 @@ function mockClient(configMain, result) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-describe('Test shares functionality', () => {
+describe('Test rounds functionality', () => {
 
   let configCopy, configMainCopy;
   beforeEach(() => {
@@ -31,53 +31,53 @@ describe('Test shares functionality', () => {
     configMainCopy = JSON.parse(JSON.stringify(configMain));
   });
 
-  test('Test initialization of shares', () => {
+  test('Test initialization of rounds', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
-    expect(typeof shares.handleEfficiency).toBe('function');
-    expect(typeof shares.handleEffort).toBe('function');
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
+    expect(typeof rounds.handleEfficiency).toBe('function');
+    expect(typeof rounds.handleEffort).toBe('function');
   });
 
-  test('Test shares database updates [1]', () => {
+  test('Test rounds database updates [1]', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
-    expect(shares.handleEfficiency({ valid: 1, invalid: 0, stale: 0 }, 'valid')).toBe(100);
-    expect(shares.handleEfficiency({ valid: 0, invalid: 1, stale: 0 }, 'valid')).toBe(50);
-    expect(shares.handleEfficiency({ valid: 1, invalid: 1, stale: 0 }, 'valid')).toBe(66.67);
-    expect(shares.handleEfficiency({ valid: 1, invalid: 0, stale: 1 }, 'valid')).toBe(66.67);
-    expect(shares.handleEfficiency({}, 'valid')).toBe(100);
-    expect(shares.handleEfficiency({}, 'invalid')).toBe(0);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
+    expect(rounds.handleEfficiency({ valid: 1, invalid: 0, stale: 0 }, 'valid')).toBe(100);
+    expect(rounds.handleEfficiency({ valid: 0, invalid: 1, stale: 0 }, 'valid')).toBe(50);
+    expect(rounds.handleEfficiency({ valid: 1, invalid: 1, stale: 0 }, 'valid')).toBe(66.67);
+    expect(rounds.handleEfficiency({ valid: 1, invalid: 0, stale: 1 }, 'valid')).toBe(66.67);
+    expect(rounds.handleEfficiency({}, 'valid')).toBe(100);
+    expect(rounds.handleEfficiency({}, 'invalid')).toBe(0);
   });
 
-  test('Test shares database updates [2]', () => {
+  test('Test rounds database updates [2]', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
-    expect(shares.handleEffort(100, { difficulty: 10 }, 'valid', 100)).toBe(110);
-    expect(shares.handleEffort(100, { difficulty: 10 }, 'invalid', 100)).toBe(100);
-    expect(shares.handleEffort(100, {}, 'valid', 100)).toBe(100);
-    expect(shares.handleEffort(0, {}, 'invalid', 100)).toBe(0);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
+    expect(rounds.handleEffort(100, { difficulty: 10 }, 'valid', 100)).toBe(110);
+    expect(rounds.handleEffort(100, { difficulty: 10 }, 'invalid', 100)).toBe(100);
+    expect(rounds.handleEffort(100, {}, 'valid', 100)).toBe(100);
+    expect(rounds.handleEffort(0, {}, 'invalid', 100)).toBe(0);
   });
 
-  test('Test shares database updates [3]', () => {
+  test('Test rounds database updates [3]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
-    expect(shares.handleTimes({ timestamp: 1634742080841, times: 0 }, 1634742290841)).toBe(210);
-    expect(shares.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742180841)).toBe(245);
-    expect(shares.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742830841)).toBe(895);
-    expect(shares.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742370841)).toBe(435);
-    expect(shares.handleTimes({ times: 145 }, 1634742530841)).toBe(595);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
+    expect(rounds.handleTimes({ timestamp: 1634742080841, times: 0 }, 1634742290841)).toBe(210);
+    expect(rounds.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742180841)).toBe(245);
+    expect(rounds.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742830841)).toBe(895);
+    expect(rounds.handleTimes({ timestamp: 1634742080841, times: 145 }, 1634742370841)).toBe(435);
+    expect(rounds.handleTimes({ times: 145 }, 1634742530841)).toBe(595);
   });
 
-  test('Test shares database updates [4]', () => {
+  test('Test rounds database updates [4]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = { hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
     const expected = {
       timestamp: 1634742080841,
@@ -97,14 +97,14 @@ describe('Test shares functionality', () => {
       transaction: 'transaction1',
       type: 'primary',
     };
-    expect(shares.handleCurrentBlocks(100, 'miner1', 150, 'round', shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentBlocks(100, 'miner1', 150, 'round', shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [5]', () => {
+  test('Test rounds database updates [5]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = { hash: 'hash', height: 1, transaction: 'transaction1' };
     const expected = {
       timestamp: 1634742080841,
@@ -124,14 +124,14 @@ describe('Test shares functionality', () => {
       transaction: 'transaction1',
       type: 'primary',
     };
-    expect(shares.handleCurrentBlocks(100, null, 150, 'round', shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentBlocks(100, null, 150, 'round', shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [6]', () => {
+  test('Test rounds database updates [6]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = { identifier: 'master' };
     const expected = {
       timestamp: 1634742080841,
@@ -143,14 +143,14 @@ describe('Test shares functionality', () => {
       type: 'primary',
       work: 1,
     };
-    expect(shares.handleCurrentHashrate('miner1', 1, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentHashrate('miner1', 1, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [7]', () => {
+  test('Test rounds database updates [7]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const expected = {
       timestamp: 1634742080841,
       miner: 'miner1',
@@ -161,14 +161,14 @@ describe('Test shares functionality', () => {
       type: 'primary',
       work: 0,
     };
-    expect(shares.handleCurrentHashrate('miner1', 1, {}, 'invalid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentHashrate('miner1', 1, {}, 'invalid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [8]', () => {
+  test('Test rounds database updates [8]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = { identifier: 'master' };
     const expected = {
       timestamp: 1634742080841,
@@ -180,14 +180,14 @@ describe('Test shares functionality', () => {
       type: 'primary',
       work: 1,
     };
-    expect(shares.handleCurrentHashrate(null, 1, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentHashrate(null, 1, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [9]', () => {
+  test('Test rounds database updates [9]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -200,14 +200,14 @@ describe('Test shares functionality', () => {
       valid: 1,
       work: 1,
     };
-    expect(shares.handleCurrentMetadata(100, 150, roundData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentMetadata(100, 150, roundData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [10]', () => {
+  test('Test rounds database updates [10]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -220,14 +220,14 @@ describe('Test shares functionality', () => {
       valid: 0,
       work: 0,
     };
-    expect(shares.handleCurrentMetadata(100, 150, roundData, shareData, 'valid', true, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentMetadata(100, 150, roundData, shareData, 'valid', true, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [11]', () => {
+  test('Test rounds database updates [11]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -240,14 +240,14 @@ describe('Test shares functionality', () => {
       valid: 0,
       work: 0,
     };
-    expect(shares.handleCurrentMetadata(100, 150, roundData, shareData, 'invalid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentMetadata(100, 150, roundData, shareData, 'invalid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [12]', () => {
+  test('Test rounds database updates [12]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -260,14 +260,14 @@ describe('Test shares functionality', () => {
       valid: 0,
       work: 0,
     };
-    expect(shares.handleCurrentMetadata(100, 150, roundData, shareData, 'stale', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentMetadata(100, 150, roundData, shareData, 'stale', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [13]', () => {
+  test('Test rounds database updates [13]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0, work: 100 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -280,14 +280,14 @@ describe('Test shares functionality', () => {
       type: 'primary',
       valid: 1,
     };
-    expect(shares.handleCurrentMiners('miner1', 150, roundData, shareData, 'valid', 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentMiners('miner1', 150, roundData, shareData, 'valid', 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [14]', () => {
+  test('Test rounds database updates [14]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0, work: 100 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -300,14 +300,14 @@ describe('Test shares functionality', () => {
       type: 'primary',
       valid: 1,
     };
-    expect(shares.handleCurrentMiners(null, 150, roundData, shareData, 'valid', 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentMiners(null, 150, roundData, shareData, 'valid', 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [15]', () => {
+  test('Test rounds database updates [15]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const workerData = { timestamp: 1634742080000, times: 0 };
     const shareData = { identifier: 'master', difficulty: 1 };
     const expected = {
@@ -325,14 +325,14 @@ describe('Test shares functionality', () => {
       valid: 1,
       work: 1,
     };
-    expect(shares.handleCurrentRounds('miner1', workerData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentRounds('miner1', workerData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [16]', () => {
+  test('Test rounds database updates [16]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const workerData = { timestamp: 1634742080000, times: 0 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -350,14 +350,14 @@ describe('Test shares functionality', () => {
       valid: 1,
       work: 1,
     };
-    expect(shares.handleCurrentRounds(null, workerData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentRounds(null, workerData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [17]', () => {
+  test('Test rounds database updates [17]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const workerData = { timestamp: 1634742080000, times: 0 };
     const shareData = { identifier: 'master', difficulty: 1 };
     const expected = {
@@ -375,14 +375,14 @@ describe('Test shares functionality', () => {
       valid: 0,
       work: 0,
     };
-    expect(shares.handleCurrentRounds(null, workerData, shareData, 'invalid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentRounds(null, workerData, shareData, 'invalid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [18]', () => {
+  test('Test rounds database updates [18]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const workerData = { timestamp: 1634742080000, times: 0 };
     const shareData = { identifier: 'master', difficulty: 1 };
     const expected = {
@@ -400,14 +400,14 @@ describe('Test shares functionality', () => {
       valid: 0,
       work: 0,
     };
-    expect(shares.handleCurrentRounds(null, workerData, shareData, 'stale', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentRounds(null, workerData, shareData, 'stale', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [19]', () => {
+  test('Test rounds database updates [19]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0, work: 100 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -422,14 +422,14 @@ describe('Test shares functionality', () => {
       type: 'primary',
       valid: 1,
     };
-    expect(shares.handleCurrentWorkers('miner1', 150, roundData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentWorkers('miner1', 150, roundData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares database updates [20]', () => {
+  test('Test rounds database updates [20]', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const roundData = { valid: 1, invalid: 0, stale: 0, work: 100 };
     const shareData = { difficulty: 1 };
     const expected = {
@@ -444,14 +444,14 @@ describe('Test shares functionality', () => {
       type: 'primary',
       valid: 1,
     };
-    expect(shares.handleCurrentWorkers(null, 150, roundData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
+    expect(rounds.handleCurrentWorkers(null, 150, roundData, shareData, 'valid', false, 'primary')).toStrictEqual(expected);
   });
 
-  test('Test shares primary updates [1]', (done) => {
+  test('Test rounds primary updates [1]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null, null];
     const shareData = { addrPrimary: 'miner1', blockDiffPrimary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
     const expectedBlocks = `
@@ -533,14 +533,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedPrimary);
       done();
     });
-    shares.handlePrimary(lookups, shareData, 'valid', false, () => {});
+    rounds.handlePrimary(lookups, shareData, 'valid', false, () => {});
   });
 
-  test('Test shares primary updates [2]', (done) => {
+  test('Test rounds primary updates [2]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [] }, null, { rows: [] }, null, null];
     const shareData = { addrPrimary: null, blockDiffPrimary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
     const expectedBlocks = `
@@ -622,14 +622,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedPrimary);
       done();
     });
-    shares.handlePrimary(lookups, shareData, 'valid', false, () => {});
+    rounds.handlePrimary(lookups, shareData, 'valid', false, () => {});
   });
 
-  test('Test shares primary updates [3]', (done) => {
+  test('Test rounds primary updates [3]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null, null];
     const shareData = { addrPrimary: 'miner1', blockDiffPrimary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
     const expectedBlocks = `
@@ -711,14 +711,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedPrimary);
       done();
     });
-    shares.handlePrimary(lookups, shareData, 'valid', true, () => {});
+    rounds.handlePrimary(lookups, shareData, 'valid', true, () => {});
   });
 
-  test('Test shares primary updates [4]', (done) => {
+  test('Test rounds primary updates [4]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [] }, null, { rows: [] }, null, null];
     const shareData = { addrPrimary: null, blockDiffPrimary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
     const expectedBlocks = `
@@ -800,14 +800,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedPrimary);
       done();
     });
-    shares.handlePrimary(lookups, shareData, 'valid', true, () => {});
+    rounds.handlePrimary(lookups, shareData, 'valid', true, () => {});
   });
 
-  test('Test shares auxiliary updates [1]', (done) => {
+  test('Test rounds auxiliary updates [1]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null];
     const shareData = { addrAuxiliary: 'miner1', blockDiffAuxiliary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
     const expectedBlocks = `
@@ -889,14 +889,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedAuxiliary);
       done();
     });
-    shares.handleAuxiliary(lookups, shareData, 'valid', false, () => {});
+    rounds.handleAuxiliary(lookups, shareData, 'valid', false, () => {});
   });
 
-  test('Test shares auxiliary updates [2]', (done) => {
+  test('Test rounds auxiliary updates [2]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [] }, null, { rows: [] }, null];
     const shareData = { addrAuxiliary: null, blockDiffAuxiliary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
     const expectedBlocks = `
@@ -978,14 +978,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedAuxiliary);
       done();
     });
-    shares.handleAuxiliary(lookups, shareData, 'valid', false, () => {});
+    rounds.handleAuxiliary(lookups, shareData, 'valid', false, () => {});
   });
 
-  test('Test shares auxiliary updates [3]', (done) => {
+  test('Test rounds auxiliary updates [3]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [{ work: 100 }] }, null, { rows: [{ work: 100 }] }, null];
     const shareData = { addrAuxiliary: 'miner1', blockDiffAuxiliary: 150, hash: 'hash', height: 1, identifier: 'master', transaction: 'transaction1' };
     const expectedBlocks = `
@@ -1067,14 +1067,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedAuxiliary);
       done();
     });
-    shares.handleAuxiliary(lookups, shareData, 'valid', true, () => {});
+    rounds.handleAuxiliary(lookups, shareData, 'valid', true, () => {});
   });
 
-  test('Test shares auxiliary updates [4]', (done) => {
+  test('Test rounds auxiliary updates [4]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, null, { rows: [] }, null, { rows: [] }, null];
     const shareData = { addrAuxiliary: null, blockDiffAuxiliary: null, hash: 'hash', height: 1, transaction: 'transaction1' };
     const expectedBlocks = `
@@ -1156,14 +1156,14 @@ describe('Test shares functionality', () => {
       expect(transaction[4]).toBe(expectedAuxiliary);
       done();
     });
-    shares.handleAuxiliary(lookups, shareData, 'valid', true, () => {});
+    rounds.handleAuxiliary(lookups, shareData, 'valid', true, () => {});
   });
 
-  test('Test shares updates [1]', (done) => {
+  test('Test rounds updates [1]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [
       null,
       { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
@@ -1300,14 +1300,14 @@ describe('Test shares functionality', () => {
       expect(transaction[5]).toBe(expectedWorkers);
       done();
     });
-    shares.handleShares(lookups, shareData, 'valid', false, () => {});
+    rounds.handleRounds(lookups, shareData, 'valid', false, () => {});
   });
 
-  test('Test shares updates [2]', (done) => {
+  test('Test rounds updates [2]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] }, null];
     const shareData = {
       addrPrimary: 'primary1',
@@ -1438,14 +1438,14 @@ describe('Test shares functionality', () => {
       expect(transaction[5]).toBe(expectedWorkers);
       done();
     });
-    shares.handleShares(lookups, shareData, 'valid', false, () => {});
+    rounds.handleRounds(lookups, shareData, 'valid', false, () => {});
   });
 
-  test('Test shares updates [3]', (done) => {
+  test('Test rounds updates [3]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [
       null,
       { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
@@ -1582,14 +1582,14 @@ describe('Test shares functionality', () => {
       expect(transaction[5]).toBe(expectedWorkers);
       done();
     });
-    shares.handleShares(lookups, shareData, 'valid', true, () => {});
+    rounds.handleRounds(lookups, shareData, 'valid', true, () => {});
   });
 
-  test('Test shares updates [4]', (done) => {
+  test('Test rounds updates [4]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [null, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] }, null];
     const shareData = {
       addrPrimary: 'primary1',
@@ -1720,15 +1720,15 @@ describe('Test shares functionality', () => {
       expect(transaction[5]).toBe(expectedWorkers);
       done();
     });
-    shares.handleShares(lookups, shareData, 'valid', true, () => {});
+    rounds.handleRounds(lookups, shareData, 'valid', true, () => {});
   });
 
-  test('Test shares updates [5]', (done) => {
+  test('Test rounds updates [5]', (done) => {
     MockDate.set(1634742080841);
     configCopy.auxiliary = { enabled: true };
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const lookups = [
       null,
       { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
@@ -1982,10 +1982,10 @@ describe('Test shares functionality', () => {
       expect(transaction[10]).toBe(expectedAuxWorkers);
       done();
     });
-    shares.handleShares(lookups, shareData, 'valid', false, () => {});
+    rounds.handleRounds(lookups, shareData, 'valid', false, () => {});
   });
 
-  test('Test shares submission handling [1]', (done) => {
+  test('Test rounds submission handling [1]', (done) => {
     const lookups = [
       null,
       { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
@@ -1996,7 +1996,7 @@ describe('Test shares functionality', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2017,10 +2017,10 @@ describe('Test shares functionality', () => {
       reward: 100,
       shareDiff: 1,
     };
-    shares.handleSubmissions(shareData, true, true, () => done());
+    rounds.handleSubmissions(shareData, true, true, () => done());
   });
 
-  test('Test shares submission handling [2]', (done) => {
+  test('Test rounds submission handling [2]', (done) => {
     const lookups = [
       null,
       { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
@@ -2031,7 +2031,7 @@ describe('Test shares functionality', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2052,10 +2052,10 @@ describe('Test shares functionality', () => {
       reward: 100,
       shareDiff: 1,
     };
-    shares.handleSubmissions(shareData, true, false, () => done());
+    rounds.handleSubmissions(shareData, true, false, () => done());
   });
 
-  test('Test shares submission handling [3]', (done) => {
+  test('Test rounds submission handling [3]', (done) => {
     const lookups = [
       null,
       { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
@@ -2066,7 +2066,7 @@ describe('Test shares functionality', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2087,10 +2087,10 @@ describe('Test shares functionality', () => {
       reward: 100,
       shareDiff: 1,
     };
-    shares.handleSubmissions(shareData, true, true, () => done());
+    rounds.handleSubmissions(shareData, true, true, () => done());
   });
 
-  test('Test shares submission handling [4]', (done) => {
+  test('Test rounds submission handling [4]', (done) => {
     const lookups = [
       null,
       { rows: [{ valid: 1, invalid: 0, stale: 0, work: 100 }] },
@@ -2101,7 +2101,7 @@ describe('Test shares functionality', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2122,10 +2122,10 @@ describe('Test shares functionality', () => {
       reward: 100,
       shareDiff: 1,
     };
-    shares.handleSubmissions(shareData, true, false, () => done());
+    rounds.handleSubmissions(shareData, true, false, () => done());
   });
 
-  test('Test shares submission handling [5]', (done) => {
+  test('Test rounds submission handling [5]', (done) => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const lookups = [
       null,
@@ -2137,7 +2137,7 @@ describe('Test shares functionality', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2158,14 +2158,14 @@ describe('Test shares functionality', () => {
       reward: 100,
       shareDiff: 1,
     };
-    shares.handleSubmissions(shareData, true, false, () => {
+    rounds.handleSubmissions(shareData, true, false, () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
     });
   });
 
-  test('Test shares submission handling [6]', (done) => {
+  test('Test rounds submission handling [6]', (done) => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const lookups = [
       null,
@@ -2177,7 +2177,7 @@ describe('Test shares functionality', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2198,14 +2198,14 @@ describe('Test shares functionality', () => {
       reward: 100,
       shareDiff: 1,
     };
-    shares.handleSubmissions(shareData, false, false, () => {
+    rounds.handleSubmissions(shareData, false, false, () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
     });
   });
 
-  test('Test shares submission handling [7]', (done) => {
+  test('Test rounds submission handling [7]', (done) => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const lookups = [
       null,
@@ -2217,7 +2217,7 @@ describe('Test shares functionality', () => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2230,18 +2230,18 @@ describe('Test shares functionality', () => {
       identifier: 'master',
       error: 'job not found',
     };
-    shares.handleSubmissions(shareData, false, false, () => {
+    rounds.handleSubmissions(shareData, false, false, () => {
       expect(consoleSpy).toHaveBeenCalled();
       console.log.mockClear();
       done();
     });
   });
 
-  test('Test shares submission handling [8]', (done) => {
+  test('Test rounds submission handling [8]', (done) => {
     MockDate.set(1634742080841);
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
-    const shares = new Shares(logger, client, configCopy, configMainCopy);
+    const rounds = new Rounds(logger, client, configCopy, configMainCopy);
     const shareData = {
       job: 1,
       id: 1,
@@ -2262,6 +2262,6 @@ describe('Test shares functionality', () => {
       reward: 100,
       shareDiff: 1,
     };
-    shares.handleSubmissions(shareData, false, false, () => done());
+    rounds.handleSubmissions(shareData, false, false, () => done());
   });
 });

@@ -1,19 +1,20 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const CurrentNetwork = function (logger, configMain) {
+const HistoricalMiners = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Current Parameters
-  this.numbers = ['timestamp', 'difficulty', 'hashrate', 'height'];
-  this.strings = ['type'];
-  this.parameters = ['timestamp', 'difficulty', 'hashrate', 'height', 'type'];
+  // Handle Historical Parameters
+  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
+  this.strings = ['miner', 'type'];
+  this.parameters = ['timestamp', 'miner', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale',
+    'type', 'valid'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -50,9 +51,9 @@ const CurrentNetwork = function (logger, configMain) {
     return output;
   };
 
-  // Select Current Network Using Parameters
-  this.selectCurrentNetworkMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".current_network`;
+  // Select Historical Miners Using Parameters
+  this.selectHistoricalMinersMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_miners`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -64,36 +65,37 @@ const CurrentNetwork = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Network Values String
-  this.buildCurrentNetworkMain = function(updates) {
+  // Build Miners Values String
+  this.buildHistoricalMinersMain = function(updates) {
     let values = '';
-    updates.forEach((network, idx) => {
+    updates.forEach((miner, idx) => {
       values += `(
-        ${ network.timestamp },
-        ${ network.difficulty },
-        ${ network.hashrate },
-        ${ network.height },
-        '${ network.type }')`;
+        ${ miner.timestamp },
+        ${ miner.recent },
+        '${ miner.miner }',
+        ${ miner.efficiency },
+        ${ miner.effort },
+        ${ miner.hashrate },
+        ${ miner.invalid },
+        ${ miner.stale },
+        '${ miner.type }',
+        ${ miner.valid })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
-  // Insert Rows Using Current Data
-  this.insertCurrentNetworkMain = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalMinersMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".current_network (
-        timestamp, difficulty,
-        hashrate, height, type)
-      VALUES ${ _this.buildCurrentNetworkMain(updates) }
-      ON CONFLICT ON CONSTRAINT current_network_unique
-      DO UPDATE SET
-        timestamp = EXCLUDED.timestamp,
-        difficulty = EXCLUDED.difficulty,
-        hashrate = EXCLUDED.hashrate,
-        height = EXCLUDED.height;`;
+      INSERT INTO "${ pool }".historical_miners (
+        timestamp, recent, miner,
+        efficiency, effort, hashrate,
+        invalid, stale, type, valid)
+      VALUES ${ _this.buildHistoricalMinersMain(updates) }
+      ON CONFLICT ON CONSTRAINT historical_miners_recent
+      DO NOTHING;`;
   };
-
 };
 
-module.exports = CurrentNetwork;
+module.exports = HistoricalMiners;

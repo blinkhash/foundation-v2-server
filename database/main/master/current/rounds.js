@@ -1,4 +1,4 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 

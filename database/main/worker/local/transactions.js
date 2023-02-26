@@ -1,19 +1,19 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const HistoricalNetwork = function (logger, configMain) {
+const LocalTransactions = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Historical Parameters
-  this.numbers = ['timestamp', 'difficulty', 'hashrate', 'height'];
-  this.strings = ['type'];
-  this.parameters = ['timestamp', 'difficulty', 'hashrate', 'height', 'type'];
+  // Handle Local Parameters
+  this.numbers = ['timestamp'];
+  this.strings = ['uuid', 'type'];
+  this.parameters = ['timestamp', 'uuid', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -50,9 +50,9 @@ const HistoricalNetwork = function (logger, configMain) {
     return output;
   };
 
-  // Select Historical Network Using Parameters
-  this.selectHistoricalNetworkMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".historical_network`;
+  // Select Local Transactions Using Parameters
+  this.selectLocalTransactionsMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".local_transactions`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -64,32 +64,43 @@ const HistoricalNetwork = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Network Values String
-  this.buildHistoricalNetworkMain = function(updates) {
+
+  // Build Transactions Values String
+  this.buildLocalTransactionsMain = function(updates) {
     let values = '';
-    updates.forEach((network, idx) => {
+    updates.forEach((transaction, idx) => {
       values += `(
-        ${ network.timestamp },
-        ${ network.recent },
-        ${ network.difficulty },
-        ${ network.hashrate },
-        ${ network.height },
-        '${ network.type }')`;
+        ${ transaction.timestamp },
+        '${ transaction.uuid }',
+        '${ transaction.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
-  // Insert Rows Using Historical Data
-  this.insertHistoricalNetworkMain = function(pool, updates) {
+  // Insert Rows Using Transactions Data
+  this.insertLocalTransactionsMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".historical_network (
-        timestamp, recent, difficulty,
-        hashrate, height, type)
-      VALUES ${ _this.buildHistoricalNetworkMain(updates) }
-      ON CONFLICT ON CONSTRAINT historical_network_recent
-      DO NOTHING;`;
+      INSERT INTO "${ pool }".local_transactions (
+        timestamp, uuid, type)
+      VALUES ${ _this.buildLocalTransactionsMain(updates) }
+      ON CONFLICT ON CONSTRAINT local_transactions_unique
+      DO NOTHING RETURNING uuid;`;
   };
-};
 
-module.exports = HistoricalNetwork;
+  // Delete Rows From Local UUIDs
+  this.deleteLocalTransactionsMain = function(pool, uuids) {
+    return `
+      DELETE FROM "${ pool }".local_transactions
+      WHERE uuid IN (${ uuids.join(', ') });`;
+  };
+
+  // Delete Rows From Local UUIDs
+  this.deleteLocalTransactionsInactive = function(pool, timestamp) {
+    return `
+      DELETE FROM "${ pool }".local_transactions
+      WHERE timestamp < ${ timestamp };`;
+  };
+}
+
+module.exports = LocalTransactions;

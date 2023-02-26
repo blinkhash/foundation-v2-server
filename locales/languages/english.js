@@ -7,17 +7,23 @@ exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 exports.databaseCommandsText1 = (query, error) => `An error was thrown when trying to execute a query (${ query }): ${ error }`;
 exports.databaseCommandsText2 = (error) => `An error was thrown when trying to handle checks and validations: ${ error }`;
 exports.databaseCommandsText3 = (retries) => `An error was thrown by the database, waiting before attempting (#${ retries + 1}) to reconnect ...`;
-exports.databaseCommandsText4 = () => 'Successfully reconnected to the database, continuing execution ...';
-exports.databaseCommandsText5 = () => 'Unable to reconnect to database, exceeded retry limits ...';
-exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } schema, initializing stratum ...`;
+exports.databaseCommandsText4 = () => 'Successfully reconnected to the master database, continuing execution ...';
+exports.databaseCommandsText5 = () => 'Successfully reconnected to the worker database, continuing execution ...';
+exports.databaseCommandsText6 = () => 'Unable to reconnect to master database, exceeded retry limits ...';
+exports.databaseCommandsText7 = () => 'Unable to reconnect to worker database, exceeded retry limits ...';
+exports.databaseSchemaText1 = (pool) => `Validated the ${ pool } master schema, initializing stratum ...`;
+exports.databaseSchemaText2 = (pool) => `Validated the ${ pool } worker schema, initializing stratum ...`;
 exports.databaseStartingText1 = (type) => `Started updating statistics and data for ${ type } rounds`;
 exports.databaseStartingText2 = (type) => `Started handling checks and validation for ${ type } rounds`;
 exports.databaseStartingText3 = (type) => `Started handling balances and payments for ${ type } rounds`;
+exports.databaseStartingText4 = (type) => `Started updating metadata and rounds with submitted shares`;
 exports.databaseUpdatesText1 = (type) => `Finished updating statistics and data for ${ type } rounds`;
 exports.databaseUpdatesText2 = (type, rounds) => `Finished handling checks and validation for ${ type } rounds: (${ rounds })`;
 exports.databaseUpdatesText3 = (type) => `Finished handling checks and validation for ${ type } rounds: (0)`;
 exports.databaseUpdatesText4 = (type, rounds) => `Finished handling balances and payments for ${ type } rounds: (${ rounds })`;
 exports.databaseUpdatesText5 = (type) => `Finished handling balances and payments for ${ type } rounds: (0)`;
+exports.databaseUpdatesText6 = (shares) => `Finished updating metadata and rounds with submitted shares: (${ shares })`;
+exports.databaseUpdatesText7 = (type) => `Finished updating metadata and rounds with submitted shares: (0)`;
 
 // Shares Text
 exports.sharesSubmissionsText1 = (difficulty, actual, address, ip) => `A share was accepted at difficulty ${ difficulty }/${ actual || 0 } by ${ address } [${ ip }]`;

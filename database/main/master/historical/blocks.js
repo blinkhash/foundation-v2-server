@@ -1,16 +1,16 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const CurrentBlocks = function (logger, configMain) {
+const HistoricalBlocks = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Current Parameters
+  // Handle Historical Parameters
   this.numbers = ['timestamp', 'submitted', 'confirmations', 'difficulty', 'height', 'luck', 'reward'];
   this.strings = ['miner', 'worker', 'category', 'hash', 'identifier', 'round', 'transaction', 'type'];
   this.parameters = ['timestamp', 'submitted', 'miner', 'worker', 'category', 'confirmations',
@@ -52,9 +52,9 @@ const CurrentBlocks = function (logger, configMain) {
     return output;
   };
 
-  // Select Current Blocks Using Parameters
-  this.selectCurrentBlocksMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".current_blocks`;
+  // Select Historical Blocks Using Parameters
+  this.selectHistoricalBlocksMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_blocks`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -67,7 +67,7 @@ const CurrentBlocks = function (logger, configMain) {
   };
 
   // Build Blocks Values String
-  this.buildCurrentBlocksMain = function(updates) {
+  this.buildHistoricalBlocksMain = function(updates) {
     let values = '';
     updates.forEach((block, idx) => {
       values += `(
@@ -93,41 +93,18 @@ const CurrentBlocks = function (logger, configMain) {
   };
 
   // Insert Rows Using Blocks Data
-  this.insertCurrentBlocksMain = function(pool, updates) {
+  this.insertHistoricalBlocksMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".current_blocks (
+      INSERT INTO "${ pool }".historical_blocks (
         timestamp, submitted, miner,
         worker, category, confirmations,
         difficulty, hash, height,
         identifier, luck, reward,
         round, solo, transaction,
         type)
-      VALUES ${ _this.buildCurrentBlocksMain(updates) }
-      ON CONFLICT ON CONSTRAINT current_blocks_unique
-      DO UPDATE SET
-        timestamp = EXCLUDED.timestamp,
-        submitted = EXCLUDED.submitted,
-        miner = EXCLUDED.miner,
-        worker = EXCLUDED.worker,
-        category = EXCLUDED.category,
-        confirmations = EXCLUDED.confirmations,
-        difficulty = EXCLUDED.difficulty,
-        hash = EXCLUDED.hash,
-        height = EXCLUDED.height,
-        identifier = EXCLUDED.identifier,
-        luck = EXCLUDED.luck,
-        reward = EXCLUDED.reward,
-        solo = EXCLUDED.solo,
-        transaction = EXCLUDED.transaction,
-        type = EXCLUDED.type;`;
-  };
-
-  // Delete Rows From Current Round
-  this.deleteCurrentBlocksMain = function(pool, rounds) {
-    return `
-      DELETE FROM "${ pool }".current_blocks
-      WHERE round IN (${ rounds.join(', ') });`;
+      VALUES ${ _this.buildHistoricalBlocksMain(updates) }
+      ON CONFLICT DO NOTHING;`;
   };
 };
 
-module.exports = CurrentBlocks;
+module.exports = HistoricalBlocks;

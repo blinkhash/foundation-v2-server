@@ -1,16 +1,16 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const CurrentWorkers = function (logger, configMain) {
+const HistoricalWorkers = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Current Parameters
+  // Handle Historical Parameters
   this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
   this.strings = ['miner', 'worker', 'type'];
   this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'invalid',
@@ -51,9 +51,9 @@ const CurrentWorkers = function (logger, configMain) {
     return output;
   };
 
-  // Select Current Workers Using Parameters
-  this.selectCurrentWorkersMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".current_workers`;
+  // Select Historical Workers Using Parameters
+  this.selectHistoricalWorkersMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_workers`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -66,44 +66,17 @@ const CurrentWorkers = function (logger, configMain) {
   };
 
   // Build Workers Values String
-  this.buildCurrentWorkersHashrate = function(updates) {
+  this.buildHistoricalWorkersMain = function(updates) {
     let values = '';
     updates.forEach((worker, idx) => {
       values += `(
         ${ worker.timestamp },
-        '${ worker.miner }',
-        '${ worker.worker }',
-        ${ worker.hashrate },
-        ${ worker.solo },
-        '${ worker.type }')`;
-      if (idx < updates.length - 1) values += ', ';
-    });
-    return values;
-  };
-
-  // Insert Rows Using Hashrate Data
-  this.insertCurrentWorkersHashrate = function(pool, updates) {
-    return `
-      INSERT INTO "${ pool }".current_workers (
-        timestamp, miner, worker,
-        hashrate, solo, type)
-      VALUES ${ _this.buildCurrentWorkersHashrate(updates) }
-      ON CONFLICT ON CONSTRAINT current_workers_unique
-      DO UPDATE SET
-        timestamp = EXCLUDED.timestamp,
-        hashrate = EXCLUDED.hashrate;`;
-  };
-
-  // Build Workers Values String
-  this.buildCurrentWorkersRounds = function(updates) {
-    let values = '';
-    updates.forEach((worker, idx) => {
-      values += `(
-        ${ worker.timestamp },
+        ${ worker.recent },
         '${ worker.miner }',
         '${ worker.worker }',
         ${ worker.efficiency },
         ${ worker.effort },
+        ${ worker.hashrate },
         ${ worker.invalid },
         ${ worker.solo },
         ${ worker.stale },
@@ -114,31 +87,18 @@ const CurrentWorkers = function (logger, configMain) {
     return values;
   };
 
-  // Insert Rows Using Round Data
-  this.insertCurrentWorkersRounds = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalWorkersMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".current_workers (
-        timestamp, miner, worker,
-        efficiency, effort, invalid,
-        solo, stale, type, valid)
-      VALUES ${ _this.buildCurrentWorkersRounds(updates) }
-      ON CONFLICT ON CONSTRAINT current_workers_unique
-      DO UPDATE SET
-        timestamp = EXCLUDED.timestamp,
-        efficiency = EXCLUDED.efficiency,
-        effort = EXCLUDED.effort,
-        invalid = "${ pool }".current_workers.invalid + EXCLUDED.invalid,
-        solo = EXCLUDED.solo,
-        stale = "${ pool }".current_workers.stale + EXCLUDED.stale,
-        valid = "${ pool }".current_workers.valid + EXCLUDED.valid;`;
-  };
-
-  // Delete Rows From Current Round
-  this.deleteCurrentWorkersInactive = function(pool, timestamp) {
-    return `
-      DELETE FROM "${ pool }".current_workers
-      WHERE timestamp < ${ timestamp };`;
+      INSERT INTO "${ pool }".historical_workers (
+        timestamp, recent, miner,
+        worker, efficiency, effort,
+        hashrate, invalid, solo,
+        stale, type, valid)
+      VALUES ${ _this.buildHistoricalWorkersMain(updates) }
+      ON CONFLICT ON CONSTRAINT historical_workers_recent
+      DO NOTHING;`;
   };
 };
 
-module.exports = CurrentWorkers;
+module.exports = HistoricalWorkers;

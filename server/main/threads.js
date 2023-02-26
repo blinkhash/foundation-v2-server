@@ -23,10 +23,12 @@ const Threads = function(logger, client, configMain) {
       const loader = new Loader(_this.logger, _this.configMain);
       const builder = new Builder(_this.logger, _this.configMain);
       const configs = loader.handleConfigs();
-      _this.client.commands.schema.handleSchema(configs, () => {
-        builder.configs = configs;
-        builder.setupPoolServer();
-        builder.setupPoolWorkers();
+      _this.client.master.commands.schema.handleSchema(configs, () => {
+        _this.client.worker.commands.schema.handleSchema(configs, () => {
+          builder.configs = configs;
+          builder.setupPoolServer();
+          builder.setupPoolWorkers();
+        });
       });
     }
 

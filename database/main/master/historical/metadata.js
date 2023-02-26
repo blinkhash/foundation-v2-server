@@ -1,19 +1,21 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const CurrentPayments = function (logger, configMain) {
+const HistoricalMetadata = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Current Parameters
-  this.numbers = ['timestamp'];
-  this.strings = ['round', 'type'];
-  this.parameters = ['timestamp', 'round', 'type'];
+  // Handle Historical Parameters
+  this.numbers = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
+    'stale', 'valid', 'work', 'workers'];
+  this.strings = ['type'];
+  this.parameters = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
+    'stale', 'type', 'valid', 'work', 'workers'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -50,9 +52,9 @@ const CurrentPayments = function (logger, configMain) {
     return output;
   };
 
-  // Select Current Payments Using Parameters
-  this.selectCurrentPaymentsMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".current_payments`;
+  // Select Historical Metadata Using Parameters
+  this.selectHistoricalMetadataMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_metadata`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -64,35 +66,41 @@ const CurrentPayments = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Payments Values String
-  this.buildCurrentPaymentsMain = function(updates) {
+  // Build Metadata Values String
+  this.buildHistoricalMetadataMain = function(updates) {
     let values = '';
-    updates.forEach((transaction, idx) => {
+    updates.forEach((metadata, idx) => {
       values += `(
-        ${ transaction.timestamp },
-        '${ transaction.round }',
-        '${ transaction.type }')`;
+        ${ metadata.timestamp },
+        ${ metadata.recent },
+        ${ metadata.blocks },
+        ${ metadata.efficiency },
+        ${ metadata.effort },
+        ${ metadata.hashrate },
+        ${ metadata.invalid },
+        ${ metadata.miners },
+        ${ metadata.stale },
+        '${ metadata.type }',
+        ${ metadata.valid },
+        ${ metadata.work },
+        ${ metadata.workers })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
-  // Insert Rows Using Current Data
-  this.insertCurrentPaymentsMain = function(pool, updates) {
+  // Insert Rows Using Historical Data
+  this.insertHistoricalMetadataMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".current_payments (
-        timestamp, round, type)
-      VALUES ${ _this.buildCurrentPaymentsMain(updates) }
-      ON CONFLICT ON CONSTRAINT current_payments_unique
-      DO NOTHING RETURNING round;`;
-  };
-
-  // Delete Rows From Current Rounds
-  this.deleteCurrentPaymentsMain = function(pool, rounds) {
-    return `
-      DELETE FROM "${ pool }".current_payments
-      WHERE round IN (${ rounds.join(', ') });`;
+      INSERT INTO "${ pool }".historical_metadata (
+        timestamp, recent, blocks,
+        efficiency, effort, hashrate,
+        invalid, miners, stale,
+        type, valid, work, workers)
+      VALUES ${ _this.buildHistoricalMetadataMain(updates) }
+      ON CONFLICT ON CONSTRAINT historical_metadata_recent
+      DO NOTHING;`;
   };
 };
 
-module.exports = CurrentPayments;
+module.exports = HistoricalMetadata;

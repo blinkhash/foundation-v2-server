@@ -1,9 +1,9 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const HistoricalMetadata = function (logger, configMain) {
+const HistoricalRounds = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
@@ -11,11 +11,10 @@ const HistoricalMetadata = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Historical Parameters
-  this.numbers = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
-    'stale', 'valid', 'work', 'workers'];
-  this.strings = ['type'];
-  this.parameters = ['timestamp', 'blocks', 'efficiency', 'effort', 'hashrate', 'invalid', 'miners',
-    'stale', 'type', 'valid', 'work', 'workers'];
+  this.numbers = ['timestamp', 'invalid', 'stale', 'times', 'valid', 'work'];
+  this.strings = ['miner', 'worker', 'identifier', 'round', 'type'];
+  this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
+    'stale', 'times', 'type', 'valid', 'work'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -52,9 +51,9 @@ const HistoricalMetadata = function (logger, configMain) {
     return output;
   };
 
-  // Select Historical Metadata Using Parameters
-  this.selectHistoricalMetadataMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".historical_metadata`;
+  // Select Historical Rounds Using Parameters
+  this.selectHistoricalRoundsMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_rounds`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -66,41 +65,39 @@ const HistoricalMetadata = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Metadata Values String
-  this.buildHistoricalMetadataMain = function(updates) {
+  // Build Rounds Values String
+  this.buildHistoricalRoundsMain = function(updates) {
     let values = '';
-    updates.forEach((metadata, idx) => {
+    updates.forEach((round, idx) => {
       values += `(
-        ${ metadata.timestamp },
-        ${ metadata.recent },
-        ${ metadata.blocks },
-        ${ metadata.efficiency },
-        ${ metadata.effort },
-        ${ metadata.hashrate },
-        ${ metadata.invalid },
-        ${ metadata.miners },
-        ${ metadata.stale },
-        '${ metadata.type }',
-        ${ metadata.valid },
-        ${ metadata.work },
-        ${ metadata.workers })`;
+        ${ round.timestamp },
+        '${ round.miner }',
+        '${ round.worker }',
+        '${ round.identifier }',
+        ${ round.invalid },
+        '${ round.round }',
+        ${ round.solo },
+        ${ round.stale },
+        ${ round.times },
+        '${ round.type }',
+        ${ round.valid },
+        ${ round.work })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
   // Insert Rows Using Historical Data
-  this.insertHistoricalMetadataMain = function(pool, updates) {
+  this.insertHistoricalRoundsMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".historical_metadata (
-        timestamp, recent, blocks,
-        efficiency, effort, hashrate,
-        invalid, miners, stale,
-        type, valid, work, workers)
-      VALUES ${ _this.buildHistoricalMetadataMain(updates) }
-      ON CONFLICT ON CONSTRAINT historical_metadata_recent
-      DO NOTHING;`;
+      INSERT INTO "${ pool }".historical_rounds (
+        timestamp, miner, worker,
+        identifier, invalid, round,
+        solo, stale, times, type,
+        valid, work)
+      VALUES ${ _this.buildHistoricalRoundsMain(updates) }
+      ON CONFLICT DO NOTHING;`;
   };
 };
 
-module.exports = HistoricalMetadata;
+module.exports = HistoricalRounds;

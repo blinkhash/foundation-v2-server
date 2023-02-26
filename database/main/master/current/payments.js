@@ -1,20 +1,19 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const HistoricalWorkers = function (logger, configMain) {
+const CurrentPayments = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // Handle Historical Parameters
-  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
-  this.strings = ['miner', 'worker', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'invalid',
-    'solo', 'stale', 'type', 'valid'];
+  // Handle Current Parameters
+  this.numbers = ['timestamp'];
+  this.strings = ['round', 'type'];
+  this.parameters = ['timestamp', 'round', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -51,9 +50,9 @@ const HistoricalWorkers = function (logger, configMain) {
     return output;
   };
 
-  // Select Historical Workers Using Parameters
-  this.selectHistoricalWorkersMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".historical_workers`;
+  // Select Current Payments Using Parameters
+  this.selectCurrentPaymentsMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_payments`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -65,40 +64,35 @@ const HistoricalWorkers = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Workers Values String
-  this.buildHistoricalWorkersMain = function(updates) {
+  // Build Payments Values String
+  this.buildCurrentPaymentsMain = function(updates) {
     let values = '';
-    updates.forEach((worker, idx) => {
+    updates.forEach((transaction, idx) => {
       values += `(
-        ${ worker.timestamp },
-        ${ worker.recent },
-        '${ worker.miner }',
-        '${ worker.worker }',
-        ${ worker.efficiency },
-        ${ worker.effort },
-        ${ worker.hashrate },
-        ${ worker.invalid },
-        ${ worker.solo },
-        ${ worker.stale },
-        '${ worker.type }',
-        ${ worker.valid })`;
+        ${ transaction.timestamp },
+        '${ transaction.round }',
+        '${ transaction.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
-  // Insert Rows Using Historical Data
-  this.insertHistoricalWorkersMain = function(pool, updates) {
+  // Insert Rows Using Current Data
+  this.insertCurrentPaymentsMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".historical_workers (
-        timestamp, recent, miner,
-        worker, efficiency, effort,
-        hashrate, invalid, solo,
-        stale, type, valid)
-      VALUES ${ _this.buildHistoricalWorkersMain(updates) }
-      ON CONFLICT ON CONSTRAINT historical_workers_recent
-      DO NOTHING;`;
+      INSERT INTO "${ pool }".current_payments (
+        timestamp, round, type)
+      VALUES ${ _this.buildCurrentPaymentsMain(updates) }
+      ON CONFLICT ON CONSTRAINT current_payments_unique
+      DO NOTHING RETURNING round;`;
+  };
+
+  // Delete Rows From Current Rounds
+  this.deleteCurrentPaymentsMain = function(pool, rounds) {
+    return `
+      DELETE FROM "${ pool }".current_payments
+      WHERE round IN (${ rounds.join(', ') });`;
   };
 };
 
-module.exports = HistoricalWorkers;
+module.exports = CurrentPayments;

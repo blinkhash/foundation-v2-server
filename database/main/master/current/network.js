@@ -1,9 +1,9 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const CurrentTransactions = function (logger, configMain) {
+const CurrentNetwork = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
@@ -11,9 +11,9 @@ const CurrentTransactions = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  this.numbers = ['timestamp'];
-  this.strings = ['round', 'type'];
-  this.parameters = ['timestamp', 'round', 'type'];
+  this.numbers = ['timestamp', 'difficulty', 'hashrate', 'height'];
+  this.strings = ['type'];
+  this.parameters = ['timestamp', 'difficulty', 'hashrate', 'height', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -50,9 +50,9 @@ const CurrentTransactions = function (logger, configMain) {
     return output;
   };
 
-  // Select Current Transactions Using Parameters
-  this.selectCurrentTransactionsMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".current_transactions`;
+  // Select Current Network Using Parameters
+  this.selectCurrentNetworkMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".current_network`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -64,42 +64,36 @@ const CurrentTransactions = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Transactions Values String
-  this.buildCurrentTransactionsMain = function(updates) {
+  // Build Network Values String
+  this.buildCurrentNetworkMain = function(updates) {
     let values = '';
-    updates.forEach((transaction, idx) => {
+    updates.forEach((network, idx) => {
       values += `(
-        ${ transaction.timestamp },
-        '${ transaction.round }',
-        '${ transaction.type }')`;
+        ${ network.timestamp },
+        ${ network.difficulty },
+        ${ network.hashrate },
+        ${ network.height },
+        '${ network.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
-  // Insert Rows Using Transactions Data
-  this.insertCurrentTransactionsMain = function(pool, updates) {
+  // Insert Rows Using Current Data
+  this.insertCurrentNetworkMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".current_transactions (
-        timestamp, round, type)
-      VALUES ${ _this.buildCurrentTransactionsMain(updates) }
-      ON CONFLICT ON CONSTRAINT current_transactions_unique
-      DO NOTHING RETURNING round;`;
+      INSERT INTO "${ pool }".current_network (
+        timestamp, difficulty,
+        hashrate, height, type)
+      VALUES ${ _this.buildCurrentNetworkMain(updates) }
+      ON CONFLICT ON CONSTRAINT current_network_unique
+      DO UPDATE SET
+        timestamp = EXCLUDED.timestamp,
+        difficulty = EXCLUDED.difficulty,
+        hashrate = EXCLUDED.hashrate,
+        height = EXCLUDED.height;`;
   };
 
-  // Delete Rows From Current Rounds
-  this.deleteCurrentTransactionsMain = function(pool, rounds) {
-    return `
-      DELETE FROM "${ pool }".current_transactions
-      WHERE round IN (${ rounds.join(', ') });`;
-  };
-
-  // Delete Rows From Current Round
-  this.deleteCurrentTransactionsInactive = function(pool, timestamp) {
-    return `
-      DELETE FROM "${ pool }".current_transactions
-      WHERE timestamp < ${ timestamp };`;
-  };
 };
 
-module.exports = CurrentTransactions;
+module.exports = CurrentNetwork;

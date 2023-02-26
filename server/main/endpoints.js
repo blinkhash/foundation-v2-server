@@ -12,10 +12,11 @@ const Endpoints = function (logger, client, configMain) {
   this.configMain = configMain;
   this.text = Text[configMain.language];
 
-  // API Variables
-  this.executor = _this.client.commands.executor;
-  this.current = _this.client.commands.current;
-  this.historical = _this.client.commands.historical;
+  // Client Handlers
+  this.master = {
+    executor: _this.client.master.commands.executor,
+    current: _this.client.master.commands.current,
+    historical: _this.client.master.commands.historical };
 
   // Handle Blocks Queries
   this.handleCurrentBlocks = function(pool, queries, callback) {
@@ -71,8 +72,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Blocks Data
-    const transaction = [_this.current.blocks.selectCurrentBlocksMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.blocks.selectCurrentBlocksMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Hashrate Queries
@@ -121,8 +122,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Hashrate Data
-    const transaction = [_this.current.hashrate.selectCurrentHashrateMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.hashrate.selectCurrentHashrateMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Metadata Queries
@@ -170,8 +171,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Metadata Data
-    const transaction = [_this.current.metadata.selectCurrentMetadataMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.metadata.selectCurrentMetadataMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Miners Queries
@@ -219,8 +220,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Miners Data
-    const transaction = [_this.current.miners.selectCurrentMinersMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.miners.selectCurrentMinersMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Network Queries
@@ -265,8 +266,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Network Data
-    const transaction = [_this.current.network.selectCurrentNetworkMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.network.selectCurrentNetworkMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Payments Queries
@@ -314,8 +315,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Payments Data
-    const transaction = [_this.current.payments.selectCurrentPaymentsMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.payments.selectCurrentPaymentsMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Rounds Queries
@@ -367,8 +368,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Rounds Data
-    const transaction = [_this.current.rounds.selectCurrentRoundsMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.rounds.selectCurrentRoundsMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Transactions Queries
@@ -416,8 +417,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Transactions Data
-    const transaction = [_this.current.transactions.selectCurrentTransactionsMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.transactions.selectCurrentTransactionsMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Workers Queries
@@ -463,8 +464,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Workers Data
-    const transaction = [_this.current.workers.selectCurrentWorkersMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.current.workers.selectCurrentWorkersMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Blocks Queries
@@ -521,8 +522,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Blocks Data
-    const transaction = [_this.historical.blocks.selectHistoricalBlocksMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.blocks.selectHistoricalBlocksMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Metadata Queries
@@ -569,8 +570,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Metadata Data
-    const transaction = [_this.historical.metadata.selectHistoricalMetadataMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.metadata.selectHistoricalMetadataMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Miners Queries
@@ -616,8 +617,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Miners Data
-    const transaction = [_this.historical.miners.selectHistoricalMinersMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.miners.selectHistoricalMinersMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Network Queries
@@ -662,8 +663,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Network Data
-    const transaction = [_this.historical.network.selectHistoricalNetworkMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.network.selectHistoricalNetworkMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Payments Queries
@@ -708,8 +709,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Payments Data
-    const transaction = [_this.historical.payments.selectHistoricalPaymentsMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.payments.selectHistoricalPaymentsMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Rounds Queries
@@ -760,8 +761,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Rounds Data
-    const transaction = [_this.historical.rounds.selectHistoricalRoundsMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.rounds.selectHistoricalRoundsMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Transactions Queries
@@ -806,8 +807,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Transactions Data
-    const transaction = [_this.historical.transactions.selectHistoricalTransactionsMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.transactions.selectHistoricalTransactionsMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Workers Queries
@@ -853,8 +854,8 @@ const Endpoints = function (logger, client, configMain) {
     }
 
     // Make Request and Return Workers Data
-    const transaction = [_this.historical.workers.selectHistoricalWorkersMain(pool, queries)];
-    _this.executor(transaction, (lookups) => callback(200, lookups.rows));
+    const transaction = [_this.master.historical.workers.selectHistoricalWorkersMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => callback(200, lookups.rows));
   };
 
   // Handle Blocks Queries
@@ -912,9 +913,9 @@ const Endpoints = function (logger, client, configMain) {
 
     // Make Request and Return Blocks Data
     const transaction = [
-      _this.current.blocks.selectCurrentBlocksMain(pool, queries),
-      _this.historical.blocks.selectHistoricalBlocksMain(pool, queries)];
-    _this.executor(transaction, (lookups) => {
+      _this.master.current.blocks.selectCurrentBlocksMain(pool, queries),
+      _this.master.historical.blocks.selectHistoricalBlocksMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => {
       callback(200, lookups.map((data, idx) => {
         const partition = idx === 0 ? 'current' : 'historical';
         return data.rows.map((obj) => ({ ...obj, partition: partition }));
@@ -972,9 +973,9 @@ const Endpoints = function (logger, client, configMain) {
 
     // Make Request and Return Rounds Data
     const transaction = [
-      _this.current.rounds.selectCurrentRoundsMain(pool, queries),
-      _this.historical.rounds.selectHistoricalRoundsMain(pool, queries)];
-    _this.executor(transaction, (lookups) => {
+      _this.master.current.rounds.selectCurrentRoundsMain(pool, queries),
+      _this.master.historical.rounds.selectHistoricalRoundsMain(pool, queries)];
+    _this.master.executor(transaction, (lookups) => {
       callback(200, lookups.map((data, idx) => {
         const partition = idx === 0 ? 'current' : 'historical';
         return data.rows.map((obj) => ({ ...obj, partition: partition }));

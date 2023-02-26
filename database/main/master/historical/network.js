@@ -1,9 +1,9 @@
-const Text = require('../../../locales/index');
+const Text = require('../../../../locales/index');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Main Schema Function
-const HistoricalRounds = function (logger, configMain) {
+const HistoricalNetwork = function (logger, configMain) {
 
   const _this = this;
   this.logger = logger;
@@ -11,10 +11,9 @@ const HistoricalRounds = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Historical Parameters
-  this.numbers = ['timestamp', 'invalid', 'stale', 'times', 'valid', 'work'];
-  this.strings = ['miner', 'worker', 'identifier', 'round', 'type'];
-  this.parameters = ['timestamp', 'miner', 'worker', 'identifier', 'invalid', 'round', 'solo',
-    'stale', 'times', 'type', 'valid', 'work'];
+  this.numbers = ['timestamp', 'difficulty', 'hashrate', 'height'];
+  this.strings = ['type'];
+  this.parameters = ['timestamp', 'difficulty', 'hashrate', 'height', 'type'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -51,9 +50,9 @@ const HistoricalRounds = function (logger, configMain) {
     return output;
   };
 
-  // Select Historical Rounds Using Parameters
-  this.selectHistoricalRoundsMain = function(pool, parameters) {
-    let output = `SELECT * FROM "${ pool }".historical_rounds`;
+  // Select Historical Network Using Parameters
+  this.selectHistoricalNetworkMain = function(pool, parameters) {
+    let output = `SELECT * FROM "${ pool }".historical_network`;
     const filtered = Object.keys(parameters).filter((key) => _this.parameters.includes(key));
     filtered.forEach((parameter, idx) => {
       if (idx === 0) output += ' WHERE ';
@@ -65,39 +64,32 @@ const HistoricalRounds = function (logger, configMain) {
     return output + ';';
   };
 
-  // Build Rounds Values String
-  this.buildHistoricalRoundsMain = function(updates) {
+  // Build Network Values String
+  this.buildHistoricalNetworkMain = function(updates) {
     let values = '';
-    updates.forEach((round, idx) => {
+    updates.forEach((network, idx) => {
       values += `(
-        ${ round.timestamp },
-        '${ round.miner }',
-        '${ round.worker }',
-        '${ round.identifier }',
-        ${ round.invalid },
-        '${ round.round }',
-        ${ round.solo },
-        ${ round.stale },
-        ${ round.times },
-        '${ round.type }',
-        ${ round.valid },
-        ${ round.work })`;
+        ${ network.timestamp },
+        ${ network.recent },
+        ${ network.difficulty },
+        ${ network.hashrate },
+        ${ network.height },
+        '${ network.type }')`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
   };
 
   // Insert Rows Using Historical Data
-  this.insertHistoricalRoundsMain = function(pool, updates) {
+  this.insertHistoricalNetworkMain = function(pool, updates) {
     return `
-      INSERT INTO "${ pool }".historical_rounds (
-        timestamp, miner, worker,
-        identifier, invalid, round,
-        solo, stale, times, type,
-        valid, work)
-      VALUES ${ _this.buildHistoricalRoundsMain(updates) }
-      ON CONFLICT DO NOTHING;`;
+      INSERT INTO "${ pool }".historical_network (
+        timestamp, recent, difficulty,
+        hashrate, height, type)
+      VALUES ${ _this.buildHistoricalNetworkMain(updates) }
+      ON CONFLICT ON CONSTRAINT historical_network_recent
+      DO NOTHING;`;
   };
 };
 
-module.exports = HistoricalRounds;
+module.exports = HistoricalNetwork;
