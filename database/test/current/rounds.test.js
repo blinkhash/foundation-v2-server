@@ -1,4 +1,4 @@
-const CurrentRounds = require('../../main/current/rounds');
+const CurrentRounds = require('../../main/master/current/rounds');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main/example.js');
 const logger = new Logger(configMain);

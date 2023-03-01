@@ -28,15 +28,15 @@ const Rounds = function (logger, client, config, configMain) {
     local: _this.client.worker.commands.local };
 
   // Handle Efficiency Updates
-  this.handleEfficiency = function(roundData, shareType) {
-    const valid = shareType === 'valid' ? (roundData.valid || 0) + 1 : (roundData.valid || 0);
-    const total = (roundData.valid || 0) + (roundData.stale || 0) + (roundData.invalid || 0) + 1;
+  this.handleEfficiency = function(round, shareType) {
+    const valid = shareType === 'valid' ? (round.valid || 0) + 1 : (round.valid || 0);
+    const total = (round.valid || 0) + (round.stale || 0) + (round.invalid || 0) + 1;
     return Math.round(((valid / total) || 0) * 10000) / 100;
   };
 
   // Handle Effort Updates
-  this.handleEffort = function(work, shareData, shareType, difficulty) {
-    const total = shareType === 'valid' ? work + (shareData.clientdiff || 0) : work;
+  this.handleEffort = function(share, difficulty, work, shareType) {
+    const total = shareType === 'valid' ? work + (share.clientdiff || 0) : work;
     return Math.round(((total / difficulty) || 0) * 10000) / 100;
   };
 
@@ -48,6 +48,44 @@ const Rounds = function (logger, client, config, configMain) {
     if (timeChange < 900) times += timeChange;
     return times;
   };
+
+  // Handle Hashrate Updates
+  this.handleCurrentHashrate = function(share, shareType, minerType, blockType) {
+
+    // Calculate Features of Hashrate
+    const current = shareType === 'valid' ? share.clientdiff : 0;
+    const identifier = share.identifier || 'master';
+    const worker = blockType === 'primary' ? share.addrprimary : share.addrauxiliary
+
+    // Return Hashrate Updates
+    return {
+      timestamp: Date.now(),
+      miner: (worker || '').split('.')[0],
+      worker: worker,
+      identifier: identifier,
+      share: shareType,
+      solo: minerType,
+      type: blockType,
+      work: current,
+    };
+  };
+
+  // Handle Metadata Updates
+  this.handleCurrentMetadata = function(metadata, round, share, shareType, minerType, blockType) {
+
+    // Calculate Features of Metadata
+    const invalid = shareType === 'invalid' ? 1 : 0;
+    const stale = shareType === 'stale' ? 1 : 0;
+    const valid = shareType === 'valid' ? 1 : 0;
+    const current = shareType === 'valid' ? shareData.clientdiff : 0;
+    const difficulty = blockType === 'primary' ? share.blockdiffprimary : share.blockdiffauxiliary;
+    const work = minerType ? (round.work || 0) : (metadata.work || 0);
+
+    // Calculate Efficiency/Effort Metadata
+    const efficiency = _this.handleEfficiency(metadata, shareType);
+    const effort = _this.handleEffort(share, difficulty, work, shareType);
+  };
+
 
   // // Handle Blocks Updates
   // this.handleCurrentBlocks = function(work, worker, difficulty, round, shareData, shareType, minerType, blockType) {
@@ -361,10 +399,6 @@ const Rounds = function (logger, client, config, configMain) {
   //   if (shareData.error && shareData.error === 'job not found') shareType = 'stale';
   //   else if (!shareValid || shareData.error) shareType = 'invalid';
   //
-  //   // Build Round Parameters
-  //   const parameters = { worker: shareData.addrprimary, solo: minerType, type: 'primary', order: 'timestamp', direction: 'descending' };
-  //   const auxParameters = { worker: shareData.addrauxiliary, solo: minerType, type: 'auxiliary', order: 'timestamp', direction: 'descending' };
-  //
   //   // Build Combined Transaction
   //   const transaction = [
   //     'BEGIN;',
@@ -413,26 +447,113 @@ const Rounds = function (logger, client, config, configMain) {
   //   }
   // };
 
-  // Handle Share/Block Updates
-  this.handleShares = function(shares, callback) {
+  // Handle Round Updates
+  this.handleUpdates = function(lookups, shares, callback) {
 
     // Build Combined Transaction
     const transaction = ['BEGIN;'];
 
-    // Separate into Segments
-    let current = [];
-    const segments = [];
+    // Establish Specific Lookups
+    let metadata = lookups[1].rows[0] || {};
+    let auxMetadata = lookups[2].rows[0] || {};
+    const roundSolo = lookups[3].rows || [];
+    const roundShared = lookups[4].rows || [];
+    const auxRoundSolo = lookups[5].rows || [];
+    const auxRoundShared = lookups[6].rows || [];
+
+    // Designate Update Containers
+    const hashrateUpdates = [];
+    const auxHashrateUpdates = [];
+
+    // Handle Individual Shares
+    const current = {};
     shares.forEach((share) => {
-      current.push(share);
-      if (share.blockType !== 'share') {
-        segments.push(current);
-        current = [];
+
+      // Calculate Share Features
+      let shareType = 'valid';
+      const minerType = utils.checkSoloMining(_this.config, share);
+      if (share.error && share.error === 'job not found') shareType = 'stale';
+      else if (!share.sharevalid || share.error) shareType = 'invalid';
+
+      // Handle Hashrate Updates
+      if (Date.now() - _this.config.settings.window.hashrate <= share.timestamp) {
+        hashrateUpdates.push(_this.handleCurrentHashrate(share, shareType, minerType, 'primary'));
+        auxHashrateUpdates.push(_this.handleCurrentHashrate(share, shareType, minerType, 'auxiliary'));
       }
     });
 
-    // Handle Batch Logic
-    segments.push(current);
-    console.log(segments);
+    // Add Primary Hashrate Updates
+    if (hashrateUpdates.length >= 1) {
+      transaction.push(_this.master.current.hashrate.insertCurrentHashrateMain(_this.pool, hashrateUpdates));
+    }
+
+    // Add Auxiliary Hashrate Updates
+    if (_this.config.auxiliary && _this.config.auxiliary.enabled && auxHashrateUpdates.length >= 1) {
+      transaction.push(_this.master.current.hashrate.insertCurrentHashrateMain(_this.pool, auxHashrateUpdates));
+    }
+
+    //   // Build Combined Transaction
+    //   const transaction = [
+    //     'BEGIN;',
+    //     ,
+    //     _this.master.current.metadata.insertCurrentMetadataRounds(_this.pool, [metadataUpdates]),
+    //     _this.master.current.miners.insertCurrentMinersRounds(_this.pool, [minerUpdates]),
+    //     _this.master.current.rounds.insertCurrentRoundsMain(_this.pool, [roundUpdates]),
+    //     _this.master.current.workers.insertCurrentWorkersRounds(_this.pool, [workerUpdates])];
+    //
+    //   // Add Support for Auxiliary Handling
+    //   if (_this.config.auxiliary && _this.config.auxiliary.enabled) {
+    //     transaction.push(_this.master.current.hashrate.insertCurrentHashrateMain(_this.pool, [auxHashrateUpdates]));
+    //     transaction.push(_this.master.current.metadata.insertCurrentMetadataRounds(_this.pool, [auxMetadataUpdates]));
+    //     transaction.push(_this.master.current.miners.insertCurrentMinersRounds(_this.pool, [auxMinerUpdates]));
+    //     transaction.push(_this.master.current.rounds.insertCurrentRoundsMain(_this.pool, [auxRoundUpdates]));
+    //     transaction.push(_this.master.current.workers.insertCurrentWorkersRounds(_this.pool, [auxWorkerUpdates]));
+    //   }
+
+    // Insert Work into Database
+    transaction.push('COMMIT;');
+    //   _this.master.executor(transaction, () => callback());
+  };
+
+  // Handle Share/Block Updates
+  this.handleShares = function(shares, callback) {
+
+    // Initialize Designators
+    const addrPrimarySolo = [];
+    const addrPrimaryShared = [];
+    const addrAuxiliarySolo = [];
+    const addrAuxiliaryShared = [];
+
+    // Handle Individual Shares
+    shares.forEach((share) => {
+      const minerType = utils.checkSoloMining(_this.config, share);
+
+      // Track Primary/Auxiliary Share Addresses
+      const primary = `'${ share.addrprimary }'`;
+      const auxiliary = `'${ share.addrauxiliary }'`;
+
+      // Handle Share Designations
+      if (!(addrPrimarySolo.includes(primary)) && minerType) addrPrimarySolo.push(primary);
+      if (!(addrPrimaryShared.includes(primary)) && !minerType) addrPrimaryShared.push(primary);
+      if (!(addrAuxiliarySolo.includes(auxiliary)) && minerType) addrAuxiliarySolo.push(auxiliary);
+      if (!(addrAuxiliaryShared.includes(auxiliary)) && !minerType) addrAuxiliaryShared.push(auxiliary);
+    });
+
+    // Build Combined Transaction
+    const transaction = [
+      'BEGIN;',
+      _this.master.current.metadata.selectCurrentMetadataMain(_this.pool, { type: 'primary' }),
+      _this.master.current.metadata.selectCurrentMetadataMain(_this.pool, { type: 'auxiliary' }),
+      _this.master.current.rounds.selectCurrentRoundsBatchAddressesSolo(_this.pool, addrPrimarySolo, 'primary'),
+      _this.master.current.rounds.selectCurrentRoundsBatchAddressesShared(_this.pool, addrPrimaryShared, 'primary'),
+      _this.master.current.rounds.selectCurrentRoundsBatchAddressesSolo(_this.pool, addrAuxiliarySolo, 'auxiliary'),
+      _this.master.current.rounds.selectCurrentRoundsBatchAddressesShared(_this.pool, addrAuxiliaryShared, 'auxiliary'),
+      'COMMIT;'];
+
+    // Handle Combined Batch Lookups
+    _this.master.executor(transaction, (lookups) => {
+      _this.handleUpdates(lookups, shares, () => callback());
+    });
   };
 
   // Handle Share/Block Batches
@@ -484,7 +605,7 @@ const Rounds = function (logger, client, config, configMain) {
 
     // Handle Initial Logging
     const starting = [_this.text.databaseStartingText4()];
-    _this.logger.log('Rounds', _this.config.name, starting);
+    _this.logger.debug('Rounds', _this.config.name, starting);
 
     // Build Combined Transaction
     const transaction = [
@@ -501,13 +622,13 @@ const Rounds = function (logger, client, config, configMain) {
   // Start Rounds Interval Management
   /* istanbul ignore next */
   this.handleInterval = function() {
-    const minInterval = _this.config.settings.interval.rounds * 0.75;
-    const maxInterval = _this.config.settings.interval.rounds * 1.25;
-    const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
-    setTimeout(() => {
-      _this.handleInterval();
+    // const minInterval = _this.config.settings.interval.rounds * 0.75;
+    // const maxInterval = _this.config.settings.interval.rounds * 1.25;
+    // const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
+    // setTimeout(() => {
+    //   _this.handleInterval();
       _this.handleRounds(() => {});
-    }, random);
+    // }, random);
   };
 
   // Start Rounds Capabilities

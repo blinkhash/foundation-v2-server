@@ -1,4 +1,4 @@
-const CurrentWorkers = require('../../main/current/workers');
+const CurrentWorkers = require('../../main/master/current/workers');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main/example.js');
 const logger = new Logger(configMain);

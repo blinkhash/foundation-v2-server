@@ -1,4 +1,4 @@
-const CurrentHashrate = require('../../main/current/hashrate');
+const CurrentHashrate = require('../../main/master/current/hashrate');
 const Logger = require('../../../server/main/logger');
 const configMain = require('../../../configs/main/example.js');
 const logger = new Logger(configMain);

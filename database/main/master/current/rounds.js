@@ -88,6 +88,26 @@ const CurrentRounds = function (logger, configMain) {
     return values;
   };
 
+  // Select Current Rounds Using Parameters
+  this.selectCurrentRoundsBatchAddressesSolo = function(pool, addresses, type) {
+    return addresses.length >= 1 ? `
+      SELECT DISTINCT ON (worker) * FROM "${ pool }".current_rounds
+      WHERE worker IN (${ addresses.join(', ') })
+      AND solo = true AND type = '${ type }'
+      ORDER BY worker, timestamp DESC;` : `
+      SELECT * FROM "${ pool }".current_rounds LIMIT 0;`;
+  };
+
+  // Select Current Rounds Using Parameters
+  this.selectCurrentRoundsBatchAddressesShared = function(pool, addresses, type) {
+    return addresses.length >= 1 ? `
+      SELECT DISTINCT ON (worker) * FROM "${ pool }".current_rounds
+      WHERE worker IN (${ addresses.join(', ') })
+      AND solo = false AND type = '${ type }'
+      ORDER BY worker, timestamp DESC;` : `
+      SELECT * FROM "${ pool }".current_rounds LIMIT 0;`;
+  };
+
   // Insert Rows Using Round Data
   this.insertCurrentRoundsMain = function(pool, updates) {
     return `
