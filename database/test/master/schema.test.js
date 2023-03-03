@@ -1,6 +1,6 @@
-const Schema = require('../main/schema');
-const Logger = require('../../server/main/logger');
-const configMain = require('../../configs/main/example.js');
+const Schema = require('../../main/master/schema');
+const Logger = require('../../../server/main/logger');
+const configMain = require('../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,6 +195,7 @@ describe('Test schema functionality', () => {
         stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
         valid INT NOT NULL DEFAULT 0,
+        work FLOAT NOT NULL DEFAULT 0,
         CONSTRAINT current_miners_unique UNIQUE (miner, type));
       CREATE INDEX current_miners_balance ON "Pool-Main".current_miners(balance, type);
       CREATE INDEX current_miners_miner ON "Pool-Main".current_miners(miner, type);
@@ -281,6 +282,7 @@ describe('Test schema functionality', () => {
       CREATE TABLE "Pool-Main".current_rounds(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
+        submitted BIGINT NOT NULL DEFAULT -1,
         recent BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
@@ -362,6 +364,7 @@ describe('Test schema functionality', () => {
         stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
         valid INT NOT NULL DEFAULT 0,
+        work FLOAT NOT NULL DEFAULT 0,
         CONSTRAINT current_workers_unique UNIQUE (worker, solo, type));
       CREATE INDEX current_workers_miner ON "Pool-Main".current_workers(miner, type);
       CREATE INDEX current_workers_solo ON "Pool-Main".current_workers(solo, type);
@@ -483,6 +486,7 @@ describe('Test schema functionality', () => {
         stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
         valid INT NOT NULL DEFAULT 0,
+        work FLOAT NOT NULL DEFAULT 0,
         CONSTRAINT historical_miners_recent UNIQUE (recent, miner, type));
       CREATE INDEX historical_miners_miner ON "Pool-Main".historical_miners(miner, type);
       CREATE INDEX historical_miners_type ON "Pool-Main".historical_miners(type);`;
@@ -572,6 +576,7 @@ describe('Test schema functionality', () => {
       CREATE TABLE "Pool-Main".historical_rounds(
         id BIGSERIAL PRIMARY KEY,
         timestamp BIGINT NOT NULL DEFAULT -1,
+        submitted BIGINT NOT NULL DEFAULT -1,
         miner VARCHAR NOT NULL DEFAULT 'unknown',
         worker VARCHAR NOT NULL DEFAULT 'unknown',
         identifier VARCHAR NOT NULL DEFAULT 'master',
@@ -654,6 +659,7 @@ describe('Test schema functionality', () => {
         stale INT NOT NULL DEFAULT 0,
         type VARCHAR NOT NULL DEFAULT 'primary',
         valid INT NOT NULL DEFAULT 0,
+        work FLOAT NOT NULL DEFAULT 0,
         CONSTRAINT historical_workers_recent UNIQUE (recent, worker, type));
       CREATE INDEX historical_workers_miner ON "Pool-Main".historical_workers(miner, type);
       CREATE INDEX historical_workers_worker ON "Pool-Main".historical_workers(worker, type);

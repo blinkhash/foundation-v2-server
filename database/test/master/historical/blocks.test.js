@@ -1,6 +1,6 @@
-const HistoricalBlocks = require('../../main/historical/blocks');
-const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main/example.js');
+const HistoricalBlocks = require('../../../main/master/historical/blocks');
+const Logger = require('../../../../server/main/logger');
+const configMain = require('../../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////

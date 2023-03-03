@@ -13,7 +13,8 @@ process.env.configMain = JSON.stringify(configMain);
 
 function mockClient() {
   const client = new events.EventEmitter();
-  client.commands = { executor: () => {}, current: {}, historical: {}};
+  client.master = { commands: { executor: () => {}, current: {}, historical: {}} };
+  client.worker = { commands: { executor: () => {}, local: {} }};
   return client;
 }
 

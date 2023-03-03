@@ -1,6 +1,6 @@
-const CurrentWorkers = require('../../main/master/current/workers');
-const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main/example.js');
+const CurrentWorkers = require('../../../main/master/current/workers');
+const Logger = require('../../../../server/main/logger');
+const configMain = require('../../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,26 @@ describe('Test database workers functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test workers command handling [4]', () => {
+  test('Test workers command handling [5]', () => {
+    const workers = new CurrentWorkers(logger, configMainCopy);
+    const addresses = ['address1', 'address2', 'address3'];
+    const response = workers.selectCurrentWorkersBatchAddresses('Pool-Main', addresses, 'primary');
+    const expected = `
+      SELECT DISTINCT ON (worker) * FROM "Pool-Main".current_workers
+      WHERE worker IN (address1, address2, address3) AND type = 'primary'
+      ORDER BY worker, timestamp DESC;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test workers command handling [6]', () => {
+    const workers = new CurrentWorkers(logger, configMainCopy);
+    const response = workers.selectCurrentWorkersBatchAddresses('Pool-Main', [], 'primary');
+    const expected = `
+      SELECT * FROM "Pool-Main".current_workers LIMIT 0;`
+    expect(response).toBe(expected);
+  });
+
+  test('Test workers command handling [7]', () => {
     const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
@@ -107,7 +126,7 @@ describe('Test database workers functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test workers command handling [5]', () => {
+  test('Test workers command handling [8]', () => {
     const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
@@ -142,7 +161,7 @@ describe('Test database workers functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test workers command handling [6]', () => {
+  test('Test workers command handling [9]', () => {
     const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
@@ -155,13 +174,15 @@ describe('Test database workers functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     };
     const response = workers.insertCurrentWorkersRounds('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
         efficiency, effort, invalid,
-        solo, stale, type, valid)
+        solo, stale, type, valid,
+        work)
       VALUES (
         1,
         'miner1',
@@ -172,6 +193,7 @@ describe('Test database workers functionality', () => {
         false,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
@@ -181,11 +203,12 @@ describe('Test database workers functionality', () => {
         invalid = "Pool-Main".current_workers.invalid + EXCLUDED.invalid,
         solo = EXCLUDED.solo,
         stale = "Pool-Main".current_workers.stale + EXCLUDED.stale,
-        valid = "Pool-Main".current_workers.valid + EXCLUDED.valid;`;
+        valid = "Pool-Main".current_workers.valid + EXCLUDED.valid,
+        work = "Pool-Main".current_workers.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
   });
 
-  test('Test workers command handling [7]', () => {
+  test('Test workers command handling [10]', () => {
     const workers = new CurrentWorkers(logger, configMainCopy);
     const updates = {
       worker: 'worker1',
@@ -198,13 +221,15 @@ describe('Test database workers functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     };
     const response = workers.insertCurrentWorkersRounds('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_workers (
         timestamp, miner, worker,
         efficiency, effort, invalid,
-        solo, stale, type, valid)
+        solo, stale, type, valid,
+        work)
       VALUES (
         1,
         'miner1',
@@ -215,6 +240,7 @@ describe('Test database workers functionality', () => {
         false,
         0,
         'primary',
+        1,
         1), (
         1,
         'miner1',
@@ -225,6 +251,7 @@ describe('Test database workers functionality', () => {
         false,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
@@ -234,11 +261,12 @@ describe('Test database workers functionality', () => {
         invalid = "Pool-Main".current_workers.invalid + EXCLUDED.invalid,
         solo = EXCLUDED.solo,
         stale = "Pool-Main".current_workers.stale + EXCLUDED.stale,
-        valid = "Pool-Main".current_workers.valid + EXCLUDED.valid;`;
+        valid = "Pool-Main".current_workers.valid + EXCLUDED.valid,
+        work = "Pool-Main".current_workers.work + EXCLUDED.work;`;
     expect(response).toBe(expected);
   });
 
-  test('Test workers command handling [8]', () => {
+  test('Test workers command handling [11]', () => {
     const workers = new CurrentWorkers(logger, configMainCopy);
     const response = workers.deleteCurrentWorkersInactive('Pool-Main', 1);
     const expected = `

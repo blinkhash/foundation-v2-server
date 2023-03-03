@@ -1,6 +1,6 @@
-const HistoricalMiners = require('../../main/historical/miners');
-const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main/example.js');
+const HistoricalMiners = require('../../../main/master/historical/miners');
+const Logger = require('../../../../server/main/logger');
+const configMain = require('../../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,13 +83,15 @@ describe('Test database miners functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     };
     const response = miners.insertHistoricalMinersMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        invalid, stale, type, valid)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         1,
         1,
@@ -100,6 +102,7 @@ describe('Test database miners functionality', () => {
         0,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
@@ -119,13 +122,15 @@ describe('Test database miners functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     };
     const response = miners.insertHistoricalMinersMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        invalid, stale, type, valid)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         1,
         1,
@@ -136,6 +141,7 @@ describe('Test database miners functionality', () => {
         0,
         0,
         'primary',
+        1,
         1), (
         1,
         1,
@@ -146,6 +152,7 @@ describe('Test database miners functionality', () => {
         0,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;

@@ -1,5 +1,4 @@
 const Text = require('../../locales/index');
-const utils = require('./utils');
 const uuid = require('uuid');
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,12 +39,12 @@ const Shares = function (logger, client, config, configMain) {
       timestamp: Date.now(),
       submitted: submitted,
       ip: shareData.ip,
-      port: shareData.port,
+      port: parseFloat(shareData.port),
       addrprimary: shareData.addrPrimary,
-      addrauxiliary: shareData.addrAuxiliary,
+      addrauxiliary: shareData.addrAuxiliary || '',
       blockdiffprimary: shareData.blockDiffPrimary,
-      blockdiffauxiliary: shareData.blockDiffAuxiliary,
-      blockvalid: blockValid || false,
+      blockdiffauxiliary: shareData.blockDiffAuxiliary || -1,
+      blockvalid: blockValid,
       blocktype: shareData.blockType,
       clientdiff: shareData.difficulty,
       hash: shareData.hash,
@@ -53,7 +52,7 @@ const Shares = function (logger, client, config, configMain) {
       identifier: shareData.identifier,
       reward: shareData.reward,
       sharediff: shareData.shareDiff,
-      sharevalid: shareValid || false,
+      sharevalid: shareValid,
       transaction: transaction,
     };
   };
@@ -77,7 +76,6 @@ const Shares = function (logger, client, config, configMain) {
 
     // Calculate Share Features
     let shareType = 'valid';
-    const minerType = utils.checkSoloMining(_this.config, shareData);
     if (shareData.error && shareData.error === 'job not found') shareType = 'stale';
     else if (!shareValid || shareData.error) shareType = 'invalid';
 

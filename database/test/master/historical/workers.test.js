@@ -1,6 +1,6 @@
-const HistoricalWorkers = require('../../main/historical/workers');
-const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main/example.js');
+const HistoricalWorkers = require('../../../main/master/historical/workers');
+const Logger = require('../../../../server/main/logger');
+const configMain = require('../../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,6 +93,7 @@ describe('Test database workers functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     };
     const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates]);
     const expected = `
@@ -100,7 +101,7 @@ describe('Test database workers functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1,
         1,
@@ -113,6 +114,7 @@ describe('Test database workers functionality', () => {
         false,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -134,6 +136,7 @@ describe('Test database workers functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     };
     const response = workers.insertHistoricalWorkersMain('Pool-Main', [updates, updates]);
     const expected = `
@@ -141,7 +144,7 @@ describe('Test database workers functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1,
         1,
@@ -154,6 +157,7 @@ describe('Test database workers functionality', () => {
         false,
         0,
         'primary',
+        1,
         1), (
         1,
         1,
@@ -166,6 +170,7 @@ describe('Test database workers functionality', () => {
         false,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;

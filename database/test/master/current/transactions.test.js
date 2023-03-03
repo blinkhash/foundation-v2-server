@@ -1,6 +1,6 @@
-const CurrentTransactions = require('../../main/master/current/transactions');
-const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main/example.js');
+const CurrentTransactions = require('../../../main/master/current/transactions');
+const Logger = require('../../../../server/main/logger');
+const configMain = require('../../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////

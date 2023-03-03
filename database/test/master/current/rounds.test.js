@@ -1,6 +1,6 @@
-const CurrentRounds = require('../../main/master/current/rounds');
-const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main/example.js');
+const CurrentRounds = require('../../../main/master/current/rounds');
+const Logger = require('../../../../server/main/logger');
+const configMain = require('../../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,14 +104,34 @@ describe('Test database rounds functionality', () => {
 
   test('Test rounds command handling [8]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
+    const addresses = ['address1', 'address2', 'address3'];
+    const response = rounds.selectCurrentRoundsBatchAddresses('Pool-Main', addresses, 'primary');
+    const expected = `
+      SELECT DISTINCT ON (worker) * FROM "Pool-Main".current_rounds
+      WHERE worker IN (address1, address2, address3) AND type = 'primary'
+      ORDER BY worker, timestamp DESC;`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test rounds command handling [9]', () => {
+    const rounds = new CurrentRounds(logger, configMainCopy);
+    const response = rounds.selectCurrentRoundsBatchAddresses('Pool-Main', [], 'primary');
+    const expected = `
+      SELECT * FROM "Pool-Main".current_rounds LIMIT 0;`
+    expect(response).toBe(expected);
+  });
+
+  test('Test rounds command handling [10]', () => {
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      submitted: 1,
       recent: 1,
       miner: 'miner1',
       worker: 'worker1',
-      round: 'round1',
       identifier: 'master',
       invalid: 0,
+      round: 'round1',
       solo: true,
       stale: 0,
       times: 100,
@@ -122,11 +142,12 @@ describe('Test database rounds functionality', () => {
     const response = rounds.insertCurrentRoundsMain('Pool-Main', [updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_rounds (
-        timestamp, recent, miner,
-        worker, identifier, invalid,
-        round, solo, stale, times,
-        type, valid, work)
+        timestamp, submitted, recent,
+        miner, worker, identifier, invalid,
+        round, solo, stale, times, type,
+        valid, work)
       VALUES (
+        1,
         1,
         1,
         'miner1',
@@ -143,6 +164,7 @@ describe('Test database rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_rounds_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
+        submitted = EXCLUDED.submitted,
         invalid = "Pool-Main".current_rounds.invalid + EXCLUDED.invalid,
         stale = "Pool-Main".current_rounds.stale + EXCLUDED.stale,
         times = GREATEST("Pool-Main".current_rounds.times, EXCLUDED.times),
@@ -151,10 +173,11 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [9]', () => {
+  test('Test rounds command handling [11]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
+      submitted: 1,
       recent: 1,
       miner: 'miner1',
       worker: 'worker1',
@@ -171,11 +194,12 @@ describe('Test database rounds functionality', () => {
     const response = rounds.insertCurrentRoundsMain('Pool-Main', [updates, updates]);
     const expected = `
       INSERT INTO "Pool-Main".current_rounds (
-        timestamp, recent, miner,
-        worker, identifier, invalid,
-        round, solo, stale, times,
-        type, valid, work)
+        timestamp, submitted, recent,
+        miner, worker, identifier, invalid,
+        round, solo, stale, times, type,
+        valid, work)
       VALUES (
+        1,
         1,
         1,
         'miner1',
@@ -189,6 +213,7 @@ describe('Test database rounds functionality', () => {
         'primary',
         1,
         8), (
+        1,
         1,
         1,
         'miner1',
@@ -205,6 +230,7 @@ describe('Test database rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_rounds_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
+        submitted = EXCLUDED.submitted,
         invalid = "Pool-Main".current_rounds.invalid + EXCLUDED.invalid,
         stale = "Pool-Main".current_rounds.stale + EXCLUDED.stale,
         times = GREATEST("Pool-Main".current_rounds.times, EXCLUDED.times),
@@ -213,7 +239,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [10]', () => {
+  test('Test rounds command handling [12]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.updateCurrentRoundsMainSolo('Pool-Main', 'miner1', 'round1', 'primary');
     const expected = `
@@ -224,7 +250,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [11]', () => {
+  test('Test rounds command handling [13]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.updateCurrentRoundsMainShared('Pool-Main', 'round1', 'primary');
     const expected = `
@@ -235,16 +261,16 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [12]', () => {
+  test('Test rounds command handling [14]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.deleteCurrentRoundsInactive('Pool-Main', 1);
     const expected = `
       DELETE FROM "Pool-Main".current_rounds
-      WHERE round = 'current' AND timestamp < 1;`;
+      WHERE round = 'current' AND submitted < 1;`;
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [13]', () => {
+  test('Test rounds command handling [15]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.deleteCurrentRoundsMain('Pool-Main', ['round1']);
     const expected = `

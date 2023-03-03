@@ -15,7 +15,7 @@ describe('Test client functionality', () => {
   test('Test initialization of client', () => {
     const client = new Client(logger, configMainCopy);
     expect(typeof client.configMain).toBe('object');
-    expect(typeof client.handleMasterClient).toBe('function');
-    expect(typeof client.handleWorkerClient).toBe('function');
+    expect(typeof client.handleClientMaster).toBe('function');
+    expect(typeof client.handleClientWorker).toBe('function');
   });
 });

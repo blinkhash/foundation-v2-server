@@ -1,6 +1,6 @@
-const CurrentBlocks = require('../../main/master/current/blocks');
-const Logger = require('../../../server/main/logger');
-const configMain = require('../../../configs/main/example.js');
+const CurrentBlocks = require('../../../main/master/current/blocks');
+const Logger = require('../../../../server/main/logger');
+const configMain = require('../../../../configs/main/example.js');
 const logger = new Logger(configMain);
 
 ////////////////////////////////////////////////////////////////////////////////

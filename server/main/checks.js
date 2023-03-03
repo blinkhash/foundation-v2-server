@@ -97,6 +97,7 @@ const Checks = function (logger, client, config, configMain) {
       const current = combined[identifier];
       return {
         timestamp: timestamp,
+        submitted: timestamp,
         recent: recent,
         miner: current.miner,
         worker: current.worker,
