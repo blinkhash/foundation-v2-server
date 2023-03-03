@@ -44,7 +44,7 @@ const Rounds = function (logger, client, config, configMain) {
   // Handle Times Updates
   this.handleTimes = function(sharePrevious, timestamp) {
     let times = sharePrevious.times || 0;
-    const lastTime = sharePrevious.submitted || Date.now();
+    const lastTime = parseFloat(sharePrevious.submitted) || Date.now();
     const timeChange = utils.roundTo(Math.max(timestamp - lastTime, 0) / 1000, 4);
     if (timeChange < 900) times += timeChange;
     return Math.round(times * 10000) / 10000;
@@ -214,7 +214,7 @@ const Rounds = function (logger, client, config, configMain) {
     // Return Round Updates
     return {
       timestamp: Date.now(),
-      submitted: submitted,
+      submitted: parseFloat(submitted),
       recent: recent,
       miner: (worker || '').split('.')[0],
       worker: worker,
@@ -349,12 +349,12 @@ const Rounds = function (logger, client, config, configMain) {
 
       // Determine Current Round States
       const interval = _this.config.settings.interval.recent;
-      const recent = Math.round(share.timestamp / interval) * interval;
+      const recent = minerType ? 0 : Math.round(share.timestamp / interval) * interval;
       const initial = rounds[worker] || {};
-      const current = updates[`${ worker }_${ recent }`] || {};
+      const current = updates[`${ worker }_${ recent }_${ minerType }`] || {};
 
       const segment = _this.handleCurrentRounds(initial, current, share, shareType, minerType, blockType);
-      updates[`${ worker }_${ segment.recent }`] = segment;
+      updates[`${ worker }_${ segment.recent }_${ segment.solo }`] = segment;
     });
 
     // Return Round Updates
