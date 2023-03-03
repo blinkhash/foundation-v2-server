@@ -1,4 +1,5 @@
 const Text = require('../../locales/index');
+const utils = require('./utils');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -12,6 +13,10 @@ const Payments = function (logger, client, config, configMain) {
   this.configMain = configMain;
   this.pool = config.name;
   this.text = Text[configMain.language];
+
+  // Stratum Variables
+  process.setMaxListeners(0);
+  this.forkId = process.env.forkId;
 
   // Client Handlers
   this.master = {
@@ -165,15 +170,13 @@ const Payments = function (logger, client, config, configMain) {
   this.handleFailures = function(blocks, callback) {
 
     // Build Combined Transaction
-    const transaction = ['BEGIN;'];
-
-    // Remove Finished Payments from Table
     const paymentsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.master.current.payments.deleteCurrentPaymentsMain(
-      _this.pool, paymentsDelete));
+    const transaction = [
+      'BEGIN;',
+      _this.master.current.payments.deleteCurrentPaymentsMain(_this.pool, paymentsDelete),
+      'COMMIT;'];
 
     // Insert Work into Database
-    transaction.push('COMMIT;');
     _this.master.executor(transaction, () => callback());
   };
 
@@ -430,23 +433,24 @@ const Payments = function (logger, client, config, configMain) {
   // Start Payments Interval Management
   /* istanbul ignore next */
   this.handleInterval = function() {
-    const minInterval = _this.config.settings.interval.payments * 0.75;
-    const maxInterval = _this.config.settings.interval.payments * 1.25;
-    const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
+    const interval = _this.config.settings.interval.payments;
     setTimeout(() => {
       _this.handleInterval();
       if (_this.config.primary.payments.enabled) _this.handlePayments('primary', () => {});
       if (_this.config.auxiliary && _this.config.auxiliary.enabled && _this.config.auxiliary.payments.enabled) {
         _this.handlePayments('auxiliary', () => {});
       }
-    }, random);
+    }, interval);
   };
 
   // Start Payments Capabilities
   /* istanbul ignore next */
   this.setupPayments = function(stratum, callback) {
     _this.stratum = stratum;
-    _this.handleInterval();
+    const interval = _this.config.settings.interval.payments;
+    const numForks = utils.countProcessForks(_this.configMain);
+    const timing = parseFloat(_this.forkId) * interval / numForks;
+    setTimeout(() => _this.handleInterval(), timing);
     callback();
   };
 };

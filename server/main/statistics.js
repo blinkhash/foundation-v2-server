@@ -1,4 +1,5 @@
 const Text = require('../../locales/index');
+const utils = require('./utils');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -14,11 +15,18 @@ const Statistics = function (logger, client, config, configMain, template) {
   this.template = template;
   this.text = Text[configMain.language];
 
+  // Stratum Variables
+  process.setMaxListeners(0);
+  this.forkId = process.env.forkId;
+
   // Client Handlers
   this.master = {
     executor: _this.client.master.commands.executor,
     current: _this.client.master.commands.current,
     historical: _this.client.master.commands.historical };
+  this.worker = {
+    executor: _this.client.worker.commands.executor,
+    local: _this.client.worker.commands.local };
 
   // Handle Current Metadata Updates
   this.handleCurrentMetadata = function(miners, workers, total, blockType) {
@@ -131,6 +139,7 @@ const Statistics = function (logger, client, config, configMain, template) {
         stale: miner.stale,
         type: miner.type,
         valid: miner.valid,
+        work: miner.work,
       };
     });
   };
@@ -177,6 +186,7 @@ const Statistics = function (logger, client, config, configMain, template) {
         stale: worker.stale,
         type: worker.type,
         valid: worker.valid,
+        work: worker.work,
       };
     });
   };
@@ -394,6 +404,7 @@ const Statistics = function (logger, client, config, configMain, template) {
       _this.master.current.workers.deleteCurrentWorkersInactive(_this.pool, inactiveWindow),
       _this.master.current.workers.selectCurrentWorkersMain(_this.pool, { solo: true, type: blockType }),
       _this.master.current.workers.selectCurrentWorkersMain(_this.pool, { solo: false, type: blockType }),
+      _this.worker.local.transactions.deleteLocalTransactionsInactive(_this.pool, updateWindow),
       'COMMIT;'];
 
     // Establish Separate Behavior
@@ -431,22 +442,23 @@ const Statistics = function (logger, client, config, configMain, template) {
   // Start Statistics Interval Management
   /* istanbul ignore next */
   this.handleInterval = function() {
-    const minInterval = _this.config.settings.interval.statistics * 0.75;
-    const maxInterval = _this.config.settings.interval.statistics * 1.25;
-    const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
+    const interval = _this.config.settings.interval.statistics;
     setTimeout(() => {
       _this.handleInterval();
       if (_this.config.primary.checks.enabled) _this.handleStatistics('primary', () => {});
       if (_this.config.auxiliary && _this.config.auxiliary.enabled && _this.config.auxiliary.checks.enabled) {
         _this.handleStatistics('auxiliary', () => {});
       }
-    }, random);
+    }, interval);
   };
 
   // Start Statistics Capabilities
   /* istanbul ignore next */
   this.setupStatistics = function(callback) {
-    _this.handleInterval();
+    const interval = _this.config.settings.interval.statistics;
+    const numForks = utils.countProcessForks(_this.configMain);
+    const timing = parseFloat(_this.forkId) * interval / numForks;
+    setTimeout(() => _this.handleInterval(), timing);
     callback();
   };
 };

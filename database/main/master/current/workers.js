@@ -11,10 +11,10 @@ const CurrentWorkers = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Current Parameters
-  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
+  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid', 'work'];
   this.strings = ['miner', 'worker', 'type'];
   this.parameters = ['timestamp', 'miner', 'worker', 'efficiency', 'effort', 'hashrate', 'invalid',
-    'solo', 'stale', 'type', 'valid'];
+    'solo', 'stale', 'type', 'valid', 'work'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -65,6 +65,15 @@ const CurrentWorkers = function (logger, configMain) {
     return output + ';';
   };
 
+  // Select Current Rounds Using Parameters
+  this.selectCurrentWorkersBatchAddresses = function(pool, addresses, type) {
+    return addresses.length >= 1 ? `
+      SELECT DISTINCT ON (worker) * FROM "${ pool }".current_workers
+      WHERE worker IN (${ addresses.join(', ') }) AND type = '${ type }'
+      ORDER BY worker, timestamp DESC;` : `
+      SELECT * FROM "${ pool }".current_workers LIMIT 0;`;
+  };
+
   // Build Workers Values String
   this.buildCurrentWorkersHashrate = function(updates) {
     let values = '';
@@ -108,7 +117,8 @@ const CurrentWorkers = function (logger, configMain) {
         ${ worker.solo },
         ${ worker.stale },
         '${ worker.type }',
-        ${ worker.valid })`;
+        ${ worker.valid },
+        ${ worker.work })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
@@ -120,7 +130,8 @@ const CurrentWorkers = function (logger, configMain) {
       INSERT INTO "${ pool }".current_workers (
         timestamp, miner, worker,
         efficiency, effort, invalid,
-        solo, stale, type, valid)
+        solo, stale, type, valid,
+        work)
       VALUES ${ _this.buildCurrentWorkersRounds(updates) }
       ON CONFLICT ON CONSTRAINT current_workers_unique
       DO UPDATE SET
@@ -130,7 +141,8 @@ const CurrentWorkers = function (logger, configMain) {
         invalid = "${ pool }".current_workers.invalid + EXCLUDED.invalid,
         solo = EXCLUDED.solo,
         stale = "${ pool }".current_workers.stale + EXCLUDED.stale,
-        valid = "${ pool }".current_workers.valid + EXCLUDED.valid;`;
+        valid = "${ pool }".current_workers.valid + EXCLUDED.valid,
+        work = "${ pool }".current_workers.work + EXCLUDED.work;`;
   };
 
   // Delete Rows From Current Round

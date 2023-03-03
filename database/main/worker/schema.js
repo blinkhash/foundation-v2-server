@@ -119,7 +119,7 @@ const Schema = function (logger, executor, configMain) {
         _this.handleDeployment(pool).then(() => {
           const lastIdx = idx === keys.length - 1;
           const lines = [_this.text.databaseSchemaText2(pool)];
-          _this.logger.log('Database', 'Worker', lines);
+          _this.logger.log('Database', 'Database', lines);
           if (lastIdx) callback();
         });
       });

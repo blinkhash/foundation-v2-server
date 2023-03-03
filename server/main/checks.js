@@ -1,4 +1,5 @@
 const Text = require('../../locales/index');
+const utils = require('./utils');
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -12,6 +13,10 @@ const Checks = function (logger, client, config, configMain) {
   this.configMain = configMain;
   this.pool = config.name;
   this.text = Text[configMain.language];
+
+  // Stratum Variables
+  process.setMaxListeners(0);
+  this.forkId = process.env.forkId;
 
   // Client Handlers
   this.master = {
@@ -65,7 +70,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Calculate Features of Rounds
     const timestamp = Date.now();
-    const interval = _this.config.settings.interval.orphans;
+    const interval = _this.config.settings.interval.recent;
     const recent = Math.round(timestamp / interval) * interval;
 
     // Flatten Nested Round Array
@@ -112,15 +117,13 @@ const Checks = function (logger, client, config, configMain) {
   this.handleFailures = function(blocks, callback) {
 
     // Build Combined Transaction
-    const transaction = ['BEGIN;'];
-
-    // Remove Finished Transactions from Table
-    const transactionsDelete = blocks.map((block) => `'${ block.round }'`);
-    transaction.push(_this.master.current.transactions.deleteCurrentTransactionsMain(
-      _this.pool, transactionsDelete));
+    const transactionDelete = blocks.map((block) => `'${ block.round }'`);
+    const transaction = [
+      'BEGIN;',
+      _this.master.current.transactions.deleteCurrentTransactionsMain(_this.pool, transactionDelete),
+      'COMMIT;'];
 
     // Insert Work into Database
-    transaction.push('COMMIT;');
     _this.master.executor(transaction, () => callback());
   };
 
@@ -355,23 +358,24 @@ const Checks = function (logger, client, config, configMain) {
   // Start Checks Interval Management
   /* istanbul ignore next */
   this.handleInterval = function() {
-    const minInterval = _this.config.settings.interval.checks * 0.75;
-    const maxInterval = _this.config.settings.interval.checks * 1.25;
-    const random = Math.floor(Math.random() * (maxInterval - minInterval) + minInterval);
+    const interval = _this.config.settings.interval.checks;
     setTimeout(() => {
       _this.handleInterval();
       if (_this.config.primary.checks.enabled) _this.handleChecks('primary', () => {});
       if (_this.config.auxiliary && _this.config.auxiliary.enabled && _this.config.auxiliary.checks.enabled) {
         _this.handleChecks('auxiliary', () => {});
       }
-    }, random);
+    }, interval);
   };
 
   // Start Checks Capabilities
   /* istanbul ignore next */
   this.setupChecks = function(stratum, callback) {
     _this.stratum = stratum;
-    _this.handleInterval();
+    const interval = _this.config.settings.interval.checks;
+    const numForks = utils.countProcessForks(_this.configMain);
+    const timing = parseFloat(_this.forkId) * interval / numForks;
+    setTimeout(() => _this.handleInterval(), timing);
     callback();
   };
 };

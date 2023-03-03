@@ -12,10 +12,10 @@ const CurrentMiners = function (logger, configMain) {
 
   // Handle Current Parameters
   this.numbers = ['timestamp', 'balance', 'efficiency', 'effort', 'generate', 'hashrate', 'immature',
-    'invalid', 'paid', 'stale', 'valid'];
+    'invalid', 'paid', 'stale', 'valid', 'work'];
   this.strings = ['miner', 'type'];
   this.parameters = ['timestamp', 'miner', 'balance', 'efficiency', 'effort', 'generate', 'hashrate',
-    'immature', 'invalid', 'paid', 'stale', 'type', 'valid'];
+    'immature', 'invalid', 'paid', 'stale', 'type', 'valid', 'work'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -66,6 +66,15 @@ const CurrentMiners = function (logger, configMain) {
     return output + ';';
   };
 
+  // Select Current Rounds Using Parameters
+  this.selectCurrentMinersBatchAddresses = function(pool, addresses, type) {
+    return addresses.length >= 1 ? `
+      SELECT DISTINCT ON (miner) * FROM "${ pool }".current_miners
+      WHERE miner IN (${ addresses.join(', ') }) AND type = '${ type }'
+      ORDER BY miner, timestamp DESC;` : `
+      SELECT * FROM "${ pool }".current_miners LIMIT 0;`;
+  };
+
   // Build Miners Values String
   this.buildCurrentMinersHashrate = function(updates) {
     let values = '';
@@ -105,7 +114,8 @@ const CurrentMiners = function (logger, configMain) {
         ${ miner.invalid },
         ${ miner.stale },
         '${ miner.type }',
-        ${ miner.valid })`;
+        ${ miner.valid },
+        ${ miner.work })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
@@ -117,7 +127,7 @@ const CurrentMiners = function (logger, configMain) {
       INSERT INTO "${ pool }".current_miners (
         timestamp, miner, efficiency,
         effort, invalid, stale, type,
-        valid)
+        valid, work)
       VALUES ${ _this.buildCurrentMinersRounds(updates) }
       ON CONFLICT ON CONSTRAINT current_miners_unique
       DO UPDATE SET
@@ -126,7 +136,8 @@ const CurrentMiners = function (logger, configMain) {
         effort = EXCLUDED.effort,
         invalid = "${ pool }".current_miners.invalid + EXCLUDED.invalid,
         stale = "${ pool }".current_miners.stale + EXCLUDED.stale,
-        valid = "${ pool }".current_miners.valid + EXCLUDED.valid;`;
+        valid = "${ pool }".current_miners.valid + EXCLUDED.valid,
+        work = "${ pool }".current_miners.work + EXCLUDED.work;`;
   };
 
   // Build Miners Values String

@@ -11,10 +11,10 @@ const HistoricalMiners = function (logger, configMain) {
   this.text = Text[configMain.language];
 
   // Handle Historical Parameters
-  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid'];
+  this.numbers = ['timestamp', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale', 'valid', 'work'];
   this.strings = ['miner', 'type'];
   this.parameters = ['timestamp', 'miner', 'efficiency', 'effort', 'hashrate', 'invalid', 'stale',
-    'type', 'valid'];
+    'type', 'valid', 'work'];
 
   // Handle String Parameters
   this.handleStrings = function(parameters, parameter) {
@@ -79,7 +79,8 @@ const HistoricalMiners = function (logger, configMain) {
         ${ miner.invalid },
         ${ miner.stale },
         '${ miner.type }',
-        ${ miner.valid })`;
+        ${ miner.valid },
+        ${ miner.work })`;
       if (idx < updates.length - 1) values += ', ';
     });
     return values;
@@ -91,7 +92,8 @@ const HistoricalMiners = function (logger, configMain) {
       INSERT INTO "${ pool }".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        invalid, stale, type, valid)
+        invalid, stale, type, valid,
+        work)
       VALUES ${ _this.buildHistoricalMinersMain(updates) }
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
