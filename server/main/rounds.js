@@ -80,13 +80,13 @@ const Rounds = function (logger, client, config, configMain) {
   }
 
   // Handle Blocks Updates
-  this.handleCurrentBlocks = function(metadata, share, round, shareType, minerType, blockType) {
+  this.handleCurrentBlocks = function(metadata, round, share, shareType, minerType, blockType) {
 
     // Calculate Features of Blocks
     const identifier = share.identifier || 'master';
     const difficulty = blockType === 'primary' ? share.blockdiffprimary : share.blockdiffauxiliary;
     const worker = blockType === 'primary' ? share.addrprimary : share.addrauxiliary
-    const work = minerType ? round.work : metadata.work;
+    const work = minerType ? (round.work || 0) : (metadata.work || 0);
 
     // Calculate Luck for Block
     const luck = _this.handleEffort(share, difficulty, work, shareType);
@@ -413,12 +413,12 @@ const Rounds = function (logger, client, config, configMain) {
     const auxMetadata = lookups[2].rows[0] || {};
 
     // Handle Individual Lookups
-    const miners = _this.handleMinersLookups(lookups[3].rows || []);
-    const auxMiners = _this.handleMinersLookups(lookups[4].rows || []);
-    const rounds = _this.handleWorkersLookups(lookups[5].rows || []);
-    const auxRounds = _this.handleWorkersLookups(lookups[6].rows || []);
-    const workers = _this.handleWorkersLookups(lookups[7].rows || []);
-    const auxWorkers = _this.handleWorkersLookups(lookups[8].rows || []);
+    const miners = _this.handleMinersLookups(lookups[3].rows);
+    const auxMiners = _this.handleMinersLookups(lookups[4].rows);
+    const rounds = _this.handleWorkersLookups(lookups[5].rows);
+    const auxRounds = _this.handleWorkersLookups(lookups[6].rows);
+    const workers = _this.handleWorkersLookups(lookups[7].rows);
+    const auxWorkers = _this.handleWorkersLookups(lookups[8].rows);
 
     // Handle Hashrate Updates
     const hashrateUpdates = _this.handleHashrate(shares, 'primary');
@@ -479,22 +479,19 @@ const Rounds = function (logger, client, config, configMain) {
   this.handlePrimary = function(lookups, shares, callback) {
 
     // Calculate Block Features
-    let shareType = 'valid';
-    const block = shares[0] || {};
+    const block = shares[0];
     const minerType = utils.checkSoloMining(_this.config, block);
     const miner = (block.addrprimary || '').split('.')[0];
-    if (block.error && block.error === 'job not found') shareType = 'stale';
-    else if (!block.sharevalid || block.error) shareType = 'invalid';
 
     // Handle Individual Lookups
     const metadata = lookups[1].rows[0] || {};
-    const rounds = _this.handleWorkersLookups(lookups[5].rows || []);
+    const rounds = _this.handleWorkersLookups(lookups[5].rows);
     const round = rounds[block.addrprimary] || {};
 
     // Determine Updates for Block
     const metadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'primary' };
     const metadataReset = { timestamp: Date.now(), type: 'primary' };
-    const blockUpdates = _this.handleCurrentBlocks(metadata, block, round, shareType, minerType, 'primary');
+    const blockUpdates = _this.handleCurrentBlocks(metadata, round, block, 'valid', minerType, 'primary');
     const roundUpdates = (minerType) ? (
       _this.master.current.rounds.updateCurrentRoundsMainSolo(_this.pool, miner, blockUpdates.round, 'primary')) : (
       _this.master.current.rounds.updateCurrentRoundsMainShared(_this.pool, blockUpdates.round, 'primary'));
@@ -516,22 +513,19 @@ const Rounds = function (logger, client, config, configMain) {
   this.handleAuxiliary = function(lookups, shares, callback) {
 
     // Calculate Block Features
-    let shareType = 'valid';
-    const block = shares[0] || {};
+    const block = shares[0];
     const minerType = utils.checkSoloMining(_this.config, block);
     const miner = (block.addrauxiliary || '').split('.')[0];
-    if (block.error && block.error === 'job not found') shareType = 'stale';
-    else if (!block.sharevalid || block.error) shareType = 'invalid';
 
     // Handle Individual Lookups
     const metadata = lookups[2].rows[0] || {};
-    const rounds = _this.handleWorkersLookups(lookups[6].rows || []);
+    const rounds = _this.handleWorkersLookups(lookups[6].rows);
     const round = rounds[block.addrauxiliary] || {};
 
     // Determine Updates for Block
     const metadataBlocks = { timestamp: Date.now(), blocks: 1, type: 'auxiliary' };
     const metadataReset = { timestamp: Date.now(), type: 'auxiliary' };
-    const blockUpdates = _this.handleCurrentBlocks(metadata, block, round, shareType, minerType, 'auxiliary');
+    const blockUpdates = _this.handleCurrentBlocks(metadata, round, block, 'valid', minerType, 'auxiliary');
     const roundUpdates = (minerType) ? (
       _this.master.current.rounds.updateCurrentRoundsMainSolo(_this.pool, miner, blockUpdates.round, 'auxiliary')) : (
       _this.master.current.rounds.updateCurrentRoundsMainShared(_this.pool, blockUpdates.round, 'auxiliary'));
@@ -623,11 +617,13 @@ const Rounds = function (logger, client, config, configMain) {
 
     // Default Behavior
     default:
+      callback();
       break;
     }
   };
 
   // Handle Share/Block Batches
+  /* istanbul ignore next */
   this.handleBatches = function(lookups, callback) {
 
     // Build Combined Transaction
@@ -675,6 +671,7 @@ const Rounds = function (logger, client, config, configMain) {
   };
 
   // Handle Rounds Updates
+  /* istanbul ignore next */
   this.handleRounds = function(callback) {
 
     // Handle Initial Logging
