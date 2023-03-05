@@ -123,6 +123,27 @@ describe('Test database rounds functionality', () => {
 
   test('Test rounds command handling [10]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
+    const response = rounds.selectCurrentRoundsPayments('Pool-Main', 'round1', false, 'primary');
+    const expected = `
+      SELECT DISTINCT ON (m.worker, m.round, m.solo, m.type)
+        t.timestamp, t.submitted, t.recent, m.miner, m.worker,
+        m.identifier, t.invalid, m.round, m.solo, t.stale, t.times, m.type,
+        t.valid, t.work FROM (
+      SELECT worker, round, solo, type, MAX(timestamp) as timestamp,
+        MAX(submitted) as submitted, MAX(recent) as recent,
+        SUM(invalid) as invalid, SUM(stale) as stale, SUM(times) as times,
+        SUM(valid) as valid, SUM(work) as work
+      FROM "Pool-Main".current_rounds
+      GROUP BY worker, round, solo, type
+        ) t JOIN "Pool-Main".current_rounds m ON m.worker = t.worker
+        AND m.round = t.round AND m.solo = t.solo AND m.type = t.type
+      WHERE m.round = 'round1' AND m.solo = false
+      AND m.type = 'primary';`;
+    expect(response).toBe(expected);
+  });
+
+  test('Test rounds command handling [11]', () => {
+    const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
       submitted: 1,
@@ -173,7 +194,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [11]', () => {
+  test('Test rounds command handling [12]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const updates = {
       timestamp: 1,
@@ -239,7 +260,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [12]', () => {
+  test('Test rounds command handling [13]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.updateCurrentRoundsMainSolo('Pool-Main', 'miner1', 'round1', 'primary');
     const expected = `
@@ -250,7 +271,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [13]', () => {
+  test('Test rounds command handling [14]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.updateCurrentRoundsMainShared('Pool-Main', 'round1', 'primary');
     const expected = `
@@ -261,7 +282,7 @@ describe('Test database rounds functionality', () => {
     expect(response).toBe(expected);
   });
 
-  test('Test rounds command handling [14]', () => {
+  test('Test rounds command handling [15]', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.deleteCurrentRoundsInactive('Pool-Main', 1);
     const expected = `

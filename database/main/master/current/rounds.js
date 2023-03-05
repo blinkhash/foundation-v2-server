@@ -65,13 +65,32 @@ const CurrentRounds = function (logger, configMain) {
     return output + ';';
   };
 
-  // Select Current Rounds Using Parameters
+  // Select Current Rounds for Batching
   this.selectCurrentRoundsBatchAddresses = function(pool, addresses, type) {
     return addresses.length >= 1 ? `
       SELECT DISTINCT ON (worker) * FROM "${ pool }".current_rounds
       WHERE worker IN (${ addresses.join(', ') }) AND type = '${ type }'
       ORDER BY worker, timestamp DESC;` : `
       SELECT * FROM "${ pool }".current_rounds LIMIT 0;`;
+  };
+
+  // Select Current Rounds for Payments
+  this.selectCurrentRoundsPayments = function(pool, round, solo, type) {
+    return `
+      SELECT DISTINCT ON (m.worker, m.round, m.solo, m.type)
+        t.timestamp, t.submitted, t.recent, m.miner, m.worker,
+        m.identifier, t.invalid, m.round, m.solo, t.stale, t.times, m.type,
+        t.valid, t.work FROM (
+      SELECT worker, round, solo, type, MAX(timestamp) as timestamp,
+        MAX(submitted) as submitted, MAX(recent) as recent,
+        SUM(invalid) as invalid, SUM(stale) as stale, SUM(times) as times,
+        SUM(valid) as valid, SUM(work) as work
+      FROM "${ pool }".current_rounds
+      GROUP BY worker, round, solo, type
+        ) t JOIN "${ pool }".current_rounds m ON m.worker = t.worker
+        AND m.round = t.round AND m.solo = t.solo AND m.type = t.type
+      WHERE m.round = '${ round }' AND m.solo = ${ solo }
+      AND m.type = '${ type }';`;
   };
 
   // Build Rounds Values String

@@ -65,7 +65,7 @@ const CurrentWorkers = function (logger, configMain) {
     return output + ';';
   };
 
-  // Select Current Rounds Using Parameters
+  // Select Current Rounds for Batching
   this.selectCurrentWorkersBatchAddresses = function(pool, addresses, type) {
     return addresses.length >= 1 ? `
       SELECT DISTINCT ON (worker) * FROM "${ pool }".current_workers

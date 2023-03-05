@@ -66,7 +66,7 @@ const CurrentMiners = function (logger, configMain) {
     return output + ';';
   };
 
-  // Select Current Rounds Using Parameters
+  // Select Current Rounds for Batching
   this.selectCurrentMinersBatchAddresses = function(pool, addresses, type) {
     return addresses.length >= 1 ? `
       SELECT DISTINCT ON (miner) * FROM "${ pool }".current_miners

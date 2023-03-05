@@ -110,27 +110,12 @@ const Payments = function (logger, client, config, configMain) {
   this.handleHistoricalRounds = function(rounds) {
 
     // Flatten Nested Round Array
-    const combined = {};
     if (rounds.length >= 1) {
       rounds = rounds.reduce((a, b) => a.concat(b));
     }
 
-    // Collect All Round Data
-    rounds.forEach((round) => {
-      const identifier = `${ round.worker }_${ round.solo }_${ round.round }_${ round.type }`;
-      if (identifier in combined) {
-        const current = combined[identifier];
-        current.invalid += round.invalid || 0;
-        current.stale += round.stale || 0;
-        current.times += round.times || 0;
-        current.valid += round.valid || 0;
-        current.work += round.work || 0;
-      } else combined[identifier] = round;
-    });
-
     // Return Round Updates
-    return Object.keys(combined).map((identifier) => {
-      const current = combined[identifier];
+    return rounds.map((current) => {
       return {
         timestamp: Date.now(),
         miner: current.miner,
@@ -249,9 +234,8 @@ const Payments = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      const parameters = { solo: block.solo, round: block.round, type: 'primary' };
-      transaction.push(_this.master.current.rounds.selectCurrentRoundsMain(
-        _this.pool, parameters));
+      transaction.push(_this.master.current.rounds.selectCurrentRoundsPayments(
+        _this.pool, block.round, block.solo, 'primary'));
     });
 
     // Determine Workers for Rounds
@@ -287,9 +271,8 @@ const Payments = function (logger, client, config, configMain) {
 
     // Add Round Lookups to Transaction
     blocks.forEach((block) => {
-      const parameters = { solo: block.solo, round: block.round, type: 'auxiliary' };
-      transaction.push(_this.master.current.rounds.selectCurrentRoundsMain(
-        _this.pool, parameters));
+      transaction.push(_this.master.current.rounds.selectCurrentRoundsPayments(
+        _this.pool, block.round, block.solo, 'auxiliary'));
     });
 
     // Determine Workers for Rounds
