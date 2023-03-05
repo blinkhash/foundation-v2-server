@@ -1,6 +1,5 @@
 const Api = require('../main/api');
-const CommandsMaster = require('../../database/main/master/commands');
-const CommandsWorker = require('../../database/main/worker/commands');
+const Commands = require('../../database/main/master/commands');
 const Logger = require('../main/logger');
 const config = require('../../configs/pools/example.js');
 const configMain = require('../../configs/main/example.js');
@@ -10,7 +9,7 @@ const events = require('events');
 
 function mockClient(configMain, result) {
   const client = new events.EventEmitter();
-  client.master = { commands: new CommandsMaster(null, null, configMain) };
+  client.master = { commands: new Commands(null, null, configMain) };
   client.master.commands.executor = (commands, callback) => {
     client.emit('transaction', commands);
     callback(result);

@@ -1,5 +1,4 @@
-const CommandsMaster = require('../../database/main/master/commands');
-const CommandsWorker = require('../../database/main/worker/commands');
+const Commands = require('../../database/main/worker/commands');
 const Logger = require('../main/logger');
 const MockDate = require('mockdate');
 const Shares = require('../main/shares');
@@ -14,7 +13,7 @@ jest.mock('uuid', () => ({ v4: () => '123456789' }));
 
 function mockClient(configMain, result) {
   const client = new events.EventEmitter();
-  client.worker = { commands: new CommandsWorker(null, null, configMain) };
+  client.worker = { commands: new Commands(null, null, configMain) };
   client.worker.commands.executor = (commands, callback) => {
     client.emit('transaction', commands);
     callback(result);
@@ -218,7 +217,7 @@ describe('Test shares functionality', () => {
     };
     shares.handleSubmissions(shareData, true, true, () => {
       expect(consoleSpy).toHaveBeenCalled();
-      done()
+      done();
     });
   });
 
@@ -248,7 +247,7 @@ describe('Test shares functionality', () => {
     };
     shares.handleSubmissions(shareData, false, true, () => {
       expect(consoleSpy).toHaveBeenCalled();
-      done()
+      done();
     });
   });
 
@@ -278,7 +277,7 @@ describe('Test shares functionality', () => {
     };
     shares.handleSubmissions(shareData, true, true, () => {
       expect(consoleSpy).toHaveBeenCalled();
-      done()
+      done();
     });
   });
 });

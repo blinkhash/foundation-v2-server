@@ -101,6 +101,6 @@ const LocalTransactions = function (logger, configMain) {
       DELETE FROM "${ pool }".local_transactions
       WHERE timestamp < ${ timestamp };`;
   };
-}
+};
 
 module.exports = LocalTransactions;

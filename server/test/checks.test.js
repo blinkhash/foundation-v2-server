@@ -1,5 +1,4 @@
-const CommandsMaster = require('../../database/main/master/commands');
-const CommandsWorker = require('../../database/main/worker/commands');
+const Commands = require('../../database/main/master/commands');
 const Logger = require('../main/logger');
 const MockDate = require('mockdate');
 const Checks = require('../main/checks');
@@ -11,7 +10,7 @@ const events = require('events');
 
 function mockClient(configMain, result) {
   const client = new events.EventEmitter();
-  client.master = { commands: new CommandsMaster(null, null, configMain) };
+  client.master = { commands: new Commands(null, null, configMain) };
   client.master.commands.executor = (commands, callback) => {
     client.emit('transaction', commands);
     callback(result);
@@ -125,9 +124,9 @@ describe('Test checks functionality', () => {
     const miner3 = { ...miner1, miner: 'miner3', worker: 'miner3' };
     const rounds = [[miner1, miner2, miner3], [miner1, miner2, miner3]];
     const expected = [
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner1'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner2'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner3'}];
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner1'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner2'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner3'}];
     expect(checks.handleCurrentOrphans(rounds)).toStrictEqual(expected);
   });
 
@@ -154,9 +153,9 @@ describe('Test checks functionality', () => {
     const miner3 = { ...miner1, miner: 'miner3', worker: 'miner3' };
     const rounds = [[miner1, miner2, miner3]];
     const expected = [
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner1'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner2'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner3'}];
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner1'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner2'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner3'}];
     expect(checks.handleCurrentOrphans(rounds)).toStrictEqual(expected);
   });
 
@@ -183,9 +182,9 @@ describe('Test checks functionality', () => {
     const miner3 = { ...miner1, miner: 'miner3', worker: 'miner3' };
     const rounds = [[miner1, miner2, miner3], [miner1, miner2, miner3]];
     const expected = [
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 0, 'work': 0, 'worker': 'miner1'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 0, 'work': 0, 'worker': 'miner2'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742060000, 'type': 'primary', 'valid': 0, 'work': 0, 'worker': 'miner3'}];
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 0, 'work': 0, 'worker': 'miner1'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 0, 'work': 0, 'worker': 'miner2'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'current', 'solo': false, 'stale': 0, 'submitted': 1634742080841, 'times': 100, 'timestamp': 1634742080841, 'recent': 1634742000000, 'type': 'primary', 'valid': 0, 'work': 0, 'worker': 'miner3'}];
     expect(checks.handleCurrentOrphans(rounds)).toStrictEqual(expected);
   });
 
@@ -408,7 +407,7 @@ describe('Test checks functionality', () => {
       VALUES (
         1634742080841,
         1634742080841,
-        1634742060000,
+        1634742000000,
         'miner1',
         'miner1',
         'master',
@@ -422,7 +421,7 @@ describe('Test checks functionality', () => {
         100), (
         1634742080841,
         1634742080841,
-        1634742060000,
+        1634742000000,
         'miner2',
         'miner2',
         'master',
@@ -561,7 +560,7 @@ describe('Test checks functionality', () => {
       VALUES (
         1634742080841,
         1634742080841,
-        1634742060000,
+        1634742000000,
         'miner1',
         'miner1',
         'master',
@@ -575,7 +574,7 @@ describe('Test checks functionality', () => {
         100), (
         1634742080841,
         1634742080841,
-        1634742060000,
+        1634742000000,
         'miner2',
         'miner2',
         'master',
@@ -589,7 +588,7 @@ describe('Test checks functionality', () => {
         200), (
         1634742080841,
         1634742080841,
-        1634742060000,
+        1634742000000,
         'miner1',
         'miner1',
         'master',
@@ -603,7 +602,7 @@ describe('Test checks functionality', () => {
         100), (
         1634742080841,
         1634742080841,
-        1634742060000,
+        1634742000000,
         'miner2',
         'miner2',
         'master',

@@ -117,6 +117,6 @@ const LocalShares = function (logger, configMain) {
       DELETE FROM "${ pool }".local_shares
       WHERE uuid IN (${ uuids.join(', ') });`;
   };
-}
+};
 
 module.exports = LocalShares;

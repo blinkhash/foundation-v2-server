@@ -117,7 +117,7 @@ describe('Test database rounds functionality', () => {
     const rounds = new CurrentRounds(logger, configMainCopy);
     const response = rounds.selectCurrentRoundsBatchAddresses('Pool-Main', [], 'primary');
     const expected = `
-      SELECT * FROM "Pool-Main".current_rounds LIMIT 0;`
+      SELECT * FROM "Pool-Main".current_rounds LIMIT 0;`;
     expect(response).toBe(expected);
   });
 

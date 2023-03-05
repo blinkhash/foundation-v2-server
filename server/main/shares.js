@@ -40,9 +40,9 @@ const Shares = function (logger, client, config, configMain) {
       submitted: submitted,
       ip: shareData.ip,
       port: parseFloat(shareData.port),
-      addrprimary: shareData.addrPrimary,
+      addrprimary: shareData.addrPrimary || '',
       addrauxiliary: shareData.addrAuxiliary || '',
-      blockdiffprimary: shareData.blockDiffPrimary,
+      blockdiffprimary: shareData.blockDiffPrimary || -1,
       blockdiffauxiliary: shareData.blockDiffAuxiliary || -1,
       blockvalid: blockValid,
       blocktype: shareData.blockType,
@@ -69,7 +69,7 @@ const Shares = function (logger, client, config, configMain) {
 
     // Insert Work into Database
     _this.worker.executor(transaction, () => callback());
-  }
+  };
 
   // Handle Share/Block Submissions
   this.handleSubmissions = function(shareData, shareValid, blockValid, callback) {
@@ -90,6 +90,6 @@ const Shares = function (logger, client, config, configMain) {
       callback();
     });
   };
-}
+};
 
 module.exports = Shares;

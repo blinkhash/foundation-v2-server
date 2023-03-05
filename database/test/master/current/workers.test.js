@@ -93,7 +93,7 @@ describe('Test database workers functionality', () => {
     const workers = new CurrentWorkers(logger, configMainCopy);
     const response = workers.selectCurrentWorkersBatchAddresses('Pool-Main', [], 'primary');
     const expected = `
-      SELECT * FROM "Pool-Main".current_workers LIMIT 0;`
+      SELECT * FROM "Pool-Main".current_workers LIMIT 0;`;
     expect(response).toBe(expected);
   });
 

@@ -93,7 +93,7 @@ describe('Test database miners functionality', () => {
     const miners = new CurrentMiners(logger, configMainCopy);
     const response = miners.selectCurrentMinersBatchAddresses('Pool-Main', [], 'primary');
     const expected = `
-      SELECT * FROM "Pool-Main".current_miners LIMIT 0;`
+      SELECT * FROM "Pool-Main".current_miners LIMIT 0;`;
     expect(response).toBe(expected);
   });
 

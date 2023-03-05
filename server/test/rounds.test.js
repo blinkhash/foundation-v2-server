@@ -463,7 +463,7 @@ describe('Test rounds functionality', () => {
     const expected = {
       timestamp: 1634742080841,
       submitted: 1634742080841,
-      recent: 1634742060000,
+      recent: 1634742000000,
       miner: 'primary',
       worker: 'primary',
       identifier: 'master',
@@ -497,7 +497,7 @@ describe('Test rounds functionality', () => {
     const expected = {
       timestamp: 1634742080841,
       submitted: 1634742080841,
-      recent: 1634742060000,
+      recent: 1634742000000,
       miner: 'primary',
       worker: 'primary',
       identifier: 'master',
@@ -531,7 +531,7 @@ describe('Test rounds functionality', () => {
     const expected = {
       timestamp: 1634742080841,
       submitted: 1634742080841,
-      recent: 1634742060000,
+      recent: 1634742000000,
       miner: 'primary',
       worker: 'primary',
       identifier: 'master',
@@ -898,7 +898,7 @@ describe('Test rounds functionality', () => {
 
   test('Test rounds metadata updates [5]', () => {
     MockDate.set(1634742080841);
-    configCopy.ports[0].type = 'solo'
+    configCopy.ports[0].type = 'solo';
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const rounds = new Rounds(logger, client, configCopy, configMainCopy);
@@ -1073,7 +1073,7 @@ describe('Test rounds functionality', () => {
     const expected = {
       timestamp: 1634742080841,
       submitted: 1634742080841,
-      recent: 1634742060000,
+      recent: 1634742000000,
       miner: 'primary',
       worker: 'primary',
       identifier: 'master',
@@ -1107,7 +1107,7 @@ describe('Test rounds functionality', () => {
     const expected = {
       timestamp: 1634742080841,
       submitted: 1634742080841,
-      recent: 1634742060000,
+      recent: 1634742000000,
       miner: 'primary',
       worker: 'primary',
       identifier: 'master',
@@ -1142,7 +1142,7 @@ describe('Test rounds functionality', () => {
     const expected = {
       timestamp: 1634742080841,
       submitted: 1634742080841,
-      recent: 1634742060000,
+      recent: 1634742000000,
       miner: 'primary',
       worker: 'primary',
       identifier: 'master',
@@ -1177,7 +1177,7 @@ describe('Test rounds functionality', () => {
     const expected = {
       timestamp: 1634742080841,
       submitted: 1634742080841,
-      recent: 1634742060000,
+      recent: 1634742000000,
       miner: 'primary',
       worker: 'primary',
       identifier: 'master',
@@ -1195,7 +1195,7 @@ describe('Test rounds functionality', () => {
 
   test('Test rounds shares updates [5]', () => {
     MockDate.set(1634742080841);
-    configCopy.ports[0].type = 'solo'
+    configCopy.ports[0].type = 'solo';
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const rounds = new Rounds(logger, client, configCopy, configMainCopy);
@@ -1511,7 +1511,7 @@ describe('Test rounds functionality', () => {
       VALUES (
         1634742080841,
         1,
-        1634742060000,
+        1634742000000,
         'primary',
         'primary',
         'master',
@@ -1574,7 +1574,7 @@ describe('Test rounds functionality', () => {
 
   test('Test rounds main updates [2]', (done) => {
     MockDate.set(1634742080841);
-    configCopy.ports[0].type = 'solo'
+    configCopy.ports[0].type = 'solo';
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const rounds = new Rounds(logger, client, configCopy, configMainCopy);
@@ -1875,7 +1875,7 @@ describe('Test rounds functionality', () => {
       VALUES (
         1634742080841,
         1,
-        1634742060000,
+        1634742000000,
         'primary',
         'primary',
         'master',
@@ -1905,7 +1905,7 @@ describe('Test rounds functionality', () => {
       VALUES (
         1634742080841,
         1,
-        1634742060000,
+        1634742000000,
         'primary',
         'primary',
         'master',
@@ -2001,7 +2001,7 @@ describe('Test rounds functionality', () => {
 
   test('Test rounds main updates [4]', (done) => {
     MockDate.set(1634742080841);
-    configCopy.ports[0].type = 'solo'
+    configCopy.ports[0].type = 'solo';
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const rounds = new Rounds(logger, client, configCopy, configMainCopy);
@@ -2054,7 +2054,7 @@ describe('Test rounds functionality', () => {
       transaction: 'transaction1'
     };
     const expectedBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_blocks (
+      INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, submitted, miner,
         worker, category, confirmations,
         difficulty, hash, height,
@@ -2096,7 +2096,7 @@ describe('Test rounds functionality', () => {
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadataBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1634742080841,
@@ -2105,9 +2105,9 @@ describe('Test rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = \"Pool-Bitcoin\".current_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Bitcoin".current_metadata.blocks + EXCLUDED.blocks;`;
     const expectedMetadataReset = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -2120,7 +2120,7 @@ describe('Test rounds functionality', () => {
         efficiency = 0, effort = 0, invalid = 0,
         stale = 0, valid = 0, work = 0;`;
     const expectedRounds = `
-      UPDATE \"Pool-Bitcoin\".current_rounds
+      UPDATE "Pool-Bitcoin".current_rounds
       SET round = '123456789'
       WHERE round = 'current' AND solo = false
       AND type = 'primary';`;
@@ -2137,7 +2137,7 @@ describe('Test rounds functionality', () => {
 
   test('Test rounds primary updates [2]', (done) => {
     MockDate.set(1634742080841);
-    configCopy.ports[0].type = 'solo'
+    configCopy.ports[0].type = 'solo';
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const rounds = new Rounds(logger, client, configCopy, configMainCopy);
@@ -2166,7 +2166,7 @@ describe('Test rounds functionality', () => {
       transaction: 'transaction1'
     };
     const expectedBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_blocks (
+      INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, submitted, miner,
         worker, category, confirmations,
         difficulty, hash, height,
@@ -2208,7 +2208,7 @@ describe('Test rounds functionality', () => {
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadataBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1634742080841,
@@ -2217,9 +2217,9 @@ describe('Test rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = \"Pool-Bitcoin\".current_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Bitcoin".current_metadata.blocks + EXCLUDED.blocks;`;
     const expectedMetadataReset = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -2232,7 +2232,7 @@ describe('Test rounds functionality', () => {
         efficiency = 0, effort = 0, invalid = 0,
         stale = 0, valid = 0, work = 0;`;
     const expectedRounds = `
-      UPDATE \"Pool-Bitcoin\".current_rounds
+      UPDATE "Pool-Bitcoin".current_rounds
       SET round = '123456789'
       WHERE round = 'current' AND miner = 'primary'
       AND solo = true AND type = 'primary';`;
@@ -2276,7 +2276,7 @@ describe('Test rounds functionality', () => {
       transaction: 'transaction1'
     };
     const expectedBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_blocks (
+      INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, submitted, miner,
         worker, category, confirmations,
         difficulty, hash, height,
@@ -2318,7 +2318,7 @@ describe('Test rounds functionality', () => {
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadataBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1634742080841,
@@ -2327,9 +2327,9 @@ describe('Test rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = \"Pool-Bitcoin\".current_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Bitcoin".current_metadata.blocks + EXCLUDED.blocks;`;
     const expectedMetadataReset = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -2342,7 +2342,7 @@ describe('Test rounds functionality', () => {
         efficiency = 0, effort = 0, invalid = 0,
         stale = 0, valid = 0, work = 0;`;
     const expectedRounds = `
-      UPDATE \"Pool-Bitcoin\".current_rounds
+      UPDATE "Pool-Bitcoin".current_rounds
       SET round = '123456789'
       WHERE round = 'current' AND solo = false
       AND type = 'primary';`;
@@ -2387,7 +2387,7 @@ describe('Test rounds functionality', () => {
       transaction: 'transaction1'
     };
     const expectedBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_blocks (
+      INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, submitted, miner,
         worker, category, confirmations,
         difficulty, hash, height,
@@ -2429,7 +2429,7 @@ describe('Test rounds functionality', () => {
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadataBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1634742080841,
@@ -2438,9 +2438,9 @@ describe('Test rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = \"Pool-Bitcoin\".current_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Bitcoin".current_metadata.blocks + EXCLUDED.blocks;`;
     const expectedMetadataReset = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -2453,7 +2453,7 @@ describe('Test rounds functionality', () => {
         efficiency = 0, effort = 0, invalid = 0,
         stale = 0, valid = 0, work = 0;`;
     const expectedRounds = `
-      UPDATE \"Pool-Bitcoin\".current_rounds
+      UPDATE "Pool-Bitcoin".current_rounds
       SET round = '123456789'
       WHERE round = 'current' AND solo = false
       AND type = 'auxiliary';`;
@@ -2470,7 +2470,7 @@ describe('Test rounds functionality', () => {
 
   test('Test rounds auxiliary updates [2]', (done) => {
     MockDate.set(1634742080841);
-    configCopy.ports[0].type = 'solo'
+    configCopy.ports[0].type = 'solo';
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const rounds = new Rounds(logger, client, configCopy, configMainCopy);
@@ -2499,7 +2499,7 @@ describe('Test rounds functionality', () => {
       transaction: 'transaction1'
     };
     const expectedBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_blocks (
+      INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, submitted, miner,
         worker, category, confirmations,
         difficulty, hash, height,
@@ -2541,7 +2541,7 @@ describe('Test rounds functionality', () => {
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadataBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1634742080841,
@@ -2550,9 +2550,9 @@ describe('Test rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = \"Pool-Bitcoin\".current_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Bitcoin".current_metadata.blocks + EXCLUDED.blocks;`;
     const expectedMetadataReset = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -2565,7 +2565,7 @@ describe('Test rounds functionality', () => {
         efficiency = 0, effort = 0, invalid = 0,
         stale = 0, valid = 0, work = 0;`;
     const expectedRounds = `
-      UPDATE \"Pool-Bitcoin\".current_rounds
+      UPDATE "Pool-Bitcoin".current_rounds
       SET round = '123456789'
       WHERE round = 'current' AND miner = 'primary'
       AND solo = true AND type = 'auxiliary';`;
@@ -2609,7 +2609,7 @@ describe('Test rounds functionality', () => {
       transaction: 'transaction1'
     };
     const expectedBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_blocks (
+      INSERT INTO "Pool-Bitcoin".current_blocks (
         timestamp, submitted, miner,
         worker, category, confirmations,
         difficulty, hash, height,
@@ -2651,7 +2651,7 @@ describe('Test rounds functionality', () => {
         transaction = EXCLUDED.transaction,
         type = EXCLUDED.type;`;
     const expectedMetadataBlocks = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, blocks, type)
       VALUES (
         1634742080841,
@@ -2660,9 +2660,9 @@ describe('Test rounds functionality', () => {
       ON CONFLICT ON CONSTRAINT current_metadata_unique
       DO UPDATE SET
         timestamp = EXCLUDED.timestamp,
-        blocks = \"Pool-Bitcoin\".current_metadata.blocks + EXCLUDED.blocks;`;
+        blocks = "Pool-Bitcoin".current_metadata.blocks + EXCLUDED.blocks;`;
     const expectedMetadataReset = `
-      INSERT INTO \"Pool-Bitcoin\".current_metadata (
+      INSERT INTO "Pool-Bitcoin".current_metadata (
         timestamp, efficiency, effort,
         invalid, stale, type, valid,
         work)
@@ -2675,7 +2675,7 @@ describe('Test rounds functionality', () => {
         efficiency = 0, effort = 0, invalid = 0,
         stale = 0, valid = 0, work = 0;`;
     const expectedRounds = `
-      UPDATE \"Pool-Bitcoin\".current_rounds
+      UPDATE "Pool-Bitcoin".current_rounds
       SET round = '123456789'
       WHERE round = 'current' AND solo = false
       AND type = 'auxiliary';`;
