@@ -44,7 +44,7 @@ const Shares = function (logger, client, config, configMain) {
       addrauxiliary: shareData.addrAuxiliary || '',
       blockdiffprimary: shareData.blockDiffPrimary || -1,
       blockdiffauxiliary: shareData.blockDiffAuxiliary || -1,
-      blockvalid: blockValid,
+      blockvalid: blockValid || false,
       blocktype: shareData.blockType,
       clientdiff: shareData.difficulty,
       hash: shareData.hash,
@@ -52,7 +52,7 @@ const Shares = function (logger, client, config, configMain) {
       identifier: shareData.identifier,
       reward: shareData.reward,
       sharediff: shareData.shareDiff,
-      sharevalid: shareValid,
+      sharevalid: shareValid || false,
       transaction: transaction,
     };
   };
