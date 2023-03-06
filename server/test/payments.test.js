@@ -1,4 +1,4 @@
-const Commands = require('../../database/main/commands');
+const Commands = require('../../database/main/master/commands');
 const Logger = require('../main/logger');
 const MockDate = require('mockdate');
 const Payments = require('../main/payments');
@@ -10,8 +10,8 @@ const events = require('events');
 
 function mockClient(configMain, result) {
   const client = new events.EventEmitter();
-  client.commands = new Commands(null, null, configMain);
-  client.commands.executor = (commands, callback) => {
+  client.master = { commands: new Commands(null, null, configMain) };
+  client.master.commands.executor = (commands, callback) => {
     client.emit('transaction', commands);
     callback(result);
   };
@@ -170,11 +170,11 @@ describe('Test payments functionality', () => {
     };
     const miner2 = { ...miner1, miner: 'miner2', worker: 'miner2' };
     const miner3 = { ...miner1, miner: 'miner3', worker: 'miner3' };
-    const rounds = [[miner1, miner2, miner3], [miner1, miner2, miner3]];
+    const rounds = [[miner1, miner2, miner3]];
     const expected = [
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'round1', 'solo': false, 'stale': 0, 'times': 200, 'timestamp': 1634742080841, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner1'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'round1', 'solo': false, 'stale': 0, 'times': 200, 'timestamp': 1634742080841, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner2'},
-      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'round1', 'solo': false, 'stale': 0, 'times': 200, 'timestamp': 1634742080841, 'type': 'primary', 'valid': 200, 'work': 200, 'worker': 'miner3'}];
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner1', 'round': 'round1', 'solo': false, 'stale': 0, 'times': 100, 'timestamp': 1634742080841, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner1'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner2', 'round': 'round1', 'solo': false, 'stale': 0, 'times': 100, 'timestamp': 1634742080841, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner2'},
+      {'identifier': 'master', 'invalid': 0, 'miner': 'miner3', 'round': 'round1', 'solo': false, 'stale': 0, 'times': 100, 'timestamp': 1634742080841, 'type': 'primary', 'valid': 100, 'work': 100, 'worker': 'miner3'}];
     expect(payments.handleHistoricalRounds(rounds)).toStrictEqual(expected);
   });
 
@@ -444,10 +444,10 @@ describe('Test payments functionality', () => {
         'round1',
         false,
         0,
-        200,
+        100,
         'primary',
-        200,
-        200), (
+        100,
+        100), (
         1634742080841,
         'miner2',
         'miner2',
@@ -456,10 +456,58 @@ describe('Test payments functionality', () => {
         'round1',
         false,
         0,
-        400,
+        100,
         'primary',
-        400,
-        400)
+        100,
+        100), (
+        1634742080841,
+        'miner3',
+        'miner2',
+        'master',
+        0,
+        'round1',
+        false,
+        0,
+        100,
+        'primary',
+        100,
+        100), (
+        1634742080841,
+        'miner1',
+        'miner1',
+        'master',
+        0,
+        'round1',
+        false,
+        0,
+        100,
+        'primary',
+        100,
+        100), (
+        1634742080841,
+        'miner2',
+        'miner2',
+        'master',
+        0,
+        'round1',
+        false,
+        0,
+        100,
+        'primary',
+        100,
+        100), (
+        1634742080841,
+        'miner3',
+        'miner2',
+        'master',
+        0,
+        'round1',
+        false,
+        0,
+        100,
+        'primary',
+        100,
+        100)
       ON CONFLICT DO NOTHING;`;
     const expectedTransactions = `
       INSERT INTO "Pool-Bitcoin".historical_transactions (
@@ -686,10 +734,22 @@ describe('Test payments functionality', () => {
         'round1',
         false,
         0,
-        200,
+        100,
         'primary',
-        200,
-        200), (
+        100,
+        100), (
+        1634742080841,
+        'miner3',
+        'miner2',
+        'master',
+        0,
+        'round1',
+        false,
+        0,
+        100,
+        'primary',
+        100,
+        100), (
         1634742080841,
         'miner1',
         'miner1',
@@ -710,10 +770,22 @@ describe('Test payments functionality', () => {
         'round2',
         false,
         0,
-        200,
+        100,
         'primary',
-        200,
-        200)
+        100,
+        100), (
+        1634742080841,
+        'miner3',
+        'miner2',
+        'master',
+        0,
+        'round2',
+        false,
+        0,
+        100,
+        'primary',
+        100,
+        100)
       ON CONFLICT DO NOTHING;`;
     const expectedTransactions = `
       INSERT INTO "Pool-Bitcoin".historical_transactions (
@@ -1137,10 +1209,22 @@ describe('Test payments functionality', () => {
         'round1',
         false,
         0,
-        200,
+        100,
         'auxiliary',
-        200,
-        200), (
+        100,
+        100), (
+        1634742080841,
+        'miner3',
+        'miner2',
+        'master',
+        0,
+        'round1',
+        false,
+        0,
+        100,
+        'auxiliary',
+        100,
+        100), (
         1634742080841,
         'miner1',
         'miner1',
@@ -1161,10 +1245,22 @@ describe('Test payments functionality', () => {
         'round2',
         false,
         0,
-        200,
+        100,
         'auxiliary',
-        200,
-        200)
+        100,
+        100), (
+        1634742080841,
+        'miner3',
+        'miner2',
+        'master',
+        0,
+        'round2',
+        false,
+        0,
+        100,
+        'auxiliary',
+        100,
+        100)
       ON CONFLICT DO NOTHING;`;
     const expectedTransactions = `
       INSERT INTO "Pool-Bitcoin".historical_transactions (
