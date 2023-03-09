@@ -17,9 +17,10 @@ const Network = function (logger, client, config, configMain) {
   process.setMaxListeners(0);
   this.forkId = process.env.forkId;
 
-  // Database Variables
-  this.executor = _this.client.commands.executor;
-  this.current = _this.client.commands.current;
+  // Client Handlers
+  this.master = {
+    executor: _this.client.master.commands.executor,
+    current: _this.client.master.commands.current };
 
   // Handle Current Network Updates
   this.handleCurrentNetwork = function(network, networkType) {
@@ -41,11 +42,11 @@ const Network = function (logger, client, config, configMain) {
     const networkUpdates = _this.handleCurrentNetwork(network, 'primary');
     const transaction = [
       'BEGIN;',
-      _this.current.network.insertCurrentNetworkMain(_this.pool, [networkUpdates]),
+      _this.master.current.network.insertCurrentNetworkMain(_this.pool, [networkUpdates]),
       'COMMIT'];
 
     // Insert Work into Database
-    _this.executor(transaction, () => callback());
+    _this.master.executor(transaction, () => callback());
   };
 
   // Handle Primary Updates
@@ -55,11 +56,11 @@ const Network = function (logger, client, config, configMain) {
     const networkUpdates = _this.handleCurrentNetwork(network, 'auxiliary');
     const transaction = [
       'BEGIN;',
-      _this.current.network.insertCurrentNetworkMain(_this.pool, [networkUpdates]),
+      _this.master.current.network.insertCurrentNetworkMain(_this.pool, [networkUpdates]),
       'COMMIT'];
 
     // Insert Work into Database
-    _this.executor(transaction, () => callback());
+    _this.master.executor(transaction, () => callback());
   };
 
   // Handle Network Data Submissions

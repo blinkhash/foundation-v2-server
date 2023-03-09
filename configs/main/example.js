@@ -19,12 +19,23 @@ config.logger.logLevel = 'log';
 
 // Database Configuration (SQL)
 config.client = {};
-config.client.host = '127.0.0.1';
-config.client.port = 5432;
-config.client.username = '';
-config.client.password = '';
-config.client.database = '';
 config.client.tls = false;
+
+// Master Database
+config.client.master = {};
+config.client.master.host = '127.0.0.1';
+config.client.master.port = 5432;
+config.client.master.username = '';
+config.client.master.password = '';
+config.client.master.database = '';
+
+// Worker Database
+config.client.worker = {};
+config.client.worker.host = '127.0.0.1';
+config.client.worker.port = 5432;
+config.client.worker.username = '';
+config.client.worker.password = '';
+config.client.worker.database = '';
 
 // Clustering Configuration
 config.clustering = {};

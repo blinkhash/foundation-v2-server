@@ -1,4 +1,5 @@
-const Commands = require('../../database/main/commands');
+const CommandsMaster = require('../../database/main/master/commands');
+const CommandsWorker = require('../../database/main/worker/commands');
 const Logger = require('../main/logger');
 const MockDate = require('mockdate');
 const Statistics = require('../main/statistics');
@@ -10,8 +11,13 @@ const events = require('events');
 
 function mockClient(configMain, result) {
   const client = new events.EventEmitter();
-  client.commands = new Commands(null, null, configMain);
-  client.commands.executor = (commands, callback) => {
+  client.master = { commands: new CommandsMaster(null, null, configMain) };
+  client.worker = { commands: new CommandsWorker(null, null, configMain) };
+  client.master.commands.executor = (commands, callback) => {
+    client.emit('transaction', commands);
+    callback(result);
+  };
+  client.worker.commands.executor = (commands, callback) => {
     client.emit('transaction', commands);
     callback(result);
   };
@@ -223,6 +229,7 @@ describe('Test statistics functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     }];
     const expected = [{
       timestamp: 1634742080841,
@@ -235,6 +242,7 @@ describe('Test statistics functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     }];
     expect(statistics.handleHistoricalMiners(miners)).toStrictEqual(expected);
   });
@@ -281,6 +289,7 @@ describe('Test statistics functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     }];
     const expected = [{
       timestamp: 1634742080841,
@@ -295,6 +304,7 @@ describe('Test statistics functionality', () => {
       stale: 0,
       type: 'primary',
       valid: 1,
+      work: 1,
     }];
     expect(statistics.handleHistoricalWorkers(workers)).toStrictEqual(expected);
   });
@@ -349,6 +359,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'primary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -371,6 +382,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'primary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -384,6 +396,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'primary',
         valid: 1,
+        work: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -471,7 +484,8 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        invalid, stale, type, valid)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -482,6 +496,7 @@ describe('Test statistics functionality', () => {
         0,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
@@ -503,7 +518,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -516,6 +531,7 @@ describe('Test statistics functionality', () => {
         true,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -524,7 +540,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -537,6 +553,7 @@ describe('Test statistics functionality', () => {
         false,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -606,6 +623,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'primary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -628,6 +646,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'primary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -641,6 +660,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'primary',
         valid: 1,
+        work: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -728,7 +748,8 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        invalid, stale, type, valid)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -739,6 +760,7 @@ describe('Test statistics functionality', () => {
         0,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
@@ -760,7 +782,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -773,6 +795,7 @@ describe('Test statistics functionality', () => {
         true,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -781,7 +804,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -794,6 +817,7 @@ describe('Test statistics functionality', () => {
         false,
         0,
         'primary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -895,6 +919,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'auxiliary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -917,6 +942,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'auxiliary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -930,6 +956,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'auxiliary',
         valid: 1,
+        work: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -1017,7 +1044,8 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        invalid, stale, type, valid)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1028,6 +1056,7 @@ describe('Test statistics functionality', () => {
         0,
         0,
         'auxiliary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
@@ -1049,7 +1078,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1062,6 +1091,7 @@ describe('Test statistics functionality', () => {
         true,
         0,
         'auxiliary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -1070,7 +1100,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1083,6 +1113,7 @@ describe('Test statistics functionality', () => {
         false,
         0,
         'auxiliary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -1152,6 +1183,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'auxiliary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -1174,6 +1206,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'auxiliary',
         valid: 1,
+        work: 1,
       }]},
       { rows: [{
         timestamp: 1,
@@ -1187,6 +1220,7 @@ describe('Test statistics functionality', () => {
         stale: 0,
         type: 'auxiliary',
         valid: 1,
+        work: 1,
       }]},
       null];
     const expectedMetadata = `
@@ -1274,7 +1308,8 @@ describe('Test statistics functionality', () => {
       INSERT INTO "Pool-Bitcoin".historical_miners (
         timestamp, recent, miner,
         efficiency, effort, hashrate,
-        invalid, stale, type, valid)
+        invalid, stale, type, valid,
+        work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1285,6 +1320,7 @@ describe('Test statistics functionality', () => {
         0,
         0,
         'auxiliary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_miners_recent
       DO NOTHING;`;
@@ -1306,7 +1342,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1319,6 +1355,7 @@ describe('Test statistics functionality', () => {
         true,
         0,
         'auxiliary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;
@@ -1327,7 +1364,7 @@ describe('Test statistics functionality', () => {
         timestamp, recent, miner,
         worker, efficiency, effort,
         hashrate, invalid, solo,
-        stale, type, valid)
+        stale, type, valid, work)
       VALUES (
         1634742080841,
         1634742000000,
@@ -1340,6 +1377,7 @@ describe('Test statistics functionality', () => {
         false,
         0,
         'auxiliary',
+        1,
         1)
       ON CONFLICT ON CONSTRAINT historical_workers_recent
       DO NOTHING;`;

@@ -17,10 +17,13 @@ If you need help with a code-related matter, the first place to look is our [Dis
 
 Maintaining this project has always been driven out of nothing more than a desire to give back to the mining community, however I always appreciate donations, especially if this repository helps you in any way.
 
-- Bitcoin: 3EbrVYLxN5WeQmPpL6owo3A7rJELXecbbc
-- Ethereum: 0xd3e3daED621d228244Fa89A3dd8AF07B52E72319
-- Litecoin: MFWpARrSADAy3Qj79C4pSasS9F156QipwC
-- ZCash: t1NSk8gyiou8TxWRZTVuUkfM5f9riopN58A
+- Bitcoin: 38QX2MXNuUt53WTCeSM8zjQkgqqpCHN4p3
+- Dash: Xenf25o7Dv7EMp9sPo4fU865Vvzr3DMPju
+- Dogecoin: DQTiorDQCUmDXtu8aA83VBAn3E9ARfQEez
+- Ethereum: 0x923Ba122453d44bf614c6ee377A236970772952B
+- Litecoin: M8hA7wbyw39qChoDYerR1Gyp9pdDCZvpvz
+- Ravencoin: RUYstAgw1k9WQkjCASjfKo6HsUM1bD4f3j
+- ZCash: t1NvXnerxQPnoUsYruaPFMRTijEZ1KKqDSR
 
 ---
 
