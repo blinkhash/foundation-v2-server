@@ -81,7 +81,7 @@ const Checks = function (logger, client, config, configMain) {
 
     // Collect All Round Data
     rounds.forEach((round) => {
-      const identifier = `${ round.worker }_${ round.solo }_${ round.round }_${ round.type }`;
+      const identifier = `${ round.worker }_${ round.solo }_${ round.type }`;
       if (identifier in combined) {
         const current = combined[identifier];
         current.invalid += round.invalid || 0;
