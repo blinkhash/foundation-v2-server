@@ -649,6 +649,11 @@ const Rounds = function (logger, client, config, configMain) {
       const shares = lookups[1].rows.filter((share) => results.includes((share || {}).uuid));
       const segments = _this.processSegments(shares);
 
+      // Determine Number of Shares Being Processed
+      const capacity = Math.round(shares.length / _this.config.settings.batch.limit * 1000) / 10;
+      const lines = [_this.text.roundsHandlingText1(capacity)];
+      _this.logger.debug('Rounds', _this.config.name, lines);
+
       // Segments Exist to Validate
       if (segments.length >= 1) {
         async.series(segments.map((segment) => {
@@ -678,11 +683,16 @@ const Rounds = function (logger, client, config, configMain) {
     const starting = [_this.text.databaseStartingText4()];
     _this.logger.debug('Rounds', _this.config.name, starting);
 
+    // Calculate Rounds Features
+    const limit = _this.config.settings.batch.limit;
+    const updateWindow = Date.now() - _this.config.settings.window.updates;
+
     // Build Combined Transaction
-    const parameters = { order: 'submitted', direction: 'ascending', limit: 100 };
+    const parameters = { order: 'submitted', direction: 'ascending', limit: limit };
     const transaction = [
       'BEGIN;',
       _this.worker.local.shares.selectLocalSharesMain(_this.pool, parameters),
+      _this.worker.local.transactions.deleteLocalTransactionsInactive(_this.pool, updateWindow),
       'COMMIT;'];
 
     // Establish Separate Behavior

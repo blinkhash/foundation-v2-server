@@ -51,6 +51,9 @@ exports.loaderRecipientsText1 = () => 'The recipient percentage is greater than 
 exports.loaderRecipientsText2 = () => 'The recipient percentage is greater than 40%. Are you sure that you configured it properly?';
 exports.loaderTemplateText1 = () => 'The pool template is not installed or does not exist. Check your configuration files';
 
+// Rounds Text
+exports.roundsHandlingText1 = (capacity) => `The rounds handler is currently using ${ capacity }% of the total batching limit`;
+
 // Stratum Text
 exports.stratumRecipientsText1 = () => 'No recipients have been added, which means that no fees will be taken';
 
