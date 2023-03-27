@@ -6,7 +6,7 @@ exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 // Database Text
 exports.databaseCommandsText1 = (query, error) => `An error was thrown when trying to execute a query (${ query }): ${ error }`;
 exports.databaseCommandsText2 = (error) => `An error was thrown when trying to handle checks and validations: ${ error }`;
-exports.databaseCommandsText3 = (retries) => `An error was thrown by the database, waiting before attempting (#${ retries + 1}) to reconnect ...`;
+exports.databaseCommandsText3 = (retries) => `An error was thrown by the database, waiting before attempting (#${ retries + 1}) to retry ...`;
 exports.databaseCommandsText4 = () => 'Successfully reconnected to the master database, continuing execution ...';
 exports.databaseCommandsText5 = () => 'Successfully reconnected to the worker database, continuing execution ...';
 exports.databaseCommandsText6 = () => 'Unable to reconnect to master database, exceeded retry limits ...';

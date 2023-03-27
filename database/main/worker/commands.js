@@ -15,24 +15,32 @@ const Commands = function (logger, client, configMain) {
   this.client = client;
   this.configMain = configMain;
   this.text = Text[configMain.language];
+  this.timing = [1000, 5000, 30000];
 
   // Database Table Structure
   this.local = {};
+  this.retries = 0;
 
   // Execute Commands
   /* eslint-disable */
   this.executor = function(commands, callback) {
     const query = commands.join(' ')
-    const handler = (error) => { throw new Error(error); };
     _this.client.query(query, (error, results) => {
-      if (error) {
-        const lines = [_this.text.databaseCommandsText1(query, JSON.stringify(error))];
-        _this.logger.error('Database', 'Worker', lines);
-        handler(error);
-      } else {
-        callback(results);
-      }
+      if (error) _this.retry(commands, error, callback);
+      else callback(results);
     });
+  };
+
+  // Handle Retries
+  this.retry = function(commands, error, callback) {
+    if (_this.retries < 3) {
+      const lines = [_this.text.databaseCommandsText3(_this.retries)];
+      _this.logger.error('Database', 'Worker', lines);
+      setTimeout(() => {
+        _this.executor(commands, callback);
+        _this.retries += 1;
+      }, _this.timing[_this.retries] || 1000);
+    } else throw new Error(error);
   };
 
   // Build Out Schema Generation
