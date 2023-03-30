@@ -13,7 +13,7 @@ function mockClient(error, results) {
       requests += 1;
       callback(error, results);
     }
-  }}
+  }};
 }
 
 ////////////////////////////////////////////////////////////////////////////////

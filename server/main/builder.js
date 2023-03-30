@@ -77,7 +77,7 @@ const Builder = function(logger, configMain) {
     const startInterval = setInterval(() => {
       _this.createPoolWorkers(_this.numWorkers);
       _this.numWorkers += 1;
-      if (_this.numWorkers === (numForks)) {
+      if (_this.numWorkers >= numForks) {
         const lines = [_this.text.builderThreadsText3(1, numForks)];
         _this.logger.debug('Builder', 'Workers', lines);
         clearInterval(startInterval);
