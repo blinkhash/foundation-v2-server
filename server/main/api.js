@@ -35,6 +35,37 @@ const Api = function (logger, client, configs, configMain) {
     response.end(JSON.stringify(payload));
   };
 
+  // Generate Structure of Configuration
+  this.generateConfiguration = function(config, type) {
+    return {
+      name: config[type].coin.name || '',
+      symbol: config[type].coin.symbol || '',
+      algorithm: config[type].coin.algorithm || '',
+      minimumPayment: config[type].payments.minPayment || -1,
+      recipientFee: (config[type].recipients || []).reduce((p_sum, a) => {
+        return p_sum + a.percentage;
+      }, 0),
+      type: type,
+      intervals: {
+        checks: config.settings.interval.checks || -1,
+        payments: config.settings.interval.payments || -1,
+        rounds: config.settings.interval.rounds || -1,
+        statistics: config.settings.interval.statistics || -1,
+      },
+    };
+  };
+
+  // Build Configuration for API Endpoint
+  this.buildConfiguration = function(pool) {
+    const output = [];
+    const config = _this.configs[pool];
+    output.push(_this.generateConfiguration(config, 'primary'));
+    if (config.auxiliary && config.auxiliary.enabled) {
+      output.push(_this.generateConfiguration(config, 'auxiliary'));
+    }
+    return output;
+  };
+
   // Determine API Endpoint Called
   this.handleApiV2 = function(req, callback) {
 
@@ -57,6 +88,9 @@ const Api = function (logger, client, configs, configMain) {
     // Current Endpoints
     case (category === 'current' && endpoint === 'blocks'):
       _this.endpoints.handleCurrentBlocks(pool, queries, output);
+      break;
+    case (category === 'current' && endpoint === 'configuration'):
+      callback(200, _this.buildConfiguration(pool));
       break;
     case (category === 'current' && endpoint === 'hashrate'):
       _this.endpoints.handleCurrentHashrate(pool, queries, output);
