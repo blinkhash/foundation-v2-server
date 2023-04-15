@@ -204,12 +204,16 @@ describe('Test payments functionality', () => {
     const blocks = [
       { round: 'round1' }, { round: 'round2' }, { round: 'round3' },
       { round: 'round4' }, { round: 'round5' }, { round: 'round6' }];
-    const expected = `
+    const expectedPayments = `
       DELETE FROM "Pool-Bitcoin".current_payments
       WHERE round IN ('round1', 'round2', 'round3', 'round4', 'round5', 'round6');`;
+    const expectedTransactions = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
+      WHERE round IN ('round1', 'round2', 'round3', 'round4', 'round5', 'round6');`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(3);
-      expect(transaction[1]).toBe(expected);
+      expect(transaction.length).toBe(4);
+      expect(transaction[1]).toBe(expectedPayments);
+      expect(transaction[2]).toBe(expectedTransactions);
       done();
     });
     payments.handleFailures(blocks, () => {});
@@ -519,8 +523,11 @@ describe('Test payments functionality', () => {
         'transaction1',
         'primary')
       ON CONFLICT DO NOTHING;`;
+    const expectedTransactionsDelete = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
+      WHERE round IN ('round1', 'round2', 'round3', 'round4', 'round5', 'round6');`;
     client.on('transaction', (transaction) => {
-      expect(transaction.length).toBe(10);
+      expect(transaction.length).toBe(11);
       expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
       expect(transaction[2]).toBe(expectedResetMiners);
       expect(transaction[3]).toBe(expectedMiners);
@@ -529,6 +536,7 @@ describe('Test payments functionality', () => {
       expect(transaction[6]).toBe(expectedPayments);
       expect(transaction[7]).toBe(expectedGenerateRoundsUpdates);
       expect(transaction[8]).toBe(expectedTransactions);
+      expect(transaction[9]).toBe(expectedTransactionsDelete);
       done();
     });
     payments.handleUpdates(blocks, rounds, amounts, balances, 'transaction1', 'primary', () => {});
@@ -797,9 +805,12 @@ describe('Test payments functionality', () => {
         'transaction1',
         'primary')
       ON CONFLICT DO NOTHING;`;
+    const expectedTransactionsDelete = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
+      WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(10);
+        expect(transaction.length).toBe(11);
         expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
         expect(transaction[2]).toBe(expectedResetMiners);
         expect(transaction[3]).toBe(expectedMiners);
@@ -808,6 +819,7 @@ describe('Test payments functionality', () => {
         expect(transaction[6]).toBe(expectedPayments);
         expect(transaction[7]).toBe(expectedGenerateRoundsUpdates);
         expect(transaction[8]).toBe(expectedTransactions);
+        expect(transaction[9]).toBe(expectedTransactionsDelete);
       } else currentIdx += 1;
     });
     payments.handlePrimary(blocks, {}, () => done());
@@ -872,13 +884,17 @@ describe('Test payments functionality', () => {
       handlePrimaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
     let currentIdx = 0;
-    const expected = `
+    const expectedPayments = `
       DELETE FROM "Pool-Bitcoin".current_payments
+      WHERE round IN ('round1', 'round2');`;
+    const expectedTransactions = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
       WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(3);
-        expect(transaction[1]).toBe(expected);
+        expect(transaction.length).toBe(4);
+        expect(transaction[1]).toBe(expectedPayments);
+        expect(transaction[2]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handlePrimary(blocks, {}, () => done());
@@ -943,13 +959,17 @@ describe('Test payments functionality', () => {
       handlePrimaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
     let currentIdx = 0;
-    const expected = `
+    const expectedPayments = `
       DELETE FROM "Pool-Bitcoin".current_payments
+      WHERE round IN ('round1', 'round2');`;
+    const expectedTransactions = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
       WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(3);
-        expect(transaction[1]).toBe(expected);
+        expect(transaction.length).toBe(4);
+        expect(transaction[1]).toBe(expectedPayments);
+        expect(transaction[2]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handlePrimary(blocks, {}, () => done());
@@ -1013,13 +1033,17 @@ describe('Test payments functionality', () => {
       handlePrimaryPayments: (current, callback) => callback(true, {}, {}, null),
     }};
     let currentIdx = 0;
-    const expected = `
+    const expectedPayments = `
       DELETE FROM "Pool-Bitcoin".current_payments
+      WHERE round IN ('round1', 'round2');`;
+    const expectedTransactions = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
       WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(3);
-        expect(transaction[1]).toBe(expected);
+        expect(transaction.length).toBe(4);
+        expect(transaction[1]).toBe(expectedPayments);
+        expect(transaction[2]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handlePrimary(blocks, {}, () => done());
@@ -1272,9 +1296,12 @@ describe('Test payments functionality', () => {
         'transaction1',
         'auxiliary')
       ON CONFLICT DO NOTHING;`;
+    const expectedTransactionsDelete = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
+      WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(10);
+        expect(transaction.length).toBe(11);
         expect(transaction[1]).toBe(expectedGenerateBlocksDeletes);
         expect(transaction[2]).toBe(expectedResetMiners);
         expect(transaction[3]).toBe(expectedMiners);
@@ -1283,6 +1310,7 @@ describe('Test payments functionality', () => {
         expect(transaction[6]).toBe(expectedPayments);
         expect(transaction[7]).toBe(expectedGenerateRoundsUpdates);
         expect(transaction[8]).toBe(expectedTransactions);
+        expect(transaction[9]).toBe(expectedTransactionsDelete);
       } else currentIdx += 1;
     });
     payments.handleAuxiliary(blocks, {}, () => done());
@@ -1347,13 +1375,17 @@ describe('Test payments functionality', () => {
       handleAuxiliaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
     let currentIdx = 0;
-    const expected = `
+    const expectedPayments = `
       DELETE FROM "Pool-Bitcoin".current_payments
+      WHERE round IN ('round1', 'round2');`;
+    const expectedTransactions = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
       WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(3);
-        expect(transaction[1]).toBe(expected);
+        expect(transaction.length).toBe(4);
+        expect(transaction[1]).toBe(expectedPayments);
+        expect(transaction[2]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handleAuxiliary(blocks, {}, () => done());
@@ -1418,13 +1450,17 @@ describe('Test payments functionality', () => {
       handleAuxiliaryPayments: (current, callback) => callback(null, amounts, {}, 'transaction1'),
     }};
     let currentIdx = 0;
-    const expected = `
+    const expectedPayments = `
       DELETE FROM "Pool-Bitcoin".current_payments
+      WHERE round IN ('round1', 'round2');`;
+    const expectedTransactions = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
       WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(3);
-        expect(transaction[1]).toBe(expected);
+        expect(transaction.length).toBe(4);
+        expect(transaction[1]).toBe(expectedPayments);
+        expect(transaction[2]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handleAuxiliary(blocks, {}, () => done());
@@ -1488,13 +1524,17 @@ describe('Test payments functionality', () => {
       handleAuxiliaryPayments: (current, callback) => callback(true, {}, {}, null),
     }};
     let currentIdx = 0;
-    const expected = `
+    const expectedPayments = `
       DELETE FROM "Pool-Bitcoin".current_payments
+      WHERE round IN ('round1', 'round2');`;
+    const expectedTransactions = `
+      DELETE FROM "Pool-Bitcoin".current_transactions
       WHERE round IN ('round1', 'round2');`;
     client.on('transaction', (transaction) => {
       if (currentIdx === 1) {
-        expect(transaction.length).toBe(3);
-        expect(transaction[1]).toBe(expected);
+        expect(transaction.length).toBe(4);
+        expect(transaction[1]).toBe(expectedPayments);
+        expect(transaction[2]).toBe(expectedTransactions);
       } else currentIdx += 1;
     });
     payments.handleAuxiliary(blocks, {}, () => done());
@@ -1502,98 +1542,47 @@ describe('Test payments functionality', () => {
 
   test('Test payments rounds updates [1]', (done) => {
     MockDate.set(1634742080841);
-    const lookups = [null, { rows: [] }, null];
+    const lookups = [null, { rows: [] }, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
-    const initialBlock = {
-      timestamp: 1,
-      miner: 'miner1',
-      worker: 'miner1',
-      category: 'pending',
-      confirmations: -1,
-      difficulty: 150,
-      hash: 'hash',
-      height: 1,
-      identifier: 'master',
-      luck: 66.67,
-      reward: 0,
-      round: 'round',
-      solo: false,
-      transaction: 'transaction1',
-      type: 'auxiliary',
-    };
-    const initial = [
-      null,
-      { rows: [
-        { ...initialBlock, category: 'immature', round: 'round1' },
-        { ...initialBlock, category: 'generate', round: 'round2' }]},
-      { rows: [] },
-      null];
-    payments.handleRounds(initial, 'primary', () => done());
+    payments.handleRounds([], {}, 'primary', () => done());
   });
 
   test('Test payments rounds updates [2]', (done) => {
     MockDate.set(1634742080841);
-    const lookups = [null, { rows: [] }, null];
+    const lookups = [null, { rows: [] }, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
-    const initial = [null, { rows: [] }, { rows: [] }, null];
-    payments.handleRounds(initial, 'primary', () => done());
+    payments.handleRounds([], {}, 'primary', () => done());
   });
 
   test('Test payments rounds updates [3]', (done) => {
     MockDate.set(1634742080841);
-    const lookups = [null, { rows: [] }, null];
+    const lookups = [null, { rows: [] }, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
-    const initialBlock = {
-      timestamp: 1,
-      miner: 'miner1',
-      worker: 'miner1',
-      category: 'pending',
-      confirmations: -1,
-      difficulty: 150,
-      hash: 'hash',
-      height: 1,
-      identifier: 'master',
-      luck: 66.67,
-      reward: 0,
-      round: 'round',
-      solo: false,
-      transaction: 'transaction1',
-      type: 'auxiliary',
-    };
-    const initial = [
-      null,
-      { rows: [
-        { ...initialBlock, category: 'immature', round: 'round1' },
-        { ...initialBlock, category: 'generate', round: 'round2' }]},
-      { rows: [] },
-      null];
-    payments.handleRounds(initial, 'auxiliary', () => done());
+    payments.handleRounds([], {}, 'auxiliary', () => done());
   });
 
   test('Test payments rounds updates [4]', (done) => {
     MockDate.set(1634742080841);
-    const lookups = [null, { rows: [] }, null];
+    const lookups = [null, { rows: [] }, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
-    const initial = [null, { rows: [] }, { rows: [] }, null];
-    payments.handleRounds(initial, 'auxiliary', () => done());
+    payments.handleRounds([], {}, 'auxiliary', () => done());
   });
 
   test('Test payments rounds updates [5]', (done) => {
     MockDate.set(1634742080841);
-    const lookups = [null, { rows: [] }, null];
+    const lookups = [null, { rows: [] }, { rows: [] }, null];
     const client = mockClient(configMainCopy, lookups);
     const logger = new Logger(configMainCopy);
     const payments = new Payments(logger, client, configCopy, configMainCopy);
-    const initial = [null, { rows: [] }, { rows: [] }, null];
-    payments.handleRounds(initial, 'unknown', () => done());
+    payments.handleRounds([], {}, 'unknown', () => done());
   });
 
   test('Test payments submission handling', (done) => {

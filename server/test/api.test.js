@@ -66,6 +66,46 @@ describe('Test API functionality', () => {
     api.buildResponse(200, 'This is an example request', response);
   });
 
+  test('Test API configuration handling [1]', () => {
+    const client = mockClient(configMainCopy, { rows: [] });
+    const logger = new Logger(configMainCopy);
+    const api = new Api(logger, client, configs, configMainCopy);
+    const expected = {'algorithm': 'sha256d', 'intervals': {'checks': 90000, 'payments': 7200000, 'rounds': 60000, 'statistics': 90000}, 'minimumPayment': 0.005, 'name': 'Bitcoin', 'recipientFee': 0.05, 'symbol': 'BTC', 'type': 'primary'};
+    expect(api.generateConfiguration(configs.Pool1, 'primary')).toStrictEqual(expected);
+  });
+
+  test('Test API configuration handling [2]', () => {
+    const client = mockClient(configMainCopy, { rows: [] });
+    const logger = new Logger(configMainCopy);
+    const api = new Api(logger, client, configs, configMainCopy);
+    configs.Pool1.auxiliary = {
+      coin: { name: 'Dogecoin', symbol: 'DOGE', algorithm: 'scrypt' },
+      payments: { minPayment: 0.005 }};
+    const expected = {'algorithm': 'scrypt', 'intervals': {'checks': 90000, 'payments': 7200000, 'rounds': 60000, 'statistics': 90000}, 'minimumPayment': 0.005, 'name': 'Dogecoin', 'recipientFee': 0, 'symbol': 'DOGE', 'type': 'auxiliary'};
+    expect(api.generateConfiguration(configs.Pool1, 'auxiliary')).toStrictEqual(expected);
+  });
+
+  test('Test API configuration handling [3]', () => {
+    const client = mockClient(configMainCopy, { rows: [] });
+    const logger = new Logger(configMainCopy);
+    const api = new Api(logger, client, configs, configMainCopy);
+    const primary = {'algorithm': 'sha256d', 'intervals': {'checks': 90000, 'payments': 7200000, 'rounds': 60000, 'statistics': 90000}, 'minimumPayment': 0.005, 'name': 'Bitcoin', 'recipientFee': 0.05, 'symbol': 'BTC', 'type': 'primary'};
+    expect(api.buildConfiguration('Pool1')).toStrictEqual([primary]);
+  });
+
+  test('Test API configuration handling [4]', () => {
+    const client = mockClient(configMainCopy, { rows: [] });
+    const logger = new Logger(configMainCopy);
+    const api = new Api(logger, client, configs, configMainCopy);
+    configs.Pool1.auxiliary = {
+      enabled: true,
+      coin: { name: 'Dogecoin', symbol: 'DOGE', algorithm: 'scrypt' },
+      payments: { minPayment: 0.005 }};
+    const primary = {'algorithm': 'sha256d', 'intervals': {'checks': 90000, 'payments': 7200000, 'rounds': 60000, 'statistics': 90000}, 'minimumPayment': 0.005, 'name': 'Bitcoin', 'recipientFee': 0.05, 'symbol': 'BTC', 'type': 'primary'};
+    const auxiliary = {'algorithm': 'scrypt', 'intervals': {'checks': 90000, 'payments': 7200000, 'rounds': 60000, 'statistics': 90000}, 'minimumPayment': 0.005, 'name': 'Dogecoin', 'recipientFee': 0, 'symbol': 'DOGE', 'type': 'auxiliary'};
+    expect(api.buildConfiguration('Pool1')).toStrictEqual([primary, auxiliary]);
+  });
+
   test('Test API request handling [1]', (done) => {
     const request = mockRequest('Pool1', 'current', 'blocks', {});
     const client = mockClient(configMainCopy, { rows: [] });
@@ -79,6 +119,19 @@ describe('Test API functionality', () => {
   });
 
   test('Test API request handling [2]', (done) => {
+    const request = mockRequest('Pool1', 'current', 'configuration', {});
+    const client = mockClient(configMainCopy, { rows: [] });
+    const logger = new Logger(configMainCopy);
+    const api = new Api(logger, client, configs, configMainCopy);
+    const expected = {'algorithm': 'sha256d', 'intervals': {'checks': 90000, 'payments': 7200000, 'rounds': 60000, 'statistics': 90000}, 'minimumPayment': 0.005, 'name': 'Bitcoin', 'recipientFee': 0.05, 'symbol': 'BTC', 'type': 'primary'};
+    api.handleApiV2(request, (code, message) => {
+      expect(code).toBe(200);
+      expect(message).toStrictEqual([expected]);
+      done();
+    });
+  });
+
+  test('Test API request handling [3]', (done) => {
     const request = mockRequest('Pool1', 'current', 'hashrate', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -90,7 +143,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [3]', (done) => {
+  test('Test API request handling [4]', (done) => {
     const request = mockRequest('Pool1', 'current', 'metadata', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -102,7 +155,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [4]', (done) => {
+  test('Test API request handling [5]', (done) => {
     const request = mockRequest('Pool1', 'current', 'miners', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -114,7 +167,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [5]', (done) => {
+  test('Test API request handling [6]', (done) => {
     const request = mockRequest('Pool1', 'current', 'network', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -126,7 +179,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [6]', (done) => {
+  test('Test API request handling [7]', (done) => {
     const request = mockRequest('Pool1', 'current', 'payments', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -138,7 +191,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [7]', (done) => {
+  test('Test API request handling [8]', (done) => {
     const request = mockRequest('Pool1', 'current', 'ports', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -151,7 +204,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [8]', (done) => {
+  test('Test API request handling [9]', (done) => {
     const request = mockRequest('Pool1', 'current', 'rounds', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -163,7 +216,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [9]', (done) => {
+  test('Test API request handling [10]', (done) => {
     const request = mockRequest('Pool1', 'current', 'transactions', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -175,7 +228,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [10]', (done) => {
+  test('Test API request handling [11]', (done) => {
     const request = mockRequest('Pool1', 'current', 'workers', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -187,7 +240,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [11]', (done) => {
+  test('Test API request handling [12]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'blocks', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -199,7 +252,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [12]', (done) => {
+  test('Test API request handling [13]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'metadata', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -211,7 +264,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [13]', (done) => {
+  test('Test API request handling [14]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'miners', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -223,7 +276,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [14]', (done) => {
+  test('Test API request handling [15]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'network', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -235,7 +288,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [15]', (done) => {
+  test('Test API request handling [16]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'payments', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -247,7 +300,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [16]', (done) => {
+  test('Test API request handling [17]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'rounds', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -259,7 +312,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [17]', (done) => {
+  test('Test API request handling [18]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'transactions', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -271,7 +324,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [18]', (done) => {
+  test('Test API request handling [19]', (done) => {
     const request = mockRequest('Pool1', 'historical', 'workers', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -283,7 +336,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [19]', (done) => {
+  test('Test API request handling [20]', (done) => {
     const request = mockRequest('Pool1', 'combined', 'blocks', {});
     const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
     const logger = new Logger(configMainCopy);
@@ -295,7 +348,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [20]', (done) => {
+  test('Test API request handling [21]', (done) => {
     const request = mockRequest('Pool1', 'combined', 'rounds', {});
     const client = mockClient(configMainCopy, [{ rows: [] }, { rows: [] }]);
     const logger = new Logger(configMainCopy);
@@ -307,7 +360,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [21]', (done) => {
+  test('Test API request handling [22]', (done) => {
     const request = mockRequest('Pool1', '', '', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -319,7 +372,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [22]', (done) => {
+  test('Test API request handling [23]', (done) => {
     const request = mockRequest('pools', '', '', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -332,7 +385,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [23]', (done) => {
+  test('Test API request handling [24]', (done) => {
     const request = mockRequest('Pool1', 'bad', 'bad', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -345,7 +398,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [24]', (done) => {
+  test('Test API request handling [25]', (done) => {
     const request = mockRequest('bad', '', '', {});
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -358,7 +411,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [25]', (done) => {
+  test('Test API request handling [26]', (done) => {
     const request = { params: {}, queries: {} };
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
@@ -371,7 +424,7 @@ describe('Test API functionality', () => {
     });
   });
 
-  test('Test API request handling [26]', (done) => {
+  test('Test API request handling [27]', (done) => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const api = new Api(logger, client, configs, configMainCopy);

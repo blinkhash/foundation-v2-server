@@ -100,6 +100,10 @@ config.settings.banning.checkThreshold = 500;
 config.settings.banning.invalidPercent = 50;
 config.settings.banning.purgeInterval = 300000; // ms
 
+// Batch Configuration
+config.settings.batch = {};
+config.settings.batch.limit = 200;
+
 // Timeout Configuration
 config.settings.timeout = {};
 config.settings.timeout.connection = 600000; // ms

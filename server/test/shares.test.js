@@ -91,43 +91,29 @@ describe('Test shares functionality', () => {
     const client = mockClient(configMainCopy, { rows: [] });
     const logger = new Logger(configMainCopy);
     const shares = new Shares(logger, client, configCopy, configMainCopy);
-    const shareData = {
-      error: 'error1',
-      ip: '0.0.0.0',
-      port: '3001',
-      addrPrimary: 'primary',
-      blockDiffPrimary: 1,
-      blockType: 'share',
-      difficulty: 1,
-      hash: 'hash1',
-      height: 1,
-      identifier: '',
-      reward: 1,
-      shareDiff: 1,
-    };
     const expected = {
-      error: 'error1',
+      error: '',
       uuid: '123456789',
       timestamp: 1634742080841,
       submitted: 1634742080841,
       ip: '0.0.0.0',
-      port: 3001,
-      addrprimary: 'primary',
+      port: 0,
+      addrprimary: '',
       addrauxiliary: '',
-      blockdiffprimary: 1,
+      blockdiffprimary: -1,
       blockdiffauxiliary: -1,
       blockvalid: true,
       blocktype: 'share',
-      clientdiff: 1,
-      hash: 'hash1',
-      height: 1,
+      clientdiff: -1,
+      hash: '',
+      height: -1,
       identifier: '',
-      reward: 1,
-      sharediff: 1,
+      reward: -1,
+      sharediff: -1,
       sharevalid: true,
       transaction: ''
     };
-    expect(shares.handleLocalShares(shareData, true, true)).toStrictEqual(expected);
+    expect(shares.handleLocalShares({}, true, true)).toStrictEqual(expected);
   });
 
   test('Test shares main updates [1]', (done) => {

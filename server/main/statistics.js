@@ -24,9 +24,6 @@ const Statistics = function (logger, client, config, configMain, template) {
     executor: _this.client.master.commands.executor,
     current: _this.client.master.commands.current,
     historical: _this.client.master.commands.historical };
-  this.worker = {
-    executor: _this.client.worker.commands.executor,
-    local: _this.client.worker.commands.local };
 
   // Handle Current Metadata Updates
   this.handleCurrentMetadata = function(miners, workers, total, blockType) {
@@ -404,7 +401,6 @@ const Statistics = function (logger, client, config, configMain, template) {
       _this.master.current.workers.deleteCurrentWorkersInactive(_this.pool, inactiveWindow),
       _this.master.current.workers.selectCurrentWorkersMain(_this.pool, { solo: true, type: blockType }),
       _this.master.current.workers.selectCurrentWorkersMain(_this.pool, { solo: false, type: blockType }),
-      _this.worker.local.transactions.deleteLocalTransactionsInactive(_this.pool, updateWindow),
       'COMMIT;'];
 
     // Establish Separate Behavior

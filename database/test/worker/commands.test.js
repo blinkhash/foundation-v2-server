@@ -6,7 +6,14 @@ const logger = new Logger(configMain);
 ////////////////////////////////////////////////////////////////////////////////
 
 function mockClient(error, results) {
-  return { query: (commands, callback) => callback(error, results) };
+  let requests = 0;
+  return { query: (commands, callback) => {
+    if (requests >= 1) callback(false, results);
+    else {
+      requests += 1;
+      callback(error, results);
+    }
+  }};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,12 +40,21 @@ describe('Test command functionality', () => {
     });
   });
 
-  test('Test executor functionality [2]', () => {
+  test('Test executor functionality [2]', (done) => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     const client = mockClient(true, null);
     const commands = new Commands(logger, client, configMainCopy);
+    commands.executor(['test'], () => {
+      expect(consoleSpy).toHaveBeenCalled();
+      console.log.mockClear();
+      done();
+    });
+  });
+
+  test('Test executor functionality [3]', () => {
+    const client = mockClient(true, null);
+    const commands = new Commands(logger, client, configMainCopy);
+    commands.retries = 3;
     expect(() => commands.executor(['test'], () => {})).toThrow(Error);
-    expect(consoleSpy).toHaveBeenCalled();
-    console.log.mockClear();
   });
 });

@@ -6,7 +6,7 @@ exports.builderThreadsText3 = (numConfigs, numForks) => `Started ${ numConfigs }
 // Database Text
 exports.databaseCommandsText1 = (query, error) => `An error was thrown when trying to execute a query (${ query }): ${ error }`;
 exports.databaseCommandsText2 = (error) => `An error was thrown when trying to handle checks and validations: ${ error }`;
-exports.databaseCommandsText3 = (retries) => `An error was thrown by the database, waiting before attempting (#${ retries + 1}) to reconnect ...`;
+exports.databaseCommandsText3 = (retries) => `An error was thrown by the database, waiting before attempting (#${ retries + 1}) to retry ...`;
 exports.databaseCommandsText4 = () => 'Successfully reconnected to the master database, continuing execution ...';
 exports.databaseCommandsText5 = () => 'Successfully reconnected to the worker database, continuing execution ...';
 exports.databaseCommandsText6 = () => 'Unable to reconnect to master database, exceeded retry limits ...';
@@ -50,6 +50,9 @@ exports.loaderPortsText1 = (currentPort) => `Two or more ports are overlapping o
 exports.loaderRecipientsText1 = () => 'The recipient percentage is greater than 100%. Check your configuration files';
 exports.loaderRecipientsText2 = () => 'The recipient percentage is greater than 40%. Are you sure that you configured it properly?';
 exports.loaderTemplateText1 = () => 'The pool template is not installed or does not exist. Check your configuration files';
+
+// Rounds Text
+exports.roundsHandlingText1 = (capacity) => `The rounds handler is currently using ${ capacity }% of the total batching limit`;
 
 // Stratum Text
 exports.stratumRecipientsText1 = () => 'No recipients have been added, which means that no fees will be taken';
