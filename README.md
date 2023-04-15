@@ -32,3 +32,18 @@ Maintaining this project has always been driven out of nothing more than a desir
 Released under the GNU General Public License v3. See https://www.gnu.org/licenses/gpl-3.0 for more information
 
 ---
+
+### Docker
+
+Dockerfile may not always run smoothly. Double check config.js and bitcoin.js are in the right spot. If you run into any issues find me on the official Discord channel.
+
+---
+
+
+### Kubernetes helpful links
+
+https://microk8s.io/
+https://kubernetes.io/docs/home/
+https://microk8s.io/docs/registry-images
+
+---
