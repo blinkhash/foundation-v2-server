@@ -5,7 +5,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Discord](https://img.shields.io/discord/738590795384356904)](https://discord.gg/rNjez6VgNF)
 
-This portal is an extremely efficient, highly scalable, all-in-one, easy to setup cryptocurrency mining platform written entirely in Node.JS. Its main features include integrated stratum functionality and a reward/payment/share processor. The website functionality has been removed in lieu of a client that will be developed in a separate repository. For help with getting started, you can check out the documentation for the platform at https://blinkhash.com/docs.
+This portal is an extremely efficient, highly scalable, all-in-one, easy to setup cryptocurrency mining platform written entirely in Node.JS. Its main features include integrated stratum functionality and a reward/payment/share processor. The website functionality has been removed in lieu of a client that will be developed in a separate repository. For help with getting started, you can check out the documentation for the platform at https://blinkhash.com/product/foundation/v2.
 
 #### Need Support?
 
